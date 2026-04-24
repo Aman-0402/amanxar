@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- Primary Meta Tags -->
+    <title>Aman Raj — Web Developer & AI/ML Expert</title>
+    <meta name="title" content="Aman Raj — Web Developer & AI/ML Expert" />
+    <meta
+      name="description"
+      content="Full-Stack MERN Developer, AI/ML Engineer, Python Expert & Technical Trainer. Building intelligent web products and sharing knowledge through ebooks and blogs."
+    />
+    <meta name="author" content="Aman Raj" />
+    <meta
+      name="keywords"
+      content="Aman Raj, Web Developer, AI ML Expert, MERN Stack, Python Developer, Machine Learning, React Developer, Full Stack Developer, Technical Trainer"
+    />
+
+    <!-- Robots -->
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://aman-0402.github.io/aman.ai/" />
+    <meta property="og:title" content="Aman Raj — Web Developer & AI/ML Expert" />
+    <meta
+      property="og:description"
+      content="Full-Stack MERN Developer, AI/ML Engineer, Python Expert & Technical Trainer. Building intelligent web products."
+    />
+    <meta property="og:image" content="/assets/og/og-default.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://aman-0402.github.io/aman.ai/" />
+    <meta name="twitter:title" content="Aman Raj — Web Developer & AI/ML Expert" />
+    <meta
+      name="twitter:description"
+      content="Full-Stack MERN Developer, AI/ML Engineer, Python Expert & Technical Trainer."
+    />
+    <meta name="twitter:image" content="/assets/og/og-default.jpg" />
+    <meta name="twitter:creator" content="@Code_Like_Aman" />
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://aman-0402.github.io/aman.ai/" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/jpeg" href="/assets/images/Extra/logo.jpg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/Extra/logo.jpg" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Google Fonts — Plus Jakarta Sans + Inter + JetBrains Mono -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Aman Raj",
+        "jobTitle": "Full-Stack Developer & AI/ML Expert",
+        "url": "https://aman-0402.github.io/aman.ai/",
+        "email": "think.like.ai.aman@gmail.com",
+        "telephone": "+91-9852104967",
+        "description": "Web Developer, Python & Machine Learning Expert, MERN Stack Developer, Technical Trainer",
+        "sameAs": [
+          "https://github.com/Aman-0402",
+          "https://www.linkedin.com/in/aman-raj-081905211/",
+          "https://x.com/Code_Like_Aman",
+          "https://www.youtube.com/@Think_Like_Me"
+        ],
+        "knowsAbout": [
+          "React", "Node.js", "Python", "Machine Learning",
+          "MongoDB", "Express.js", "TailwindCSS", "AI Engineering"
+        ]
+      }
+    </script>
+
+    <!--
+      SPA Routing Fix for GitHub Pages — Step 2 of 2 (the decoder).
+      Pairs with: public/404.html (the encoder)
+
+      Reads the encoded path from the query string (written by 404.html),
+      reconstructs the real URL, and pushes it to browser history BEFORE
+      React Router initialises — so the router sees the correct path.
+
+      Example (subdomain):  /aman.ai/?/projects  →  /aman.ai/projects
+      Example (custom domain): /?/projects       →  /projects
+    -->
+    <script>
+      ;(function (l) {
+        // The encoder writes '?/path' into the query string.
+        // Check that the query starts with '/' to distinguish from real query params.
+        if (l.search[1] === '/') {
+          var decoded = l.search
+            .slice(1)                                    // strip leading '?'
+            .split('&')                                  // separate path from any real params
+            .map(function (s) { return s.replace(/~and~/g, '&') })  // restore encoded &
+            .join('?')                                   // first segment is path, rest are params
+          window.history.replaceState(
+            null,
+            null,
+            l.pathname.slice(0, -1) + decoded + l.hash  // rebuild full URL
+          )
+        }
+      })(window.location)
+    </script>
+
+    <!-- Base URL for runtime asset resolution (replaced by Vite at build time) -->
+    <script>window.__BASE__ = "%BASE_URL%"</script>
+
+    <!-- Theme: prevent flash of wrong theme — default is dark -->
+    <script>
+      ;(function () {
+        const stored = localStorage.getItem('theme')
+        if (stored === 'light') {
+          document.documentElement.classList.remove('dark')
+        } else {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script>
+  </head>
+  <body class="bg-bg-base text-text-primary font-body antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
