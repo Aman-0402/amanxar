@@ -8,6 +8,9 @@ const NAV_ITEMS = [
   { label: 'Overview', href: '/dashboard', icon: Home },
   { label: 'Projects', href: '/dashboard/projects', icon: FileText },
   { label: 'About', href: '/dashboard/about', icon: User },
+  { label: 'Skills', href: '/dashboard/skills', icon: FileText },
+  { label: 'Tech Stack', href: '/dashboard/tech-stack', icon: FileText },
+  { label: 'Timeline', href: '/dashboard/timeline', icon: FileText },
   { label: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
   { label: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]

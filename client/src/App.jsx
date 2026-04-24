@@ -22,6 +22,9 @@ const LoginPage        = lazy(() => import('@pages/auth/LoginPage'))
 const DashboardOverview = lazy(() => import('@pages/dashboard/DashboardOverviewPage'))
 const DashboardProjects = lazy(() => import('@pages/dashboard/DashboardProjectsPage'))
 const DashboardAbout    = lazy(() => import('@pages/dashboard/DashboardAboutPage'))
+const DashboardSkills   = lazy(() => import('@pages/dashboard/DashboardSkillsPage'))
+const DashboardTechStack = lazy(() => import('@pages/dashboard/DashboardTechStackPage'))
+const DashboardTimeline = lazy(() => import('@pages/dashboard/DashboardTimelinePage'))
 const DashboardTest     = lazy(() => import('@pages/dashboard/DashboardTestPage'))
 
 // ─── Router configuration ─────────────────────────────────────────────────────
@@ -67,6 +70,30 @@ const router = createBrowserRouter(
             element: (
               <Suspense fallback={<PageLoader />}>
                 <DashboardAbout />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'skills',
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <DashboardSkills />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'tech-stack',
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <DashboardTechStack />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'timeline',
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <DashboardTimeline />
               </Suspense>
             ),
           },

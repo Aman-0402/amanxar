@@ -9,11 +9,8 @@ import {
 } from 'lucide-react'
 import { fadeUp, slideInLeft, slideInRight, staggerContainer, scaleIn, skillBar } from '@animations/variants'
 import { viewport } from '@animations/transitions'
-import { aboutAPI } from '@services/api'
+import { aboutAPI, skillsAPI, techStackAPI, timelineAPI } from '@services/api'
 import { getIcon } from '@utils/iconMap'
-import skillsData from '@data/skills.json'
-import timelineData from '@data/timeline.json'
-import techStackData from '@data/techstack.json'
 import profileImage from '@/assets/images/AvatarHero.png'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -100,7 +97,7 @@ function StatCard({ iconName, value, label }) {
   )
 }
 
-function SkillsTab() {
+function SkillsTab({ skills }) {
   return (
     <motion.div
       key="skills"
@@ -110,11 +107,11 @@ function SkillsTab() {
       exit="exit"
       className="grid gap-6 sm:grid-cols-2"
     >
-      {skillsData.map((cat) => {
+      {skills.map((cat) => {
         const Icon = CATEGORY_ICONS[cat.icon] ?? Code2
         return (
           <div
-            key={cat.category}
+            key={cat.id}
             className="rounded-2xl border border-bg-border bg-bg-elevated p-6"
           >
             <div className="mb-5 flex items-center gap-3">
@@ -154,7 +151,7 @@ function SkillsTab() {
   )
 }
 
-function JourneyTab() {
+function JourneyTab({ timeline }) {
   return (
     <motion.div
       key="journey"
@@ -168,7 +165,7 @@ function JourneyTab() {
       <div className="absolute left-[22px] top-0 bottom-0 w-px bg-bg-border sm:left-1/2 sm:-translate-x-px" />
 
       <div className="space-y-8">
-        {timelineData.map((item, idx) => {
+        {timeline.map((item, idx) => {
           const { icon: TypeIcon, color } = TIMELINE_TYPE[item.type] ?? TIMELINE_TYPE.milestone
           const isRight = idx % 2 === 0
 
@@ -282,7 +279,7 @@ function WhatIDoTab({ whatIDo }) {
   )
 }
 
-function TechStackTab() {
+function TechStackTab({ techStack }) {
   return (
     <motion.div
       key="techstack"
@@ -292,9 +289,9 @@ function TechStackTab() {
       exit="exit"
       className="space-y-8"
     >
-      {techStackData.map((group) => (
+      {techStack.map((group) => (
         <motion.div
-          key={group.category}
+          key={group.id}
           variants={fadeUp}
           initial="hidden"
           whileInView="visible"
@@ -339,25 +336,34 @@ export default function About() {
   const [whatIDo, setWhatIDo] = useState([])
   const [bio, setBio] = useState([])
   const [highlights, setHighlights] = useState([])
+  const [skills, setSkills] = useState([])
+  const [techStack, setTechStack] = useState([])
+  const [timeline, setTimeline] = useState([])
 
   useEffect(() => {
-    const fetchAboutData = async () => {
+    const fetchAllData = async () => {
       try {
-        const [statsRes, whatIDoRes, bioRes, highlightsRes] = await Promise.all([
+        const [statsRes, whatIDoRes, bioRes, highlightsRes, skillsRes, techStackRes, timelineRes] = await Promise.all([
           aboutAPI.getStats(),
           aboutAPI.getWhatIDo(),
           aboutAPI.getBio(),
           aboutAPI.getHighlights(),
+          skillsAPI.getAll(),
+          techStackAPI.getAll(),
+          timelineAPI.getAll(),
         ])
         setStats(statsRes.data)
         setWhatIDo(whatIDoRes.data)
         setBio(bioRes.data)
         setHighlights(highlightsRes.data)
+        setSkills(skillsRes.data)
+        setTechStack(techStackRes.data)
+        setTimeline(timelineRes.data)
       } catch (err) {
         console.error('Failed to fetch about data:', err)
       }
     }
-    fetchAboutData()
+    fetchAllData()
   }, [])
 
   return (
@@ -528,9 +534,9 @@ export default function About() {
 
           {/* Tab content */}
           <AnimatePresence mode="wait">
-            {activeTab === 'Skills'      && <SkillsTab />}
-            {activeTab === 'Tech Stack'  && <TechStackTab />}
-            {activeTab === 'Journey'     && <JourneyTab />}
+            {activeTab === 'Skills'      && <SkillsTab skills={skills} />}
+            {activeTab === 'Tech Stack'  && <TechStackTab techStack={techStack} />}
+            {activeTab === 'Journey'     && <JourneyTab timeline={timeline} />}
             {activeTab === 'What I Do'   && <WhatIDoTab whatIDo={whatIDo} />}
           </AnimatePresence>
         </div>
