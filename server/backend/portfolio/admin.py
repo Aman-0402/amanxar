@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Project
+from .models import Project, AboutStat, WhatIDo, BioParagraph, AboutHighlight
 
 
 @admin.register(Project)
@@ -8,3 +8,35 @@ class ProjectAdmin(admin.ModelAdmin):
     list_filter = ('featured', 'status', 'year')
     search_fields = ('title', 'slug')
     prepopulated_fields = {'slug': ('title',)}
+
+
+@admin.register(AboutStat)
+class AboutStatAdmin(admin.ModelAdmin):
+    list_display = ('value', 'label', 'icon_name', 'order')
+    list_editable = ('order',)
+    ordering = ('order',)
+
+
+@admin.register(WhatIDo)
+class WhatIDoAdmin(admin.ModelAdmin):
+    list_display = ('title', 'icon_name', 'order')
+    list_editable = ('order',)
+    ordering = ('order',)
+
+
+@admin.register(BioParagraph)
+class BioParagraphAdmin(admin.ModelAdmin):
+    list_display = ('get_text_preview', 'order')
+    list_editable = ('order',)
+    ordering = ('order',)
+
+    def get_text_preview(self, obj):
+        return obj.text[:100] + '...' if len(obj.text) > 100 else obj.text
+    get_text_preview.short_description = 'Text'
+
+
+@admin.register(AboutHighlight)
+class AboutHighlightAdmin(admin.ModelAdmin):
+    list_display = ('text', 'order')
+    list_editable = ('order',)
+    ordering = ('order',)

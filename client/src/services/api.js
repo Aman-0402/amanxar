@@ -48,4 +48,26 @@ export const projectsAPI = {
   delete: (slug) => api.delete(`/api/projects/${slug}/`),
 }
 
+export const aboutAPI = {
+  getStats: () => api.get('/api/about/stats/'),
+  createStat: (data) => api.post('/api/about/stats/', data),
+  updateStat: (id, data) => api.put(`/api/about/stats/${id}/`, data),
+  deleteStat: (id) => api.delete(`/api/about/stats/${id}/`),
+
+  getWhatIDo: () => api.get('/api/about/what-i-do/'),
+  createWhatIDo: (data) => api.post('/api/about/what-i-do/', data),
+  updateWhatIDo: (id, data) => api.put(`/api/about/what-i-do/${id}/`, data),
+  deleteWhatIDo: (id) => api.delete(`/api/about/what-i-do/${id}/`),
+
+  getBio: () => api.get('/api/about/bio/'),
+  createBio: (data) => api.post('/api/about/bio/', data),
+  updateBio: (id, data) => api.put(`/api/about/bio/${id}/`, data),
+  deleteBio: (id) => api.delete(`/api/about/bio/${id}/`),
+
+  getHighlights: () => api.get('/api/about/highlights/'),
+  createHighlight: (data) => api.post('/api/about/highlights/', data),
+  updateHighlight: (id, data) => api.put(`/api/about/highlights/${id}/`, data),
+  deleteHighlight: (id) => api.delete(`/api/about/highlights/${id}/`),
+}
+
 export default api

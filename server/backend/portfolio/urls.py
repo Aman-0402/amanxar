@@ -1,12 +1,22 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
-from .views import ProjectViewSet
+from .views import (
+    ProjectViewSet,
+    AboutStatViewSet,
+    WhatIDoViewSet,
+    BioParagraphViewSet,
+    AboutHighlightViewSet,
+)
 
 app_name = 'portfolio'
 
 router = DefaultRouter()
 router.register(r'projects', ProjectViewSet, basename='project')
+router.register(r'about/stats', AboutStatViewSet, basename='about-stat')
+router.register(r'about/what-i-do', WhatIDoViewSet, basename='about-what-i-do')
+router.register(r'about/bio', BioParagraphViewSet, basename='about-bio')
+router.register(r'about/highlights', AboutHighlightViewSet, basename='about-highlight')
 
 urlpatterns = [
     *router.urls,

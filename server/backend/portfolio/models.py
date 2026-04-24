@@ -24,3 +24,58 @@ class Project(models.Model):
 
     def __str__(self):
         return self.title
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# About Section Models
+# ────────────────────────────────────────────────────────────────────────────
+
+class AboutStat(models.Model):
+    icon_name = models.CharField(max_length=50)
+    value = models.CharField(max_length=50)
+    label = models.CharField(max_length=100)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f'{self.value} {self.label}'
+
+
+class WhatIDo(models.Model):
+    icon_name = models.CharField(max_length=50)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    tags = models.JSONField(default=list)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+        verbose_name = 'What I Do'
+        verbose_name_plural = 'What I Do'
+
+    def __str__(self):
+        return self.title
+
+
+class BioParagraph(models.Model):
+    text = models.TextField()
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f'Paragraph {self.order + 1}'
+
+
+class AboutHighlight(models.Model):
+    text = models.CharField(max_length=255)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return self.text

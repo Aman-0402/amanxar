@@ -21,6 +21,7 @@ const NotFoundPage     = lazy(() => import('@pages/NotFoundPage'))
 const LoginPage        = lazy(() => import('@pages/auth/LoginPage'))
 const DashboardOverview = lazy(() => import('@pages/dashboard/DashboardOverviewPage'))
 const DashboardProjects = lazy(() => import('@pages/dashboard/DashboardProjectsPage'))
+const DashboardTest     = lazy(() => import('@pages/dashboard/DashboardTestPage'))
 
 // ─── Router configuration ─────────────────────────────────────────────────────
 // import.meta.env.BASE_URL is injected by Vite from the `base` option.
@@ -57,6 +58,14 @@ const router = createBrowserRouter(
             element: (
               <Suspense fallback={<PageLoader />}>
                 <DashboardProjects />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'test',
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <DashboardTest />
               </Suspense>
             ),
           },
