@@ -169,13 +169,13 @@ class Command(BaseCommand):
             )
             if created:
                 self.stdout.write(
-                    self.style.SUCCESS(f'✓ Created project: {project.title}')
+                    self.style.SUCCESS(f'[+] Created project: {project.title}')
                 )
             else:
                 self.stdout.write(
-                    self.style.WARNING(f'- Skipped project (already exists): {project.title}')
+                    self.style.WARNING(f'[-] Skipped project (already exists): {project.title}')
                 )
 
         self.stdout.write(
-            self.style.SUCCESS(f'\n✓ Seeding complete! {len(PROJECTS_DATA)} projects in database.')
+            self.style.SUCCESS(f'\n[SUCCESS] Seeding complete! {len(PROJECTS_DATA)} projects in database.')
         )
