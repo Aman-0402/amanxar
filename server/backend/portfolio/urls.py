@@ -15,6 +15,7 @@ from .views import (
     KnowledgeHubCategoryViewSet,
     KnowledgeToolViewSet,
     GalleryItemViewSet,
+    ServiceViewSet,
 )
 
 app_name = 'portfolio'
@@ -31,6 +32,7 @@ router.register(r'timeline', TimelineItemViewSet, basename='timeline-item')
 router.register(r'messages', MessageViewSet, basename='message')
 router.register(r'ebooks', EBookViewSet, basename='ebook')
 router.register(r'gallery', GalleryItemViewSet, basename='gallery-item')
+router.register(r'services', ServiceViewSet, basename='service')
 router.register(r'knowledge-hub', KnowledgeHubCategoryViewSet, basename='knowledge-hub-category')
 router.register(r'knowledge-tools', KnowledgeToolViewSet, basename='knowledge-tool')
 

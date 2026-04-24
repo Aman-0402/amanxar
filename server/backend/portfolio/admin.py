@@ -13,6 +13,7 @@ from .models import (
     KnowledgeHubCategory,
     KnowledgeTool,
     GalleryItem,
+    Service,
 )
 
 
@@ -121,3 +122,12 @@ class GalleryItemAdmin(admin.ModelAdmin):
     search_fields = ('title', 'description')
     list_editable = ('order',)
     ordering = ('-year', 'order')
+
+
+@admin.register(Service)
+class ServiceAdmin(admin.ModelAdmin):
+    list_display = ('title', 'slug', 'order')
+    list_editable = ('order',)
+    search_fields = ('title', 'description')
+    prepopulated_fields = {'slug': ('title',)}
+    ordering = ('order',)

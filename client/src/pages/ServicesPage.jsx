@@ -1,9 +1,9 @@
 import PageLayout from '@components/layout/PageLayout'
-import services from '@data/services.json'
 import { Link } from 'react-router-dom'
 import { CheckCircle2, ArrowRight } from 'lucide-react'
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion'
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
+import { servicesAPI } from '@services/api'
 
 const containerVariants = {
   hidden: {},
@@ -86,7 +86,7 @@ function ServiceCard({ svc, index }) {
       )}
 
       <Link
-        to={svc.ctaLink}
+        to={svc.cta_link}
         className="mt-auto flex items-center justify-center gap-2 rounded-xl bg-brand-primary px-5 py-3 text-sm font-semibold text-white hover:bg-brand-dark transition-colors"
       >
         {svc.cta} <ArrowRight size={14} />
@@ -96,6 +96,26 @@ function ServiceCard({ svc, index }) {
 }
 
 export default function ServicesPage() {
+  const [services, setServices] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchServices()
+  }, [])
+
+  const fetchServices = async () => {
+    try {
+      const res = await servicesAPI.getAll()
+      setServices(res.data)
+    } catch (err) {
+      console.error('Failed to fetch services:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) return <PageLayout><div className="p-8">Loading...</div></PageLayout>
+
   return (
     <PageLayout
       title="Services"

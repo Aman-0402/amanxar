@@ -255,3 +255,26 @@ class GalleryItem(models.Model):
 
     def __str__(self):
         return self.title
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Services Model
+# ────────────────────────────────────────────────────────────────────────────
+
+class Service(models.Model):
+    id = models.CharField(max_length=100, primary_key=True, unique=True)
+    slug = models.SlugField(unique=True)
+    title = models.CharField(max_length=255)
+    icon = models.CharField(max_length=10)
+    description = models.TextField()
+    features = models.JSONField(default=list)
+    pricing = models.CharField(max_length=255, blank=True, null=True)
+    cta = models.CharField(max_length=100, default='Learn More')
+    cta_link = models.CharField(max_length=255)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return self.title

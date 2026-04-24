@@ -13,6 +13,7 @@ from .models import (
     KnowledgeHubCategory,
     KnowledgeTool,
     GalleryItem,
+    Service,
 )
 
 
@@ -124,3 +125,10 @@ class GalleryItemSerializer(serializers.ModelSerializer):
         model = GalleryItem
         fields = ['id', 'title', 'description', 'category', 'image', 'year', 'order', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = ['id', 'slug', 'title', 'icon', 'description', 'features', 'pricing', 'cta', 'cta_link', 'order']
+        read_only_fields = ['id']

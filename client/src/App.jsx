@@ -29,6 +29,7 @@ const DashboardMessages = lazy(() => import('@pages/dashboard/DashboardMessagesP
 const DashboardEbooks   = lazy(() => import('@pages/dashboard/DashboardEbooksPage'))
 const DashboardKnowledgeHub = lazy(() => import('@pages/dashboard/DashboardKnowledgeHubPage'))
 const DashboardGallery  = lazy(() => import('@pages/dashboard/DashboardGalleryPage'))
+const DashboardServices = lazy(() => import('@pages/dashboard/DashboardServicesPage'))
 const DashboardTest     = lazy(() => import('@pages/dashboard/DashboardTestPage'))
 
 // ─── Router configuration ─────────────────────────────────────────────────────
@@ -130,6 +131,14 @@ const router = createBrowserRouter(
             element: (
               <Suspense fallback={<PageLoader />}>
                 <DashboardGallery />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'services',
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <DashboardServices />
               </Suspense>
             ),
           },

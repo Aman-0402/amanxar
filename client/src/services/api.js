@@ -134,4 +134,12 @@ export const galleryAPI = {
   delete: (id) => api.delete(`/api/gallery/${id}/`),
 }
 
+export const servicesAPI = {
+  getAll: () => api.get('/api/services/'),
+  getById: (id) => api.get(`/api/services/${id}/`),
+  create: (data) => api.post('/api/services/', data),
+  update: (id, data) => api.put(`/api/services/${id}/`, data),
+  delete: (id) => api.delete(`/api/services/${id}/`),
+}
+
 export default api

@@ -14,6 +14,7 @@ from .models import (
     KnowledgeHubCategory,
     KnowledgeTool,
     GalleryItem,
+    Service,
 )
 from .serializers import (
     ProjectSerializer,
@@ -29,6 +30,7 @@ from .serializers import (
     KnowledgeHubCategorySerializer,
     KnowledgeToolSerializer,
     GalleryItemSerializer,
+    ServiceSerializer,
 )
 
 
@@ -157,6 +159,16 @@ class KnowledgeToolViewSet(viewsets.ModelViewSet):
 class GalleryItemViewSet(viewsets.ModelViewSet):
     queryset = GalleryItem.objects.all()
     serializer_class = GalleryItemSerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+
+class ServiceViewSet(viewsets.ModelViewSet):
+    queryset = Service.objects.all()
+    serializer_class = ServiceSerializer
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
