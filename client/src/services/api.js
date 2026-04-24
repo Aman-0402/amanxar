@@ -42,6 +42,10 @@ export const authAPI = {
 export const projectsAPI = {
   getAll: () => api.get('/api/projects/'),
   getBySlug: (slug) => api.get(`/api/projects/${slug}/`),
+  create: (data) => api.post('/api/projects/', data),
+  update: (slug, data) => api.put(`/api/projects/${slug}/`, data),
+  partialUpdate: (slug, data) => api.patch(`/api/projects/${slug}/`, data),
+  delete: (slug) => api.delete(`/api/projects/${slug}/`),
 }
 
 export default api
