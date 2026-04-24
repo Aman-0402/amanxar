@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Edit2, Trash2 } from 'lucide-react'
+import { Plus, Edit2, Trash2 } from 'lucide-react'
 import { timelineAPI } from '@services/api'
+import TimelineFormModal from '@components/dashboard/TimelineFormModal'
+import DeleteConfirmModal from '@components/dashboard/DeleteConfirmModal'
 
 export default function DashboardTimelinePage() {
   const [timeline, setTimeline] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [formModalOpen, setFormModalOpen] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [editingItem, setEditingItem] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null)
 
   useEffect(() => {
     fetchTimeline()
@@ -22,6 +28,33 @@ export default function DashboardTimelinePage() {
       console.error(err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleSave = async (data) => {
+    try {
+      if (editingItem) {
+        await timelineAPI.update(editingItem.id, data)
+      } else {
+        await timelineAPI.create(data)
+      }
+      setFormModalOpen(false)
+      setEditingItem(null)
+      fetchTimeline()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    try {
+      await timelineAPI.delete(deleteTarget.id)
+      setDeleteModalOpen(false)
+      setDeleteTarget(null)
+      fetchTimeline()
+    } catch (err) {
+      console.error(err)
     }
   }
 
@@ -46,6 +79,16 @@ export default function DashboardTimelinePage() {
       >
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-text-primary">Timeline Items ({timeline.length})</h2>
+          <button
+            onClick={() => {
+              setEditingItem(null)
+              setFormModalOpen(true)
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 rounded bg-brand-primary text-white hover:bg-brand-primary/90 transition-colors text-sm"
+          >
+            <Plus size={16} />
+            Add Item
+          </button>
         </div>
         <div className="space-y-3">
           {timeline.length > 0 ? (
@@ -79,10 +122,22 @@ export default function DashboardTimelinePage() {
                     </div>
                   </div>
                   <div className="flex gap-1 ml-4">
-                    <button className="p-2 hover:bg-bg-border rounded transition-colors">
+                    <button
+                      onClick={() => {
+                        setEditingItem(item)
+                        setFormModalOpen(true)
+                      }}
+                      className="p-2 hover:bg-bg-border rounded transition-colors"
+                    >
                       <Edit2 size={16} className="text-text-secondary" />
                     </button>
-                    <button className="p-2 hover:bg-red-500/10 rounded transition-colors">
+                    <button
+                      onClick={() => {
+                        setDeleteTarget(item)
+                        setDeleteModalOpen(true)
+                      }}
+                      className="p-2 hover:bg-red-500/10 rounded transition-colors"
+                    >
                       <Trash2 size={16} className="text-red-400" />
                     </button>
                   </div>
@@ -94,6 +149,27 @@ export default function DashboardTimelinePage() {
           )}
         </div>
       </motion.div>
+
+      <TimelineFormModal
+        isOpen={formModalOpen}
+        onClose={() => {
+          setFormModalOpen(false)
+          setEditingItem(null)
+        }}
+        onSubmit={handleSave}
+        initialData={editingItem}
+      />
+
+      <DeleteConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false)
+          setDeleteTarget(null)
+        }}
+        onConfirm={handleDelete}
+        title="Delete Timeline Item"
+        message="Are you sure? This cannot be undone."
+      />
     </div>
   )
 }

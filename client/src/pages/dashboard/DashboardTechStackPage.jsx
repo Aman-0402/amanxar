@@ -2,11 +2,17 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Plus, Edit2, Trash2 } from 'lucide-react'
 import { techStackAPI } from '@services/api'
+import TechStackFormModal from '@components/dashboard/TechStackFormModal'
+import DeleteConfirmModal from '@components/dashboard/DeleteConfirmModal'
 
 export default function DashboardTechStackPage() {
   const [techStack, setTechStack] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [formModalOpen, setFormModalOpen] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [editingItem, setEditingItem] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null)
 
   useEffect(() => {
     fetchTechStack()
@@ -25,6 +31,33 @@ export default function DashboardTechStackPage() {
     }
   }
 
+  const handleSave = async (data) => {
+    try {
+      if (editingItem) {
+        await techStackAPI.update(editingItem.id, data)
+      } else {
+        await techStackAPI.create(data)
+      }
+      setFormModalOpen(false)
+      setEditingItem(null)
+      fetchTechStack()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    try {
+      await techStackAPI.delete(deleteTarget.id)
+      setDeleteModalOpen(false)
+      setDeleteTarget(null)
+      fetchTechStack()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   if (loading) return <div className="p-8">Loading...</div>
   if (error) return <div className="p-8 text-red-400">Error: {error}</div>
 
@@ -39,6 +72,16 @@ export default function DashboardTechStackPage() {
       >
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-text-primary">Categories ({techStack.length})</h2>
+          <button
+            onClick={() => {
+              setEditingItem(null)
+              setFormModalOpen(true)
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 rounded bg-brand-primary text-white hover:bg-brand-primary/90 transition-colors text-sm"
+          >
+            <Plus size={16} />
+            Add Category
+          </button>
         </div>
         <div className="space-y-6">
           {techStack.length > 0 ? (
@@ -47,10 +90,22 @@ export default function DashboardTechStackPage() {
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-medium text-text-primary">{cat.category}</h3>
                   <div className="flex gap-1">
-                    <button className="p-2 hover:bg-bg-border rounded transition-colors">
+                    <button
+                      onClick={() => {
+                        setEditingItem(cat)
+                        setFormModalOpen(true)
+                      }}
+                      className="p-2 hover:bg-bg-border rounded transition-colors"
+                    >
                       <Edit2 size={16} className="text-text-secondary" />
                     </button>
-                    <button className="p-2 hover:bg-red-500/10 rounded transition-colors">
+                    <button
+                      onClick={() => {
+                        setDeleteTarget(cat)
+                        setDeleteModalOpen(true)
+                      }}
+                      className="p-2 hover:bg-red-500/10 rounded transition-colors"
+                    >
                       <Trash2 size={16} className="text-red-400" />
                     </button>
                   </div>
@@ -81,6 +136,27 @@ export default function DashboardTechStackPage() {
           )}
         </div>
       </motion.div>
+
+      <TechStackFormModal
+        isOpen={formModalOpen}
+        onClose={() => {
+          setFormModalOpen(false)
+          setEditingItem(null)
+        }}
+        onSubmit={handleSave}
+        initialData={editingItem}
+      />
+
+      <DeleteConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false)
+          setDeleteTarget(null)
+        }}
+        onConfirm={handleDelete}
+        title="Delete Tech Stack Category"
+        message="Are you sure? This cannot be undone."
+      />
     </div>
   )
 }
