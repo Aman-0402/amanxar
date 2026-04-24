@@ -3,6 +3,8 @@ import { motion } from 'framer-motion'
 import { Plus, Edit2, Trash2, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react'
 import { knowledgeHubAPI, knowledgeToolsAPI } from '@services/api'
 import DeleteConfirmModal from '@components/dashboard/DeleteConfirmModal'
+import KnowledgeHubCategoryFormModal from '@components/dashboard/KnowledgeHubCategoryFormModal'
+import KnowledgeToolFormModal from '@components/dashboard/KnowledgeToolFormModal'
 
 export default function DashboardKnowledgeHubPage() {
   const [categories, setCategories] = useState([])
@@ -12,6 +14,11 @@ export default function DashboardKnowledgeHubPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [deleteType, setDeleteType] = useState(null)
+  const [categoryFormOpen, setCategoryFormOpen] = useState(false)
+  const [toolFormOpen, setToolFormOpen] = useState(false)
+  const [editingCategory, setEditingCategory] = useState(null)
+  const [editingTool, setEditingTool] = useState(null)
+  const [toolCategoryId, setToolCategoryId] = useState(null)
 
   useEffect(() => {
     fetchCategories()
@@ -62,6 +69,37 @@ export default function DashboardKnowledgeHubPage() {
     }
   }
 
+  const handleSaveCategory = async (data) => {
+    try {
+      if (editingCategory) {
+        await knowledgeHubAPI.updateCategory(editingCategory.id, data)
+      } else {
+        await knowledgeHubAPI.createCategory(data)
+      }
+      setCategoryFormOpen(false)
+      setEditingCategory(null)
+      fetchCategories()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleSaveTool = async (data) => {
+    try {
+      if (editingTool) {
+        await knowledgeToolsAPI.update(editingTool.id, data)
+      } else {
+        await knowledgeToolsAPI.create(data)
+      }
+      setToolFormOpen(false)
+      setEditingTool(null)
+      setToolCategoryId(null)
+      fetchCategories()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   if (loading) return <div className="p-8">Loading...</div>
   if (error) return <div className="p-8 text-red-400">Error: {error}</div>
 
@@ -76,6 +114,16 @@ export default function DashboardKnowledgeHubPage() {
       >
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-text-primary">Categories ({categories.length})</h2>
+          <button
+            onClick={() => {
+              setEditingCategory(null)
+              setCategoryFormOpen(true)
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 rounded bg-brand-primary text-white hover:bg-brand-primary/90 transition-colors text-sm"
+          >
+            <Plus size={16} />
+            Add Category
+          </button>
         </div>
         <div className="space-y-3">
           {categories.length > 0 ? (
@@ -93,6 +141,17 @@ export default function DashboardKnowledgeHubPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setEditingCategory(cat)
+                        setCategoryFormOpen(true)
+                      }}
+                      className="p-2 hover:bg-bg-border rounded transition-colors"
+                      title="Edit category"
+                    >
+                      <Edit2 size={16} className="text-text-secondary" />
+                    </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
@@ -114,7 +173,19 @@ export default function DashboardKnowledgeHubPage() {
 
                 {/* Tools list */}
                 {expandedCategory === cat.id && (
-                  <div className="border-t border-bg-border p-4 space-y-2">
+                  <div className="border-t border-bg-border p-4 space-y-3">
+                    <button
+                      onClick={() => {
+                        setToolCategoryId(cat.id)
+                        setEditingTool(null)
+                        setToolFormOpen(true)
+                      }}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded bg-bg-border text-text-primary hover:bg-bg-border/80 transition-colors text-xs w-full justify-center"
+                    >
+                      <Plus size={14} />
+                      Add Tool to this Category
+                    </button>
+
                     {cat.tools.length > 0 ? (
                       cat.tools.map((tool) => (
                         <div key={tool.id} className="p-3 bg-bg-surface rounded border border-bg-border/50 flex items-start justify-between gap-3">
@@ -152,6 +223,17 @@ export default function DashboardKnowledgeHubPage() {
                             </button>
                             <button
                               onClick={() => {
+                                setEditingTool(tool)
+                                setToolCategoryId(tool.category)
+                                setToolFormOpen(true)
+                              }}
+                              className="p-2 hover:bg-bg-border rounded transition-colors"
+                              title="Edit tool"
+                            >
+                              <Edit2 size={14} className="text-text-secondary" />
+                            </button>
+                            <button
+                              onClick={() => {
                                 setDeleteTarget(tool)
                                 setDeleteType('tool')
                                 setDeleteModalOpen(true)
@@ -175,6 +257,28 @@ export default function DashboardKnowledgeHubPage() {
           )}
         </div>
       </motion.div>
+
+      <KnowledgeHubCategoryFormModal
+        isOpen={categoryFormOpen}
+        onClose={() => {
+          setCategoryFormOpen(false)
+          setEditingCategory(null)
+        }}
+        onSubmit={handleSaveCategory}
+        category={editingCategory}
+      />
+
+      <KnowledgeToolFormModal
+        isOpen={toolFormOpen}
+        onClose={() => {
+          setToolFormOpen(false)
+          setEditingTool(null)
+          setToolCategoryId(null)
+        }}
+        onSubmit={handleSaveTool}
+        tool={editingTool}
+        categoryId={toolCategoryId}
+      />
 
       <DeleteConfirmModal
         isOpen={deleteModalOpen}
