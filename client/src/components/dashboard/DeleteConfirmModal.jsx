@@ -27,8 +27,9 @@ export default function DeleteConfirmModal({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm rounded-2xl border border-bg-border bg-bg-surface shadow-card z-50 p-6"
+            className="fixed inset-0 flex items-center justify-center z-50 p-4"
           >
+            <div className="w-full max-w-sm rounded-2xl border border-bg-border bg-bg-surface shadow-card p-6">
             <div className="flex justify-center mb-4">
               <div className="p-3 rounded-full bg-red-500/10">
                 <AlertTriangle className="text-red-400" size={24} />
@@ -66,6 +67,7 @@ export default function DeleteConfirmModal({
                   'Delete'
                 )}
               </button>
+            </div>
             </div>
           </motion.div>
         </>

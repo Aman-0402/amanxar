@@ -118,8 +118,9 @@ export default function ProjectFormModal({ isOpen, onClose, onSubmit, project = 
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-bg-border bg-bg-surface shadow-card z-50 p-6"
+            className="fixed inset-0 flex items-center justify-center z-50 p-4"
           >
+            <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-bg-border bg-bg-surface shadow-card p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-display text-2xl font-bold text-text-primary">
                 {project ? 'Edit Project' : 'Add New Project'}
@@ -411,6 +412,7 @@ export default function ProjectFormModal({ isOpen, onClose, onSubmit, project = 
                 </button>
               </div>
             </form>
+            </div>
           </motion.div>
         </>
       )}
