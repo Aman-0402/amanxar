@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Loader2 } from 'lucide-react'
+import { X, Loader2, AlertCircle } from 'lucide-react'
 import { modalBackdrop, modalContent } from '@animations/variants'
+import { driveUrl, extractDriveId } from '@utils/driveUrl'
 
 export default function ProjectFormModal({ isOpen, onClose, onSubmit, project = null }) {
   const [formData, setFormData] = useState({
@@ -21,12 +22,17 @@ export default function ProjectFormModal({ isOpen, onClose, onSubmit, project = 
     images: [],
   })
 
+  const [thumbnailId, setThumbnailId] = useState('')
+  const [imageIds, setImageIds] = useState('')
+  const [thumbnailUrl, setThumbnailUrl] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
     if (project) {
       setFormData(project)
+      setThumbnailUrl(project.thumbnail || '')
+      setImageIds(project.images?.join('\n') || '')
     } else {
       setFormData({
         title: '',
@@ -44,7 +50,10 @@ export default function ProjectFormModal({ isOpen, onClose, onSubmit, project = 
         highlights: [],
         images: [],
       })
+      setThumbnailUrl('')
+      setImageIds('')
     }
+    setThumbnailId('')
     setError('')
   }, [project, isOpen])
 
@@ -82,6 +91,33 @@ export default function ProjectFormModal({ isOpen, onClose, onSubmit, project = 
     setFormData((prev) => ({
       ...prev,
       links: { ...prev.links, [linkField]: value },
+    }))
+  }
+
+  const handleThumbnailIdChange = (e) => {
+    const value = e.target.value
+    setThumbnailId(value)
+    const id = extractDriveId(value)
+    setThumbnailUrl(driveUrl(id))
+    if (id) {
+      setFormData((prev) => ({
+        ...prev,
+        thumbnail: driveUrl(id),
+      }))
+    }
+  }
+
+  const handleImageIdsChange = (e) => {
+    const value = e.target.value
+    setImageIds(value)
+    const urls = value
+      .split('\n')
+      .map((line) => extractDriveId(line.trim()))
+      .filter(Boolean)
+      .map((id) => driveUrl(id))
+    setFormData((prev) => ({
+      ...prev,
+      images: urls,
     }))
   }
 
@@ -207,20 +243,30 @@ export default function ProjectFormModal({ isOpen, onClose, onSubmit, project = 
                 />
               </div>
 
-              {/* Thumbnail & Year */}
+              {/* Thumbnail (Google Drive ID) & Year */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-text-primary mb-1">
-                    Thumbnail URL
+                    Thumbnail (Google Drive ID)
                   </label>
                   <input
                     type="text"
-                    name="thumbnail"
-                    value={formData.thumbnail}
-                    onChange={handleChange}
-                    className="w-full rounded-lg border border-bg-border bg-bg-elevated px-3 py-2 text-text-primary focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
+                    value={thumbnailId}
+                    onChange={handleThumbnailIdChange}
+                    placeholder="Paste Drive file ID or share link"
+                    className="w-full rounded-lg border border-bg-border bg-bg-elevated px-3 py-2 text-text-primary focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all text-sm"
                     disabled={isLoading}
                   />
+                  {thumbnailUrl && (
+                    <div className="mt-2">
+                      <img
+                        src={thumbnailUrl}
+                        alt="Thumbnail preview"
+                        className="max-h-24 rounded-lg border border-bg-border"
+                        onError={() => setError('Failed to load image preview')}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -350,24 +396,35 @@ export default function ProjectFormModal({ isOpen, onClose, onSubmit, project = 
                 />
               </div>
 
-              {/* Images */}
+              {/* Images (Google Drive IDs) */}
               <div>
                 <label className="block text-sm font-medium text-text-primary mb-1">
-                  Images (one URL per line)
+                  Images (one Google Drive ID per line)
                 </label>
                 <textarea
-                  value={formData.images?.join('\n') || ''}
-                  onChange={(e) => {
-                    const value = e.target.value
-                    setFormData((prev) => ({
-                      ...prev,
-                      images: value.split('\n').map((item) => item.trim()).filter(Boolean),
-                    }))
-                  }}
+                  value={imageIds}
+                  onChange={handleImageIdsChange}
                   rows="3"
+                  placeholder="Paste Google Drive file IDs&#10;One ID per line"
                   className="w-full rounded-lg border border-bg-border bg-bg-elevated px-3 py-2 text-text-primary focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all resize-none text-sm"
                   disabled={isLoading}
                 />
+                {formData.images?.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    <p className="text-xs text-text-muted">Preview ({formData.images.length} images):</p>
+                    <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto">
+                      {formData.images.map((url, idx) => (
+                        <img
+                          key={idx}
+                          src={url}
+                          alt={`Preview ${idx + 1}`}
+                          className="h-20 rounded-lg border border-bg-border object-cover"
+                          onError={() => console.error('Failed to load image', url)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Featured */}
