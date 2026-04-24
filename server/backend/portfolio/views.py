@@ -1,14 +1,15 @@
-from rest_framework import generics
+from rest_framework import viewsets, permissions
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from .models import Project
 from .serializers import ProjectSerializer
 
 
-class ProjectListView(generics.ListAPIView):
-    queryset = Project.objects.all()
-    serializer_class = ProjectSerializer
-
-
-class ProjectDetailView(generics.RetrieveAPIView):
+class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     lookup_field = 'slug'
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
