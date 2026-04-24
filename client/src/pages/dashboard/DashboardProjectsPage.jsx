@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Edit2, Trash2, Plus, Eye } from 'lucide-react'
 import { projectsAPI } from '@services/api'
+import ProjectFormModal from '@components/dashboard/ProjectFormModal'
+import DeleteConfirmModal from '@components/dashboard/DeleteConfirmModal'
 import { fadeUp, staggerContainer } from '@animations/variants'
 
 export default function DashboardProjectsPage() {
@@ -9,20 +11,88 @@ export default function DashboardProjectsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const { data } = await projectsAPI.getAll()
-        setProjects(data)
-      } catch (err) {
-        setError('Failed to fetch projects')
-      } finally {
-        setIsLoading(false)
-      }
-    }
+  // Form Modal State
+  const [formModalOpen, setFormModalOpen] = useState(false)
+  const [editingProject, setEditingProject] = useState(null)
+  const [isFormSubmitting, setIsFormSubmitting] = useState(false)
 
+  // Delete Modal State
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [projectToDelete, setProjectToDelete] = useState(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  useEffect(() => {
     fetchProjects()
   }, [])
+
+  const fetchProjects = async () => {
+    try {
+      const { data } = await projectsAPI.getAll()
+      setProjects(data)
+    } catch (err) {
+      setError('Failed to fetch projects')
+      console.error(err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Form Modal Handlers
+  const handleOpenAddForm = () => {
+    setEditingProject(null)
+    setFormModalOpen(true)
+  }
+
+  const handleOpenEditForm = (project) => {
+    setEditingProject(project)
+    setFormModalOpen(true)
+  }
+
+  const handleCloseForm = () => {
+    setFormModalOpen(false)
+    setEditingProject(null)
+  }
+
+  const handleFormSubmit = async (formData) => {
+    setIsFormSubmitting(true)
+    try {
+      if (editingProject) {
+        await projectsAPI.update(editingProject.slug, formData)
+      } else {
+        await projectsAPI.create(formData)
+      }
+      await fetchProjects()
+      handleCloseForm()
+    } catch (err) {
+      throw err
+    } finally {
+      setIsFormSubmitting(false)
+    }
+  }
+
+  // Delete Modal Handlers
+  const handleOpenDeleteModal = (project) => {
+    setProjectToDelete(project)
+    setDeleteModalOpen(true)
+  }
+
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false)
+    setProjectToDelete(null)
+  }
+
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true)
+    try {
+      await projectsAPI.delete(projectToDelete.slug)
+      await fetchProjects()
+      handleCloseDeleteModal()
+    } catch (err) {
+      console.error('Failed to delete project:', err)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -41,7 +111,10 @@ export default function DashboardProjectsPage() {
             Manage your portfolio projects
           </p>
         </div>
-        <button className="flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow-glow-primary hover:bg-brand-dark transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+        <button
+          onClick={handleOpenAddForm}
+          className="flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow-glow-primary hover:bg-brand-dark transition-all duration-200"
+        >
           <Plus size={16} />
           Add Project
         </button>
@@ -158,16 +231,16 @@ export default function DashboardProjectsPage() {
                           <Eye size={16} />
                         </a>
                         <button
-                          className="p-2 text-text-muted hover:text-blue-400 hover:bg-blue-400/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Edit (coming soon)"
-                          disabled
+                          onClick={() => handleOpenEditForm(project)}
+                          className="p-2 text-text-muted hover:text-blue-400 hover:bg-blue-400/10 rounded-lg transition-colors"
+                          title="Edit"
                         >
                           <Edit2 size={16} />
                         </button>
                         <button
-                          className="p-2 text-text-muted hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Delete (coming soon)"
-                          disabled
+                          onClick={() => handleOpenDeleteModal(project)}
+                          className="p-2 text-text-muted hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+                          title="Delete"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -180,6 +253,22 @@ export default function DashboardProjectsPage() {
           </div>
         )}
       </motion.div>
+
+      {/* Modals */}
+      <ProjectFormModal
+        isOpen={formModalOpen}
+        onClose={handleCloseForm}
+        onSubmit={handleFormSubmit}
+        project={editingProject}
+      />
+
+      <DeleteConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        itemName={projectToDelete?.title || 'project'}
+        isLoading={isDeleting}
+      />
     </div>
   )
 }
