@@ -62,9 +62,10 @@ export default function ProjectDetailPage() {
 
         {project.thumbnail && (
           <img
-            src={project.thumbnail.startsWith('/media/') ? imageUrl(project.thumbnail) : assetUrl(project.thumbnail)}
+            src={typeof project.thumbnail === 'string' && (project.thumbnail.startsWith('http://') || project.thumbnail.startsWith('https://')) ? project.thumbnail : imageUrl(project.thumbnail)}
             alt={project.title}
             className="w-full rounded-xl mb-6 object-cover max-h-72"
+            onError={(e) => console.error('Thumbnail load failed:', project.thumbnail, e)}
           />
         )}
 
@@ -80,9 +81,10 @@ export default function ProjectDetailPage() {
               {project.images.map((img, index) => (
                 <img
                   key={index}
-                  src={assetUrl(img)}
+                  src={typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://')) ? img : imageUrl(img)}
                   alt={`${project.title} screenshot ${index + 1}`}
                   className="w-full rounded-lg object-cover border border-bg-border"
+                  onError={(e) => console.error(`Image ${index} load failed:`, img, e)}
                 />
               ))}
             </div>

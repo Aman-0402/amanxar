@@ -4,19 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, Moon, Sun } from 'lucide-react'
 import { useTheme } from '@context/ThemeContext'
 import { assetUrl } from '@utils/assetUrl'
+import { navbarAPI } from '@services/api'
 import MobileMenu from './MobileMenu'
 import { navbarSlide } from '@animations/variants'
-
-// ─── Nav links config ─────────────────────────────────────────────────────────
-const NAV_LINKS = [
-  { label: 'About',    href: '/about' },
-  { label: 'Projects', href: '/projects' },
-  { label: 'Gallery',  href: '/gallery' },
-  { label: 'eBooks',   href: '/ebooks' },
-  { label: 'Hub',      href: '/knowledge-hub' },
-  { label: 'Services', href: '/services' },
-  { label: 'Contact',  href: '/contact' },
-]
 
 // ─── Active link styles ───────────────────────────────────────────────────────
 const linkBase    = 'relative text-sm font-medium transition-colors duration-200 py-1 group'
@@ -27,7 +17,20 @@ export default function Navbar() {
   const { isDark, toggleTheme } = useTheme()
   const [scrolled,       setScrolled]       = useState(false)
   const [mobileOpen,     setMobileOpen]     = useState(false)
+  const [navLinks, setNavLinks] = useState([])
   const location = useLocation()
+
+  useEffect(() => {
+    const fetchNavLinks = async () => {
+      try {
+        const { data } = await navbarAPI.getAll()
+        setNavLinks(data.sort((a, b) => a.order - b.order))
+      } catch (err) {
+        console.error('Failed to fetch navbar links:', err)
+      }
+    }
+    fetchNavLinks()
+  }, [])
 
   // ── Scroll detection ────────────────────────────────────────────────────────
   const handleScroll = useCallback(() => {
@@ -86,7 +89,7 @@ export default function Navbar() {
 
           {/* ── Desktop Nav Links ─────────────────────────────────────────── */}
           <ul className="hidden lg:flex items-center gap-1" role="list">
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <li key={link.href}>
                 <NavLink
                   to={link.href}
@@ -200,7 +203,7 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <MobileMenu
-            links={NAV_LINKS}
+            links={navLinks}
             onClose={() => setMobileOpen(false)}
             isDark={isDark}
             onToggleTheme={toggleTheme}

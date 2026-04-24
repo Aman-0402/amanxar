@@ -4,9 +4,6 @@ const API_BASE_URL = 'http://localhost:8000'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 })
 
 api.interceptors.request.use(
@@ -42,9 +39,9 @@ export const authAPI = {
 export const projectsAPI = {
   getAll: () => api.get('/api/projects/'),
   getBySlug: (slug) => api.get(`/api/projects/${slug}/`),
-  create: (data) => api.post('/api/projects/', data),
-  update: (slug, data) => api.put(`/api/projects/${slug}/`, data),
-  partialUpdate: (slug, data) => api.patch(`/api/projects/${slug}/`, data),
+  create: (data, config) => api.post('/api/projects/', data, config),
+  update: (slug, data, config) => api.put(`/api/projects/${slug}/`, data, config),
+  partialUpdate: (slug, data, config) => api.patch(`/api/projects/${slug}/`, data, config),
   delete: (slug) => api.delete(`/api/projects/${slug}/`),
 }
 
@@ -129,8 +126,8 @@ export const knowledgeToolsAPI = {
 export const galleryAPI = {
   getAll: () => api.get('/api/gallery/'),
   getById: (id) => api.get(`/api/gallery/${id}/`),
-  create: (data) => api.post('/api/gallery/', data),
-  update: (id, data) => api.put(`/api/gallery/${id}/`, data),
+  create: (data, config) => api.post('/api/gallery/', data, config),
+  update: (id, data, config) => api.put(`/api/gallery/${id}/`, data, config),
   delete: (id) => api.delete(`/api/gallery/${id}/`),
 }
 
@@ -140,6 +137,45 @@ export const servicesAPI = {
   create: (data) => api.post('/api/services/', data),
   update: (id, data) => api.put(`/api/services/${id}/`, data),
   delete: (id) => api.delete(`/api/services/${id}/`),
+}
+
+export const navbarAPI = {
+  getAll: () => api.get('/api/navbar-links/'),
+  getById: (id) => api.get(`/api/navbar-links/${id}/`),
+  create: (data) => api.post('/api/navbar-links/', data),
+  update: (id, data) => api.put(`/api/navbar-links/${id}/`, data),
+  delete: (id) => api.delete(`/api/navbar-links/${id}/`),
+}
+
+export const footerSectionsAPI = {
+  getAll: () => api.get('/api/footer-sections/'),
+  getById: (id) => api.get(`/api/footer-sections/${id}/`),
+  create: (data) => api.post('/api/footer-sections/', data),
+  update: (id, data) => api.put(`/api/footer-sections/${id}/`, data),
+  delete: (id) => api.delete(`/api/footer-sections/${id}/`),
+}
+
+export const footerLinksAPI = {
+  getAll: () => api.get('/api/footer-links/'),
+  getById: (id) => api.get(`/api/footer-links/${id}/`),
+  create: (data) => api.post('/api/footer-links/', data),
+  update: (id, data) => api.put(`/api/footer-links/${id}/`, data),
+  delete: (id) => api.delete(`/api/footer-links/${id}/`),
+}
+
+export const footerCTAAPI = {
+  getAll: () => api.get('/api/footer-cta/'),
+  getById: (id) => api.get(`/api/footer-cta/${id}/`),
+  create: (data) => api.post('/api/footer-cta/', data),
+  update: (id, data) => api.put(`/api/footer-cta/${id}/`, data),
+}
+
+export const socialLinksAPI = {
+  getAll: () => api.get('/api/social-links/'),
+  getById: (id) => api.get(`/api/social-links/${id}/`),
+  create: (data) => api.post('/api/social-links/', data),
+  update: (id, data) => api.put(`/api/social-links/${id}/`, data),
+  delete: (id) => api.delete(`/api/social-links/${id}/`),
 }
 
 export default api

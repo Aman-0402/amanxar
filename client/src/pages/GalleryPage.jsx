@@ -91,7 +91,7 @@ export default function GalleryPage() {
                 {/* Image */}
                 <div className="relative h-52 w-full bg-bg-elevated overflow-hidden">
                   <img
-                    src={imageUrl(item.image)}
+                    src={typeof item.image === 'string' && (item.image.startsWith('http://') || item.image.startsWith('https://')) ? item.image : imageUrl(item.image)}
                     alt={item.title}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     onError={(e) => {
@@ -150,7 +150,7 @@ export default function GalleryPage() {
               {/* Image */}
               <div className="relative bg-bg-elevated">
                 <img
-                  src={assetUrl(lightbox.image)}
+                  src={typeof lightbox.image === 'string' && (lightbox.image.startsWith('http://') || lightbox.image.startsWith('https://')) ? lightbox.image : imageUrl(lightbox.image)}
                   alt={lightbox.title}
                   className="w-full max-h-[60vh] object-contain"
                   onError={(e) => {

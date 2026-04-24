@@ -120,9 +120,13 @@ export default function GalleryFormModal({ isOpen, onClose, onSubmit, item = nul
       }
 
       await onSubmit(submitData)
+      const successMsg = formData.id ? '✅ Gallery item updated successfully!' : '✅ Gallery item created successfully!'
+      alert(successMsg)
       onClose()
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to save gallery item')
+      const errorMsg = err.response?.data?.detail || 'Failed to save gallery item'
+      setError(`❌ Error: ${errorMsg}`)
+      alert(`❌ Failed to save: ${errorMsg}`)
     } finally {
       setIsLoading(false)
     }

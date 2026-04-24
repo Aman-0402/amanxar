@@ -50,10 +50,13 @@ export default function DashboardServicesPage() {
     if (!deleteTarget) return
     try {
       await servicesAPI.delete(deleteTarget.id)
+      alert('✅ Service deleted successfully!')
       setDeleteModalOpen(false)
       setDeleteTarget(null)
       fetchServices()
     } catch (err) {
+      const errorMsg = err.response?.data?.detail || 'Failed to delete service'
+      alert(`❌ Failed to delete: ${errorMsg}`)
       console.error(err)
     }
   }

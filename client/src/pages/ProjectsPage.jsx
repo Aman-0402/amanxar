@@ -92,9 +92,10 @@ export default function ProjectsPage() {
                   >
                     {project.thumbnail && (
                       <img
-                        src={project.thumbnail.startsWith('/media/') ? imageUrl(project.thumbnail) : assetUrl(project.thumbnail)}
+                        src={typeof project.thumbnail === 'string' && (project.thumbnail.startsWith('http://') || project.thumbnail.startsWith('https://')) ? project.thumbnail : imageUrl(project.thumbnail)}
                         alt={project.title}
                         className="w-full rounded-lg mb-4 object-cover h-40"
+                        onError={(e) => console.error('Image load failed:', project.thumbnail, e)}
                       />
                     )}
                     <h3 className="font-display font-semibold text-text-primary mb-2">

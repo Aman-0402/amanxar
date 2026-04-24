@@ -15,6 +15,11 @@ from .models import (
     KnowledgeTool,
     GalleryItem,
     Service,
+    NavbarLink,
+    FooterSection,
+    FooterLink,
+    FooterCTA,
+    SocialLink,
 )
 from .serializers import (
     ProjectSerializer,
@@ -31,6 +36,11 @@ from .serializers import (
     KnowledgeToolSerializer,
     GalleryItemSerializer,
     ServiceSerializer,
+    NavbarLinkSerializer,
+    FooterSectionSerializer,
+    FooterLinkSerializer,
+    FooterCTASerializer,
+    SocialLinkSerializer,
 )
 
 
@@ -169,6 +179,56 @@ class GalleryItemViewSet(viewsets.ModelViewSet):
 class ServiceViewSet(viewsets.ModelViewSet):
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+
+class NavbarLinkViewSet(viewsets.ModelViewSet):
+    queryset = NavbarLink.objects.all()
+    serializer_class = NavbarLinkSerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+
+class FooterSectionViewSet(viewsets.ModelViewSet):
+    queryset = FooterSection.objects.all()
+    serializer_class = FooterSectionSerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+
+class FooterLinkViewSet(viewsets.ModelViewSet):
+    queryset = FooterLink.objects.all()
+    serializer_class = FooterLinkSerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+
+class FooterCTAViewSet(viewsets.ModelViewSet):
+    queryset = FooterCTA.objects.all()
+    serializer_class = FooterCTASerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+
+class SocialLinkViewSet(viewsets.ModelViewSet):
+    queryset = SocialLink.objects.all()
+    serializer_class = SocialLinkSerializer
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:

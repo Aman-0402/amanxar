@@ -279,3 +279,94 @@ class Service(models.Model):
 
     def __str__(self):
         return self.title
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Navbar Models
+# ────────────────────────────────────────────────────────────────────────────
+
+class NavbarLink(models.Model):
+    label = models.CharField(max_length=100)
+    href = models.CharField(max_length=255)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return self.label
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Footer Models
+# ────────────────────────────────────────────────────────────────────────────
+
+class FooterSection(models.Model):
+    title = models.CharField(max_length=100)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return self.title
+
+
+class FooterLink(models.Model):
+    section = models.ForeignKey(FooterSection, on_delete=models.CASCADE, related_name='links')
+    label = models.CharField(max_length=255)
+    href = models.CharField(max_length=255)
+    external = models.BooleanField(default=False)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['section', 'order']
+
+    def __str__(self):
+        return f'{self.section.title} - {self.label}'
+
+
+class FooterCTA(models.Model):
+    badge_text = models.CharField(max_length=100, default='Open to opportunities')
+    heading = models.CharField(max_length=255, default="Let's build something amazing together")
+    button_text = models.CharField(max_length=100, default='Get in touch')
+    button_url = models.CharField(max_length=255, default='/contact')
+
+    class Meta:
+        verbose_name = 'Footer CTA'
+        verbose_name_plural = 'Footer CTA'
+
+    def __str__(self):
+        return 'Footer CTA Settings'
+
+    def save(self, *args, **kwargs):
+        # Ensure only one FooterCTA record exists
+        if not self.pk and FooterCTA.objects.exists():
+            FooterCTA.objects.all().delete()
+        super().save(*args, **kwargs)
+
+
+class SocialLink(models.Model):
+    PLATFORM_CHOICES = [
+        ('GitHub', 'GitHub'),
+        ('LinkedIn', 'LinkedIn'),
+        ('Twitter', 'Twitter/X'),
+        ('YouTube', 'YouTube'),
+        ('Email', 'Email'),
+        ('Instagram', 'Instagram'),
+        ('Facebook', 'Facebook'),
+    ]
+
+    platform = models.CharField(max_length=50, choices=PLATFORM_CHOICES)
+    url = models.URLField()
+    icon_name = models.CharField(max_length=50)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return self.platform
+
+    def __str__(self):
+        return self.title

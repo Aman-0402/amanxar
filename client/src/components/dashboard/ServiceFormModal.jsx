@@ -91,9 +91,13 @@ export default function ServiceFormModal({ isOpen, onClose, onSubmit, service = 
 
     try {
       await onSubmit(formData)
+      const successMsg = service ? '✅ Service updated successfully!' : '✅ Service created successfully!'
+      alert(successMsg)
       onClose()
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to save service')
+      const errorMsg = err.response?.data?.detail || 'Failed to save service'
+      setError(`❌ Error: ${errorMsg}`)
+      alert(`❌ Failed to save: ${errorMsg}`)
     } finally {
       setIsLoading(false)
     }

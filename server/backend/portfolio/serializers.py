@@ -14,6 +14,11 @@ from .models import (
     KnowledgeTool,
     GalleryItem,
     Service,
+    NavbarLink,
+    FooterSection,
+    FooterLink,
+    FooterCTA,
+    SocialLink,
 )
 
 
@@ -135,4 +140,41 @@ class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
         fields = ['id', 'slug', 'title', 'icon', 'description', 'features', 'pricing', 'cta', 'cta_link', 'order']
+        read_only_fields = ['id']
+
+
+class NavbarLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NavbarLink
+        fields = ['id', 'label', 'href', 'order']
+        read_only_fields = ['id']
+
+
+class FooterLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FooterLink
+        fields = ['id', 'section', 'label', 'href', 'external', 'order']
+        read_only_fields = ['id']
+
+
+class FooterSectionSerializer(serializers.ModelSerializer):
+    links = FooterLinkSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = FooterSection
+        fields = ['id', 'title', 'order', 'links']
+        read_only_fields = ['id']
+
+
+class FooterCTASerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FooterCTA
+        fields = ['id', 'badge_text', 'heading', 'button_text', 'button_url']
+        read_only_fields = ['id']
+
+
+class SocialLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialLink
+        fields = ['id', 'platform', 'url', 'icon_name', 'order']
         read_only_fields = ['id']

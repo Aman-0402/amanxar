@@ -200,12 +200,18 @@ export default function ProjectFormModal({ isOpen, onClose, onSubmit, project = 
 
         await onSubmit(submitData, true)
       } else {
-        await onSubmit(submitData, false)
+        // For non-file updates, exclude thumbnail field to avoid validation errors
+        const { thumbnail, thumbnailFile, thumbnailPreview, ...dataWithoutThumbnail } = formData
+        await onSubmit(dataWithoutThumbnail, false)
       }
 
+      const successMsg = project ? '✅ Project updated successfully!' : '✅ Project created successfully!'
+      alert(successMsg)
       onClose()
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to save project')
+      const errorMsg = err.response?.data?.detail || err.response?.data?.[Object.keys(err.response?.data || {})[0]]?.[0] || 'Failed to save project'
+      setError(`❌ Error: ${errorMsg}`)
+      alert(`❌ Failed to save: ${errorMsg}`)
     } finally {
       setIsLoading(false)
     }

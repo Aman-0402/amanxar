@@ -1,41 +1,43 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Github, Linkedin, Twitter, Youtube, Mail, ArrowUpRight } from 'lucide-react'
 import { fadeUp, staggerContainer } from '@animations/variants'
 import { assetUrl } from '@utils/assetUrl'
 import { viewport } from '@animations/transitions'
+import { footerSectionsAPI, footerCTAAPI, socialLinksAPI } from '@services/api'
 
-const FOOTER_LINKS = {
-  Navigation: [
-    { label: 'About',    href: '/about' },
-    { label: 'Projects', href: '/projects' },
-    { label: 'Services', href: '/services' },
-    { label: 'Contact',  href: '/contact' },
-  ],
-  Content: [
-    { label: 'Gallery',       href: '/gallery' },
-    { label: 'eBooks',        href: '/ebooks' },
-    { label: 'Knowledge Hub', href: '/knowledge-hub' },
-    { label: 'Resources',     href: '/resources' },
-  ],
-  Connect: [
-    { label: 'GitHub',    href: 'https://github.com/Aman-0402',                      external: true },
-    { label: 'LinkedIn',  href: 'https://www.linkedin.com/in/aman-raj-081905211/',   external: true },
-    { label: 'Twitter/X', href: 'https://x.com/Code_Like_Aman',                     external: true },
-    { label: 'Email',     href: 'mailto:think.like.ai.aman@gmail.com',               external: false },
-  ],
+const ICON_MAP = {
+  Github,
+  Linkedin,
+  Twitter,
+  Youtube,
+  Mail,
 }
 
-const SOCIALS = [
-  { Icon: Github,   href: 'https://github.com/Aman-0402',                    label: 'GitHub' },
-  { Icon: Linkedin, href: 'https://www.linkedin.com/in/aman-raj-081905211/', label: 'LinkedIn' },
-  { Icon: Twitter,  href: 'https://x.com/Code_Like_Aman',                   label: 'Twitter/X' },
-  { Icon: Youtube,  href: 'https://www.youtube.com/@Think_Like_Me',          label: 'YouTube' },
-  { Icon: Mail,     href: 'mailto:think.like.ai.aman@gmail.com',             label: 'Email' },
-]
-
 export default function Footer() {
+  const [footerSections, setFooterSections] = useState([])
+  const [footerCTA, setFooterCTA] = useState(null)
+  const [socialLinks, setSocialLinks] = useState([])
   const year = new Date().getFullYear()
+
+  useEffect(() => {
+    const fetchFooterData = async () => {
+      try {
+        const [sectionsRes, ctaRes, socialsRes] = await Promise.all([
+          footerSectionsAPI.getAll(),
+          footerCTAAPI.getAll(),
+          socialLinksAPI.getAll(),
+        ])
+        setFooterSections(sectionsRes.data.sort((a, b) => a.order - b.order))
+        setFooterCTA(ctaRes.data[0] || null)
+        setSocialLinks(socialsRes.data.sort((a, b) => a.order - b.order))
+      } catch (err) {
+        console.error('Failed to fetch footer data:', err)
+      }
+    }
+    fetchFooterData()
+  }, [])
 
   return (
     <footer className="relative overflow-hidden border-t border-bg-border bg-bg-surface">
@@ -47,36 +49,37 @@ export default function Footer() {
       </div>
 
       {/* ── CTA Band ────────────────────────────────────────────────────────── */}
-      <div className="relative border-b border-bg-border">
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewport}
-          className="section-container flex flex-col items-center gap-4 py-10 text-center sm:flex-row sm:justify-between sm:text-left"
-        >
-          <motion.div variants={fadeUp} className="space-y-1">
-            <p className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-widest text-text-muted sm:justify-start">
-              <span className="h-1.5 w-1.5 rounded-full bg-brand-primary" />
-              Open to opportunities
-            </p>
-            <h2 className="font-display text-xl font-bold text-text-primary sm:text-2xl">
-              Let's build something{' '}
-              <span className="gradient-text">amazing</span> together
-            </h2>
-          </motion.div>
+      {footerCTA && (
+        <div className="relative border-b border-bg-border">
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewport}
+            className="section-container flex flex-col items-center gap-4 py-10 text-center sm:flex-row sm:justify-between sm:text-left"
+          >
+            <motion.div variants={fadeUp} className="space-y-1">
+              <p className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-widest text-text-muted sm:justify-start">
+                <span className="h-1.5 w-1.5 rounded-full bg-brand-primary" />
+                {footerCTA.badge_text}
+              </p>
+              <h2 className="font-display text-xl font-bold text-text-primary sm:text-2xl">
+                {footerCTA.heading}
+              </h2>
+            </motion.div>
 
-          <motion.div variants={fadeUp}>
-            <Link
-              to="/contact"
-              className="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white shadow-glow-primary transition-all duration-200 hover:bg-brand-dark hover:shadow-glow-lg"
-            >
-              Get in touch
-              <ArrowUpRight size={14} />
-            </Link>
+            <motion.div variants={fadeUp}>
+              <Link
+                to={footerCTA.button_url}
+                className="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white shadow-glow-primary transition-all duration-200 hover:bg-brand-dark hover:shadow-glow-lg"
+              >
+                {footerCTA.button_text}
+                <ArrowUpRight size={14} />
+              </Link>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      </div>
+        </div>
+      )}
 
       {/* ── Main Footer Grid ─────────────────────────────────────────────────── */}
       <div className="relative section-container py-12">
@@ -117,22 +120,25 @@ export default function Footer() {
 
             {/* Social icons with 3D hover */}
             <div className="flex items-center gap-2">
-              {SOCIALS.map(({ Icon, href, label }) => (
-                <motion.a
-                  key={label}
-                  href={href}
-                  target={href.startsWith('mailto') ? undefined : '_blank'}
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  whileHover={{ rotateY: 20, rotateX: -10, scale: 1.15, y: -3 }}
-                  whileTap={{ scale: 0.92 }}
-                  transition={{ type: 'spring', stiffness: 350, damping: 18 }}
-                  style={{ transformPerspective: 500 }}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-bg-border bg-bg-elevated text-text-muted hover:text-brand-primary hover:border-brand-primary/40 hover:bg-brand-primary/8 transition-colors duration-200"
-                >
-                  <Icon size={15} />
-                </motion.a>
-              ))}
+              {socialLinks.map(({ id, icon_name, url, platform }) => {
+                const Icon = ICON_MAP[icon_name]
+                return Icon ? (
+                  <motion.a
+                    key={id}
+                    href={url}
+                    target={url.startsWith('mailto') ? undefined : '_blank'}
+                    rel="noopener noreferrer"
+                    aria-label={platform}
+                    whileHover={{ rotateY: 20, rotateX: -10, scale: 1.15, y: -3 }}
+                    whileTap={{ scale: 0.92 }}
+                    transition={{ type: 'spring', stiffness: 350, damping: 18 }}
+                    style={{ transformPerspective: 500 }}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-bg-border bg-bg-elevated text-text-muted hover:text-brand-primary hover:border-brand-primary/40 hover:bg-brand-primary/8 transition-colors duration-200"
+                  >
+                    <Icon size={15} />
+                  </motion.a>
+                ) : null
+              })}
             </div>
 
             {/* Available badge */}
@@ -146,14 +152,14 @@ export default function Footer() {
           </motion.div>
 
           {/* Link columns */}
-          {Object.entries(FOOTER_LINKS).map(([groupTitle, links]) => (
-            <motion.div key={groupTitle} variants={fadeUp}>
+          {footerSections.map((section) => (
+            <motion.div key={section.id} variants={fadeUp}>
               <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-text-muted">
-                {groupTitle}
+                {section.title}
               </h3>
               <ul className="space-y-3" role="list">
-                {links.map((link) => (
-                  <li key={link.label}>
+                {section.links?.map((link) => (
+                  <li key={link.id}>
                     {link.external ? (
                       <a
                         href={link.href}

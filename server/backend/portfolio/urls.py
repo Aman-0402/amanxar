@@ -16,6 +16,11 @@ from .views import (
     KnowledgeToolViewSet,
     GalleryItemViewSet,
     ServiceViewSet,
+    NavbarLinkViewSet,
+    FooterSectionViewSet,
+    FooterLinkViewSet,
+    FooterCTAViewSet,
+    SocialLinkViewSet,
 )
 
 app_name = 'portfolio'
@@ -35,6 +40,11 @@ router.register(r'gallery', GalleryItemViewSet, basename='gallery-item')
 router.register(r'services', ServiceViewSet, basename='service')
 router.register(r'knowledge-hub', KnowledgeHubCategoryViewSet, basename='knowledge-hub-category')
 router.register(r'knowledge-tools', KnowledgeToolViewSet, basename='knowledge-tool')
+router.register(r'navbar-links', NavbarLinkViewSet, basename='navbar-link')
+router.register(r'footer-sections', FooterSectionViewSet, basename='footer-section')
+router.register(r'footer-links', FooterLinkViewSet, basename='footer-link')
+router.register(r'footer-cta', FooterCTAViewSet, basename='footer-cta')
+router.register(r'social-links', SocialLinkViewSet, basename='social-link')
 
 urlpatterns = [
     *router.urls,

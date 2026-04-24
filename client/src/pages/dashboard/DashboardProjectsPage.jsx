@@ -65,7 +65,11 @@ export default function DashboardProjectsPage() {
       await fetchProjects()
       handleCloseForm()
     } catch (err) {
-      throw err
+      const errorMsg = err.response?.data?.detail ||
+                      err.response?.data?.[Object.keys(err.response?.data || {})[0]]?.[0] ||
+                      'Failed to save project'
+      console.error('Project save error:', err.response?.data || err)
+      alert(`❌ Failed to save: ${errorMsg}`)
     } finally {
       setIsFormSubmitting(false)
     }
@@ -86,9 +90,12 @@ export default function DashboardProjectsPage() {
     setIsDeleting(true)
     try {
       await projectsAPI.delete(projectToDelete.slug)
+      alert('✅ Project deleted successfully!')
       await fetchProjects()
       handleCloseDeleteModal()
     } catch (err) {
+      const errorMsg = err.response?.data?.detail || 'Failed to delete project'
+      alert(`❌ Failed to delete: ${errorMsg}`)
       console.error('Failed to delete project:', err)
     } finally {
       setIsDeleting(false)
