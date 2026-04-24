@@ -1,16 +1,45 @@
 import { useParams, Link, Navigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { ArrowLeft, ExternalLink, Github } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import PageLayout from '@components/layout/PageLayout'
-import projects from '@data/projects.json'
+import { projectsAPI } from '@services/api'
 import { assetUrl } from '@utils/assetUrl'
 
 export default function ProjectDetailPage() {
   const { slug } = useParams()
-  const project = projects.find((p) => p.slug === slug)
+  const [project, setProject] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  if (!project) return <Navigate to="/projects" replace />
+  useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        const { data } = await projectsAPI.getBySlug(slug)
+        setProject(data)
+      } catch (err) {
+        setError('Failed to load project')
+        console.error(err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchProject()
+  }, [slug])
+
+  if (isLoading) {
+    return (
+      <PageLayout title="Loading..." description="Loading project details" path={`/projects/${slug}`}>
+        <div className="section-container section-padding flex justify-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-brand-primary border-t-transparent" />
+        </div>
+      </PageLayout>
+    )
+  }
+
+  if (error || !project) return <Navigate to="/projects" replace />
 
   return (
     <PageLayout
@@ -60,15 +89,17 @@ export default function ProjectDetailPage() {
         )}
 
         {/* Tech stack */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          {project.techStack.map((tech) => (
-            <span key={tech} className="tag">{tech}</span>
-          ))}
-        </div>
+        {project.techStack && project.techStack.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-8">
+            {project.techStack.map((tech) => (
+              <span key={tech} className="tag">{tech}</span>
+            ))}
+          </div>
+        )}
 
         {/* Links */}
         <div className="flex items-center gap-3">
-          {project.links.demo && (
+          {project.links?.demo && (
             <a
               href={project.links.demo}
               target="_blank"
@@ -78,7 +109,7 @@ export default function ProjectDetailPage() {
               <ExternalLink size={14} /> Live Demo
             </a>
           )}
-          {project.links.github && (
+          {project.links?.github && (
             <a
               href={project.links.github}
               target="_blank"
