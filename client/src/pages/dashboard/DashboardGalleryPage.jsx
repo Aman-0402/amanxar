@@ -34,9 +34,13 @@ export default function DashboardGalleryPage() {
   const handleSave = async (data) => {
     try {
       if (editingItem) {
-        await galleryAPI.update(editingItem.id, data)
+        await galleryAPI.update(editingItem.id, data, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
       } else {
-        await galleryAPI.create(data)
+        await galleryAPI.create(data, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
       }
       setFormModalOpen(false)
       setEditingItem(null)

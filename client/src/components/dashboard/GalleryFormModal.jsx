@@ -3,32 +3,41 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Loader2 } from 'lucide-react'
 import { modalBackdrop, modalContent } from '@animations/variants'
 
+const MAX_FILE_SIZE = 1024 * 1024 // 1 MB
+
 export default function GalleryFormModal({ isOpen, onClose, onSubmit, item = null }) {
   const [formData, setFormData] = useState({
     id: '',
     title: '',
     description: '',
     category: 'Design',
-    image: '',
+    image: null,
+    imagePreview: '',
     year: new Date().getFullYear(),
     order: 0,
   })
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [fileSize, setFileSize] = useState('')
 
   const CATEGORIES = ['Design', 'Diagrams', 'Events', 'Certificates', 'Screenshots']
 
   useEffect(() => {
     if (item) {
-      setFormData(item)
+      setFormData({
+        ...item,
+        image: null,
+        imagePreview: item.image,
+      })
     } else {
       setFormData({
         id: '',
         title: '',
         description: '',
         category: 'Design',
-        image: '',
+        image: null,
+        imagePreview: '',
         year: new Date().getFullYear(),
         order: 0,
       })
@@ -57,13 +66,60 @@ export default function GalleryFormModal({ isOpen, onClose, onSubmit, item = nul
     }))
   }
 
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const fileSizeMB = file.size / (1024 * 1024)
+    const fileSizeKB = file.size / 1024
+
+    if (file.size > MAX_FILE_SIZE) {
+      const errorMsg = `❌ File too large! Max size is 1 MB, but your file is ${fileSizeMB.toFixed(2)} MB`
+      setError(errorMsg)
+      alert(errorMsg)
+      e.target.value = ''
+      return
+    }
+
+    if (!file.type.startsWith('image/')) {
+      const errorMsg = '❌ Please select a valid image file (PNG, JPG, WebP, etc.)'
+      setError(errorMsg)
+      alert(errorMsg)
+      e.target.value = ''
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setFormData((prev) => ({
+        ...prev,
+        image: file,
+        imagePreview: reader.result,
+      }))
+      setFileSize(`✅ File size: ${fileSizeKB.toFixed(2)} KB (Max 1 MB)`)
+      setError('')
+    }
+    reader.readAsDataURL(file)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setIsLoading(true)
 
     try {
-      await onSubmit(formData)
+      const submitData = new FormData()
+      submitData.append('id', formData.id)
+      submitData.append('title', formData.title)
+      submitData.append('description', formData.description)
+      submitData.append('category', formData.category)
+      submitData.append('year', formData.year)
+      submitData.append('order', formData.order)
+      if (formData.image) {
+        submitData.append('image', formData.image)
+      }
+
+      await onSubmit(submitData)
       onClose()
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to save gallery item')
@@ -201,28 +257,29 @@ export default function GalleryFormModal({ isOpen, onClose, onSubmit, item = nul
                   />
                 </div>
 
-                {/* Image URL */}
+                {/* Image Upload */}
                 <div>
                   <label className="block text-sm font-medium text-text-primary mb-1">
-                    Image URL *
+                    Image (Max 1 MB) *
                   </label>
                   <input
-                    type="url"
-                    name="image"
-                    value={formData.image}
-                    onChange={handleChange}
-                    placeholder="https://example.com/image.jpg"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
                     className="w-full rounded-lg border border-bg-border bg-bg-elevated px-3 py-2 text-text-primary focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
-                    required
                     disabled={isLoading}
                   />
-                  {formData.image && (
-                    <div className="mt-2">
+                  <p className="text-xs text-text-muted mt-1">PNG, JPG, WebP (max 1 MB)</p>
+                  {fileSize && (
+                    <p className="text-xs text-green-400 mt-1">{fileSize}</p>
+                  )}
+
+                  {formData.imagePreview && (
+                    <div className="mt-3">
                       <img
-                        src={formData.image}
+                        src={formData.imagePreview}
                         alt="Preview"
                         className="max-h-48 rounded-lg border border-bg-border object-cover"
-                        onError={() => setError('Failed to load image preview')}
                       />
                     </div>
                   )}

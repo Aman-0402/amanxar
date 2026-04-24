@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm'
 import PageLayout from '@components/layout/PageLayout'
 import { projectsAPI } from '@services/api'
 import { assetUrl } from '@utils/assetUrl'
+import { imageUrl } from '@utils/imageUrl'
 
 export default function ProjectDetailPage() {
   const { slug } = useParams()
@@ -61,7 +62,7 @@ export default function ProjectDetailPage() {
 
         {project.thumbnail && (
           <img
-            src={assetUrl(project.thumbnail)}
+            src={project.thumbnail.startsWith('/media/') ? imageUrl(project.thumbnail) : assetUrl(project.thumbnail)}
             alt={project.title}
             className="w-full rounded-xl mb-6 object-cover max-h-72"
           />

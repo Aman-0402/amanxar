@@ -53,13 +53,14 @@ export default function DashboardProjectsPage() {
     setEditingProject(null)
   }
 
-  const handleFormSubmit = async (formData) => {
+  const handleFormSubmit = async (formData, isFormData = false) => {
     setIsFormSubmitting(true)
     try {
+      const config = isFormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}
       if (editingProject) {
-        await projectsAPI.update(editingProject.slug, formData)
+        await projectsAPI.update(editingProject.slug, formData, config)
       } else {
-        await projectsAPI.create(formData)
+        await projectsAPI.create(formData, config)
       }
       await fetchProjects()
       handleCloseForm()

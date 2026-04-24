@@ -1,4 +1,5 @@
 from django.db import models
+from .validators import validate_image_size
 
 class Project(models.Model):
     slug = models.SlugField(unique=True)
@@ -6,7 +7,7 @@ class Project(models.Model):
     shortDesc = models.TextField()
     longDesc = models.TextField()
 
-    thumbnail = models.URLField(blank=True, null=True)
+    thumbnail = models.ImageField(upload_to='projects/', validators=[validate_image_size], blank=True, null=True)
     images = models.JSONField(default=list)
 
     techStack = models.JSONField(default=list)
@@ -245,7 +246,7 @@ class GalleryItem(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     category = models.CharField(max_length=100)
-    image = models.URLField()
+    image = models.ImageField(upload_to='gallery/', validators=[validate_image_size])
     year = models.IntegerField()
     order = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)

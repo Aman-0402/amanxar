@@ -4,6 +4,7 @@ import { X } from 'lucide-react'
 import PageLayout from '@components/layout/PageLayout'
 import { galleryAPI } from '@services/api'
 import { assetUrl } from '@utils/assetUrl'
+import { imageUrl } from '@utils/imageUrl'
 
 const ALL_CATEGORY = 'All'
 
@@ -90,7 +91,7 @@ export default function GalleryPage() {
                 {/* Image */}
                 <div className="relative h-52 w-full bg-bg-elevated overflow-hidden">
                   <img
-                    src={assetUrl(item.image)}
+                    src={imageUrl(item.image)}
                     alt={item.title}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     onError={(e) => {

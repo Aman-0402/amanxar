@@ -18,6 +18,8 @@ from .models import (
 
 
 class ProjectSerializer(serializers.ModelSerializer):
+    thumbnail = serializers.ImageField(required=False, allow_null=True)
+
     class Meta:
         model = Project
         fields = [
@@ -121,6 +123,8 @@ class KnowledgeHubCategorySerializer(serializers.ModelSerializer):
 
 
 class GalleryItemSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(required=True)
+
     class Meta:
         model = GalleryItem
         fields = ['id', 'title', 'description', 'category', 'image', 'year', 'order', 'created_at']

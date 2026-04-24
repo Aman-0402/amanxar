@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import PageLayout from '@components/layout/PageLayout'
 import { projectsAPI } from '@services/api'
 import { assetUrl } from '@utils/assetUrl'
+import { imageUrl } from '@utils/imageUrl'
 
 const ALL_CATEGORY = 'All'
 
@@ -91,7 +92,7 @@ export default function ProjectsPage() {
                   >
                     {project.thumbnail && (
                       <img
-                        src={assetUrl(project.thumbnail)}
+                        src={project.thumbnail.startsWith('/media/') ? imageUrl(project.thumbnail) : assetUrl(project.thumbnail)}
                         alt={project.title}
                         className="w-full rounded-lg mb-4 object-cover h-40"
                       />

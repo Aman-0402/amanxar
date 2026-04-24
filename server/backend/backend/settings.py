@@ -138,4 +138,16 @@ USE_TZ = True
 # ========================
 STATIC_URL = 'static/'
 
+# ========================
+# MEDIA FILES (User Uploads)
+# ========================
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# ========================
+# FILE UPLOAD SETTINGS
+# ========================
+FILE_UPLOAD_MAX_MEMORY_SIZE = 1048576  # 1 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 1048576  # 1 MB
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
