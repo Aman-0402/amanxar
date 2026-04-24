@@ -10,6 +10,7 @@ from .views import (
     SkillCategoryViewSet,
     TechStackCategoryViewSet,
     TimelineItemViewSet,
+    MessageViewSet,
 )
 
 app_name = 'portfolio'
@@ -23,6 +24,7 @@ router.register(r'about/highlights', AboutHighlightViewSet, basename='about-high
 router.register(r'skills', SkillCategoryViewSet, basename='skill-category')
 router.register(r'tech-stack', TechStackCategoryViewSet, basename='tech-stack-category')
 router.register(r'timeline', TimelineItemViewSet, basename='timeline-item')
+router.register(r'messages', MessageViewSet, basename='message')
 
 urlpatterns = [
     *router.urls,

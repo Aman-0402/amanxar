@@ -8,6 +8,7 @@ from .models import (
     SkillCategory,
     TechStackCategory,
     TimelineItem,
+    Message,
 )
 
 
@@ -81,3 +82,10 @@ class TimelineItemSerializer(serializers.ModelSerializer):
         model = TimelineItem
         fields = ['id', 'year', 'title', 'type', 'description', 'tags', 'order']
         read_only_fields = ['id']
+
+
+class MessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ['id', 'name', 'email', 'subject', 'message', 'created_at', 'read']
+        read_only_fields = ['id', 'created_at']

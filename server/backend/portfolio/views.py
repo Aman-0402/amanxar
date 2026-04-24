@@ -9,6 +9,7 @@ from .models import (
     SkillCategory,
     TechStackCategory,
     TimelineItem,
+    Message,
 )
 from .serializers import (
     ProjectSerializer,
@@ -19,6 +20,7 @@ from .serializers import (
     SkillCategorySerializer,
     TechStackCategorySerializer,
     TimelineItemSerializer,
+    MessageSerializer,
 )
 
 
@@ -99,5 +101,15 @@ class TimelineItemViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+
+class MessageViewSet(viewsets.ModelViewSet):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+
+    def get_permissions(self):
+        if self.action == 'create':
             return [AllowAny()]
         return [IsAuthenticated()]

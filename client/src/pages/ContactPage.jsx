@@ -4,6 +4,7 @@ import { Mail, Github, Linkedin, Twitter, Phone, Send, MapPin, Clock } from 'luc
 import PageLayout from '@components/layout/PageLayout'
 import { fadeUp, staggerContainer } from '@animations/variants'
 import { viewport } from '@animations/transitions'
+import { messagesAPI } from '@services/api'
 
 const CONTACT_METHODS = [
   {
@@ -38,10 +39,6 @@ const CONTACT_METHODS = [
   },
 ]
 
-// Note: This form uses Formspree (https://formspree.io) — 100% free, no backend needed.
-// Replace FORMSPREE_ENDPOINT with your own form endpoint.
-const FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID'
-
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
   const [status, setStatus] = useState('idle') // idle | sending | success | error
@@ -55,19 +52,11 @@ export default function ContactPage() {
     setStatus('sending')
 
     try {
-      const res = await fetch(FORMSPREE_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify(form),
-      })
-
-      if (res.ok) {
-        setStatus('success')
-        setForm({ name: '', email: '', subject: '', message: '' })
-      } else {
-        setStatus('error')
-      }
-    } catch {
+      await messagesAPI.create(form)
+      setStatus('success')
+      setForm({ name: '', email: '', subject: '', message: '' })
+    } catch (err) {
+      console.error(err)
       setStatus('error')
     }
   }

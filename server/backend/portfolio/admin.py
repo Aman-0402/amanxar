@@ -8,6 +8,7 @@ from .models import (
     SkillCategory,
     TechStackCategory,
     TimelineItem,
+    Message,
 )
 
 
@@ -71,3 +72,13 @@ class TimelineItemAdmin(admin.ModelAdmin):
     list_filter = ('type',)
     list_editable = ('order',)
     ordering = ('order',)
+
+
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'subject', 'created_at', 'read')
+    list_filter = ('read', 'created_at')
+    search_fields = ('name', 'email', 'subject', 'message')
+    readonly_fields = ('created_at', 'name', 'email', 'subject', 'message')
+    list_editable = ('read',)
+    ordering = ('-created_at',)

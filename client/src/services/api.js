@@ -94,4 +94,12 @@ export const timelineAPI = {
   delete: (id) => api.delete(`/api/timeline/${id}/`),
 }
 
+export const messagesAPI = {
+  getAll: () => api.get('/api/messages/'),
+  getById: (id) => api.get(`/api/messages/${id}/`),
+  create: (data) => api.post('/api/messages/', data),
+  markAsRead: (id, data) => api.patch(`/api/messages/${id}/`, data),
+  delete: (id) => api.delete(`/api/messages/${id}/`),
+}
+
 export default api

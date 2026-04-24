@@ -25,6 +25,7 @@ const DashboardAbout    = lazy(() => import('@pages/dashboard/DashboardAboutPage
 const DashboardSkills   = lazy(() => import('@pages/dashboard/DashboardSkillsPage'))
 const DashboardTechStack = lazy(() => import('@pages/dashboard/DashboardTechStackPage'))
 const DashboardTimeline = lazy(() => import('@pages/dashboard/DashboardTimelinePage'))
+const DashboardMessages = lazy(() => import('@pages/dashboard/DashboardMessagesPage'))
 const DashboardTest     = lazy(() => import('@pages/dashboard/DashboardTestPage'))
 
 // ─── Router configuration ─────────────────────────────────────────────────────
@@ -94,6 +95,14 @@ const router = createBrowserRouter(
             element: (
               <Suspense fallback={<PageLoader />}>
                 <DashboardTimeline />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'messages',
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <DashboardMessages />
               </Suspense>
             ),
           },
