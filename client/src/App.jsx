@@ -1,6 +1,8 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, RouterProvider, ScrollRestoration } from 'react-router-dom'
 import RootLayout from '@components/layout/RootLayout'
+import DashboardLayout from '@components/dashboard/DashboardLayout'
+import ProtectedRoute from '@components/auth/ProtectedRoute'
 import PageLoader from '@components/ui/PageLoader'
 
 // ─── Lazy-load all page components ────────────────────────────────────────────
@@ -16,6 +18,9 @@ const ServicesPage     = lazy(() => import('@pages/ServicesPage'))
 const ResourcesPage    = lazy(() => import('@pages/ResourcesPage'))
 const ContactPage      = lazy(() => import('@pages/ContactPage'))
 const NotFoundPage     = lazy(() => import('@pages/NotFoundPage'))
+const LoginPage        = lazy(() => import('@pages/auth/LoginPage'))
+const DashboardOverview = lazy(() => import('@pages/dashboard/DashboardOverviewPage'))
+const DashboardProjects = lazy(() => import('@pages/dashboard/DashboardProjectsPage'))
 
 // ─── Router configuration ─────────────────────────────────────────────────────
 // import.meta.env.BASE_URL is injected by Vite from the `base` option.
@@ -24,6 +29,41 @@ const NotFoundPage     = lazy(() => import('@pages/NotFoundPage'))
 // at '/aman.ai/' — no routes match and the screen stays blank.
 const router = createBrowserRouter(
   [
+  {
+    path: '/login',
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <LoginPage />
+      </Suspense>
+    ),
+  },
+  {
+    path: '/dashboard',
+    element: <ProtectedRoute />,
+    children: [
+      {
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <DashboardOverview />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'projects',
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <DashboardProjects />
+              </Suspense>
+            ),
+          },
+        ],
+      },
+    ],
+  },
   {
     path: '/',
     element: <RootLayout />,

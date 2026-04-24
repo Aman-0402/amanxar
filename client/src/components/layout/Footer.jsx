@@ -188,7 +188,14 @@ export default function Footer() {
         <div className="section-container flex flex-col items-center gap-2 py-5 text-center sm:flex-row sm:justify-between sm:text-left">
 
           <p className="text-xs text-text-muted">
-            © {year} Aman Raj. All rights reserved.
+            © {year}{' '}
+            <Link
+              to="/login"
+              className="hover:text-brand-primary transition-colors duration-200"
+            >
+              Aman Raj
+            </Link>
+            . All rights reserved.
           </p>
 
           <p className="text-xs text-text-muted">
