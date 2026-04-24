@@ -1,12 +1,13 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Home, FileText, MessageSquare, Settings, LogOut } from 'lucide-react'
+import { Home, FileText, MessageSquare, Settings, LogOut, User } from 'lucide-react'
 import { useAuth } from '@context/AuthContext'
 import { assetUrl } from '@utils/assetUrl'
 
 const NAV_ITEMS = [
   { label: 'Overview', href: '/dashboard', icon: Home },
   { label: 'Projects', href: '/dashboard/projects', icon: FileText },
+  { label: 'About', href: '/dashboard/about', icon: User },
   { label: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
   { label: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]

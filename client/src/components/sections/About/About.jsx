@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -9,6 +9,8 @@ import {
 } from 'lucide-react'
 import { fadeUp, slideInLeft, slideInRight, staggerContainer, scaleIn, skillBar } from '@animations/variants'
 import { viewport } from '@animations/transitions'
+import { aboutAPI } from '@services/api'
+import { getIcon } from '@utils/iconMap'
 import skillsData from '@data/skills.json'
 import timelineData from '@data/timeline.json'
 import techStackData from '@data/techstack.json'
@@ -85,13 +87,13 @@ const tabContent = {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function StatCard({ icon: Icon, value, label }) {
+function StatCard({ iconName, value, label }) {
   return (
     <motion.div
       variants={scaleIn}
       className="flex flex-col items-center gap-1 rounded-2xl border border-bg-border bg-bg-elevated p-4 text-center"
     >
-      <Icon size={18} className="text-brand-primary mb-1" />
+      <div className="text-brand-primary mb-1">{getIcon(iconName, { size: 18 })}</div>
       <span className="font-display text-2xl font-bold text-text-primary">{value}</span>
       <span className="text-xs text-text-muted">{label}</span>
     </motion.div>
@@ -224,7 +226,7 @@ function JourneyTab() {
   )
 }
 
-function WhatIDoTab() {
+function WhatIDoTab({ whatIDo }) {
   return (
     <motion.div
       key="whatido"
@@ -234,32 +236,31 @@ function WhatIDoTab() {
       exit="exit"
       className="grid gap-5 sm:grid-cols-2"
     >
-      {WHAT_I_DO.map((item) => {
-        const Icon = item.icon
-        return (
-          <motion.div
-            key={item.title}
-            variants={fadeUp}
-            className="group rounded-2xl border border-bg-border bg-bg-elevated p-6 hover:border-brand-primary/40 transition-colors duration-300"
-          >
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary/10 border border-brand-primary/20">
-              <Icon size={20} className="text-brand-primary" />
-            </div>
-            <h3 className="font-display font-semibold text-text-primary mb-2">{item.title}</h3>
-            <p className="text-sm text-text-secondary leading-relaxed mb-4">{item.description}</p>
-            <div className="flex flex-wrap gap-1.5">
-              {item.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full bg-bg-border px-2.5 py-0.5 text-xs text-text-muted"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </motion.div>
-        )
-      })}
+      {whatIDo.map((item) => (
+        <motion.div
+          key={item.id}
+          variants={fadeUp}
+          className="group rounded-2xl border border-bg-border bg-bg-elevated p-6 hover:border-brand-primary/40 transition-colors duration-300"
+        >
+          <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary/10 border border-brand-primary/20">
+            {getIcon(item.icon_name, { size: 20 }) && (
+              <div className="text-brand-primary">{getIcon(item.icon_name, { size: 20 })}</div>
+            )}
+          </div>
+          <h3 className="font-display font-semibold text-text-primary mb-2">{item.title}</h3>
+          <p className="text-sm text-text-secondary leading-relaxed mb-4">{item.description}</p>
+          <div className="flex flex-wrap gap-1.5">
+            {item.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full bg-bg-border px-2.5 py-0.5 text-xs text-text-muted"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </motion.div>
+      ))}
 
       <motion.div
         variants={fadeUp}
@@ -334,6 +335,30 @@ function TechStackTab() {
 export default function About() {
   const [activeTab, setActiveTab] = useState('Skills')
   const [imgError, setImgError] = useState(false)
+  const [stats, setStats] = useState([])
+  const [whatIDo, setWhatIDo] = useState([])
+  const [bio, setBio] = useState([])
+  const [highlights, setHighlights] = useState([])
+
+  useEffect(() => {
+    const fetchAboutData = async () => {
+      try {
+        const [statsRes, whatIDoRes, bioRes, highlightsRes] = await Promise.all([
+          aboutAPI.getStats(),
+          aboutAPI.getWhatIDo(),
+          aboutAPI.getBio(),
+          aboutAPI.getHighlights(),
+        ])
+        setStats(statsRes.data)
+        setWhatIDo(whatIDoRes.data)
+        setBio(bioRes.data)
+        setHighlights(highlightsRes.data)
+      } catch (err) {
+        console.error('Failed to fetch about data:', err)
+      }
+    }
+    fetchAboutData()
+  }, [])
 
   return (
     <>
@@ -400,8 +425,13 @@ export default function About() {
               viewport={viewport}
               className="grid grid-cols-2 gap-3"
             >
-              {STATS.map((stat) => (
-                <StatCard key={stat.label} {...stat} />
+              {stats.map((stat) => (
+                <StatCard
+                  key={stat.id}
+                  iconName={stat.icon_name}
+                  value={stat.value}
+                  label={stat.label}
+                />
               ))}
             </motion.div>
           </motion.div>
@@ -423,42 +453,26 @@ export default function About() {
               </h1>
             </motion.div>
 
-            <motion.p variants={fadeUp} className="text-text-secondary leading-relaxed text-lg">
-              I'm <span className="font-semibold text-text-primary">Aman Raj</span> — a Full-Stack Developer
-              and AI/ML Engineer based in India. I specialise in building production-ready web applications
-              with the MERN stack and Python, with a focus on integrating intelligent features that genuinely
-              solve problems.
-            </motion.p>
-
-            <motion.p variants={fadeUp} className="text-text-secondary leading-relaxed">
-              Beyond writing code, I'm passionate about sharing knowledge. Through YouTube tutorials,
-              technical eBooks, and direct training, I've helped{' '}
-              <span className="font-semibold text-text-primary">200+ developers</span> level up in web
-              development and machine learning — from complete beginners to production-ready engineers.
-            </motion.p>
-
-            <motion.p variants={fadeUp} className="text-text-secondary leading-relaxed">
-              I believe in clean architecture, thoughtful UI, and the power of continuous learning.
-              Whether it's crafting pixel-perfect interfaces with React and TailwindCSS, building
-              scalable APIs, or developing ML pipelines — I bring both technical depth and teaching
-              clarity to everything I build.
-            </motion.p>
+            {bio.map((para, index) => (
+              <motion.p
+                key={para.id}
+                variants={fadeUp}
+                className={`text-text-secondary leading-relaxed ${index === 0 ? 'text-lg' : ''}`}
+              >
+                {para.text}
+              </motion.p>
+            ))}
 
             {/* Highlights */}
             <motion.ul variants={staggerContainer} className="space-y-2.5">
-              {[
-                'MERN Stack & Python — full production experience',
-                'AI/ML Engineering: LLMs, RAG, scikit-learn, XGBoost',
-                'Technical Trainer — workshops, eBooks, 1-on-1 mentoring',
-                'Open to freelance projects and AI/ML consulting',
-              ].map((point) => (
+              {highlights.map((highlight) => (
                 <motion.li
-                  key={point}
+                  key={highlight.id}
                   variants={fadeUp}
                   className="flex items-start gap-2.5 text-sm text-text-secondary"
                 >
                   <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0 text-brand-primary" />
-                  {point}
+                  {highlight.text}
                 </motion.li>
               ))}
             </motion.ul>
@@ -517,7 +531,7 @@ export default function About() {
             {activeTab === 'Skills'      && <SkillsTab />}
             {activeTab === 'Tech Stack'  && <TechStackTab />}
             {activeTab === 'Journey'     && <JourneyTab />}
-            {activeTab === 'What I Do'   && <WhatIDoTab />}
+            {activeTab === 'What I Do'   && <WhatIDoTab whatIDo={whatIDo} />}
           </AnimatePresence>
         </div>
       </div>
