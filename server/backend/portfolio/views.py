@@ -13,6 +13,7 @@ from .models import (
     EBook,
     KnowledgeHubCategory,
     KnowledgeTool,
+    GalleryItem,
 )
 from .serializers import (
     ProjectSerializer,
@@ -27,6 +28,7 @@ from .serializers import (
     EBookSerializer,
     KnowledgeHubCategorySerializer,
     KnowledgeToolSerializer,
+    GalleryItemSerializer,
 )
 
 
@@ -145,6 +147,16 @@ class KnowledgeHubCategoryViewSet(viewsets.ModelViewSet):
 class KnowledgeToolViewSet(viewsets.ModelViewSet):
     queryset = KnowledgeTool.objects.all()
     serializer_class = KnowledgeToolSerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+
+class GalleryItemViewSet(viewsets.ModelViewSet):
+    queryset = GalleryItem.objects.all()
+    serializer_class = GalleryItemSerializer
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:

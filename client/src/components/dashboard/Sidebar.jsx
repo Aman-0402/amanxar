@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Home, FileText, MessageSquare, Settings, LogOut, User, BookOpen, Compass } from 'lucide-react'
+import { Home, FileText, MessageSquare, Settings, LogOut, User, BookOpen, Compass, Image } from 'lucide-react'
 import { useAuth } from '@context/AuthContext'
 import { assetUrl } from '@utils/assetUrl'
 
@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { label: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
   { label: 'eBooks', href: '/dashboard/ebooks', icon: BookOpen },
   { label: 'Knowledge Hub', href: '/dashboard/knowledge-hub', icon: Compass },
+  { label: 'Gallery', href: '/dashboard/gallery', icon: Image },
   { label: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
 

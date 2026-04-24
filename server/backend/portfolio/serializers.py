@@ -12,6 +12,7 @@ from .models import (
     EBook,
     KnowledgeHubCategory,
     KnowledgeTool,
+    GalleryItem,
 )
 
 
@@ -116,3 +117,10 @@ class KnowledgeHubCategorySerializer(serializers.ModelSerializer):
         model = KnowledgeHubCategory
         fields = ['id', 'label', 'description', 'icon_name', 'color', 'order', 'tools']
         read_only_fields = ['id']
+
+
+class GalleryItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GalleryItem
+        fields = ['id', 'title', 'description', 'category', 'image', 'year', 'order', 'created_at']
+        read_only_fields = ['id', 'created_at']

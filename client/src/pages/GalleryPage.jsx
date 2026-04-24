@@ -1,28 +1,47 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import PageLayout from '@components/layout/PageLayout'
-import gallery from '@data/gallery.json'
+import { galleryAPI } from '@services/api'
 import { assetUrl } from '@utils/assetUrl'
 
 const ALL_CATEGORY = 'All'
 
 export default function GalleryPage() {
+  const [gallery, setGallery] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [active, setActive] = useState(ALL_CATEGORY)
+  const [lightbox, setLightbox] = useState(null)
+
+  useEffect(() => {
+    fetchGallery()
+  }, [])
+
+  const fetchGallery = async () => {
+    try {
+      const res = await galleryAPI.getAll()
+      setGallery(res.data)
+    } catch (err) {
+      console.error('Failed to fetch gallery:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const categories = useMemo(() => {
     const cats = gallery.map((item) => item.category)
     return [ALL_CATEGORY, ...Array.from(new Set(cats))]
-  }, [])
-
-  const [active,    setActive]    = useState(ALL_CATEGORY)
-  const [lightbox,  setLightbox]  = useState(null)   // item or null
+  }, [gallery])
 
   const filtered = useMemo(
     () =>
       active === ALL_CATEGORY
         ? gallery
         : gallery.filter((item) => item.category === active),
-    [active]
+    [active, gallery]
   )
+
+  if (loading) return <PageLayout><div className="p-8">Loading...</div></PageLayout>
 
   return (
     <PageLayout

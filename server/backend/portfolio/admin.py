@@ -12,6 +12,7 @@ from .models import (
     EBook,
     KnowledgeHubCategory,
     KnowledgeTool,
+    GalleryItem,
 )
 
 
@@ -111,3 +112,12 @@ class KnowledgeToolAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description')
     list_editable = ('order',)
     ordering = ('order',)
+
+
+@admin.register(GalleryItem)
+class GalleryItemAdmin(admin.ModelAdmin):
+    list_display = ('title', 'category', 'year', 'order')
+    list_filter = ('category', 'year')
+    search_fields = ('title', 'description')
+    list_editable = ('order',)
+    ordering = ('-year', 'order')

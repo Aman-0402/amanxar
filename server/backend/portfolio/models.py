@@ -234,3 +234,24 @@ class KnowledgeTool(models.Model):
 
     def __str__(self):
         return self.name
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Gallery Model
+# ────────────────────────────────────────────────────────────────────────────
+
+class GalleryItem(models.Model):
+    id = models.CharField(max_length=100, primary_key=True, unique=True)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    category = models.CharField(max_length=100)
+    image = models.URLField()
+    year = models.IntegerField()
+    order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-year', 'order']
+
+    def __str__(self):
+        return self.title

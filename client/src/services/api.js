@@ -126,4 +126,12 @@ export const knowledgeToolsAPI = {
   delete: (id) => api.delete(`/api/knowledge-tools/${id}/`),
 }
 
+export const galleryAPI = {
+  getAll: () => api.get('/api/gallery/'),
+  getById: (id) => api.get(`/api/gallery/${id}/`),
+  create: (data) => api.post('/api/gallery/', data),
+  update: (id, data) => api.put(`/api/gallery/${id}/`, data),
+  delete: (id) => api.delete(`/api/gallery/${id}/`),
+}
+
 export default api
