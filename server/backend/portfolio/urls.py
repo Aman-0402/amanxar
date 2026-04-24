@@ -12,6 +12,8 @@ from .views import (
     TimelineItemViewSet,
     MessageViewSet,
     EBookViewSet,
+    KnowledgeHubCategoryViewSet,
+    KnowledgeToolViewSet,
 )
 
 app_name = 'portfolio'
@@ -27,6 +29,8 @@ router.register(r'tech-stack', TechStackCategoryViewSet, basename='tech-stack-ca
 router.register(r'timeline', TimelineItemViewSet, basename='timeline-item')
 router.register(r'messages', MessageViewSet, basename='message')
 router.register(r'ebooks', EBookViewSet, basename='ebook')
+router.register(r'knowledge-hub', KnowledgeHubCategoryViewSet, basename='knowledge-hub-category')
+router.register(r'knowledge-tools', KnowledgeToolViewSet, basename='knowledge-tool')
 
 urlpatterns = [
     *router.urls,

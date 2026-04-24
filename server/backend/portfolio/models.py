@@ -187,3 +187,50 @@ class EBook(models.Model):
 
     def __str__(self):
         return self.title
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Knowledge Hub Models
+# ────────────────────────────────────────────────────────────────────────────
+
+class KnowledgeHubCategory(models.Model):
+    id = models.CharField(max_length=100, primary_key=True, unique=True)
+    label = models.CharField(max_length=255)
+    description = models.TextField()
+    icon_name = models.CharField(max_length=50)
+    color = models.CharField(max_length=7)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+        verbose_name_plural = 'Knowledge Hub Categories'
+
+    def __str__(self):
+        return self.label
+
+
+class KnowledgeTool(models.Model):
+    PRICING_CHOICES = [
+        ('free', 'Free'),
+        ('freemium', 'Freemium'),
+        ('paid', 'Paid'),
+    ]
+
+    id = models.CharField(max_length=100, primary_key=True, unique=True)
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    url = models.URLField()
+    emoji = models.CharField(max_length=10, blank=True)
+    category = models.ForeignKey(KnowledgeHubCategory, on_delete=models.CASCADE, related_name='tools')
+    tags = models.JSONField(default=list)
+    pricing = models.CharField(max_length=20, choices=PRICING_CHOICES, default='free')
+    rating = models.IntegerField(default=0)
+    featured = models.BooleanField(default=False)
+    added_at = models.DateField(auto_now_add=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return self.name

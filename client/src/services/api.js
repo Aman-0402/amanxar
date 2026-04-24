@@ -110,4 +110,20 @@ export const ebooksAPI = {
   delete: (slug) => api.delete(`/api/ebooks/${slug}/`),
 }
 
+export const knowledgeHubAPI = {
+  getCategories: () => api.get('/api/knowledge-hub/'),
+  getCategoryById: (id) => api.get(`/api/knowledge-hub/${id}/`),
+  createCategory: (data) => api.post('/api/knowledge-hub/', data),
+  updateCategory: (id, data) => api.put(`/api/knowledge-hub/${id}/`, data),
+  deleteCategory: (id) => api.delete(`/api/knowledge-hub/${id}/`),
+}
+
+export const knowledgeToolsAPI = {
+  getAll: () => api.get('/api/knowledge-tools/'),
+  getById: (id) => api.get(`/api/knowledge-tools/${id}/`),
+  create: (data) => api.post('/api/knowledge-tools/', data),
+  update: (id, data) => api.put(`/api/knowledge-tools/${id}/`, data),
+  delete: (id) => api.delete(`/api/knowledge-tools/${id}/`),
+}
+
 export default api

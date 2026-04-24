@@ -10,6 +10,8 @@ from .models import (
     TimelineItem,
     Message,
     EBook,
+    KnowledgeHubCategory,
+    KnowledgeTool,
 )
 
 
@@ -98,3 +100,19 @@ class EBookSerializer(serializers.ModelSerializer):
         fields = ['id', 'slug', 'title', 'subtitle', 'description', 'category', 'tags',
                   'gradient', 'icon', 'icon_white', 'read_url', 'is_free', 'order', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+
+class KnowledgeToolSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = KnowledgeTool
+        fields = ['id', 'name', 'description', 'url', 'emoji', 'category', 'tags', 'pricing', 'rating', 'featured', 'added_at', 'order']
+        read_only_fields = ['id', 'added_at']
+
+
+class KnowledgeHubCategorySerializer(serializers.ModelSerializer):
+    tools = KnowledgeToolSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = KnowledgeHubCategory
+        fields = ['id', 'label', 'description', 'icon_name', 'color', 'order', 'tools']
+        read_only_fields = ['id']

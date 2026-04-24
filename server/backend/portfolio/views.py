@@ -11,6 +11,8 @@ from .models import (
     TimelineItem,
     Message,
     EBook,
+    KnowledgeHubCategory,
+    KnowledgeTool,
 )
 from .serializers import (
     ProjectSerializer,
@@ -23,6 +25,8 @@ from .serializers import (
     TimelineItemSerializer,
     MessageSerializer,
     EBookSerializer,
+    KnowledgeHubCategorySerializer,
+    KnowledgeToolSerializer,
 )
 
 
@@ -121,6 +125,26 @@ class EBookViewSet(viewsets.ModelViewSet):
     queryset = EBook.objects.all()
     serializer_class = EBookSerializer
     lookup_field = 'slug'
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+
+class KnowledgeHubCategoryViewSet(viewsets.ModelViewSet):
+    queryset = KnowledgeHubCategory.objects.prefetch_related('tools')
+    serializer_class = KnowledgeHubCategorySerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+
+class KnowledgeToolViewSet(viewsets.ModelViewSet):
+    queryset = KnowledgeTool.objects.all()
+    serializer_class = KnowledgeToolSerializer
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:

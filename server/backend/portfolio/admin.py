@@ -10,6 +10,8 @@ from .models import (
     TimelineItem,
     Message,
     EBook,
+    KnowledgeHubCategory,
+    KnowledgeTool,
 )
 
 
@@ -91,5 +93,21 @@ class EBookAdmin(admin.ModelAdmin):
     list_filter = ('category', 'is_free')
     search_fields = ('title', 'subtitle')
     prepopulated_fields = {'slug': ('title',)}
+    list_editable = ('order',)
+    ordering = ('order',)
+
+
+@admin.register(KnowledgeHubCategory)
+class KnowledgeHubCategoryAdmin(admin.ModelAdmin):
+    list_display = ('label', 'icon_name', 'order')
+    list_editable = ('order',)
+    ordering = ('order',)
+
+
+@admin.register(KnowledgeTool)
+class KnowledgeToolAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'pricing', 'rating', 'featured', 'order')
+    list_filter = ('category', 'pricing', 'featured')
+    search_fields = ('name', 'description')
     list_editable = ('order',)
     ordering = ('order',)

@@ -1,8 +1,8 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ExternalLink, Star, Search, X } from 'lucide-react'
 import PageLayout from '@components/layout/PageLayout'
-import toolsData from '@data/tools.json'
+import { knowledgeHubAPI } from '@services/api'
 
 const PRICING_COLORS = {
   free:     'bg-green-500/10 text-green-400 border-green-500/20',
@@ -14,16 +14,37 @@ export default function KnowledgeHubPage() {
   const { category: paramCategory } = useParams()
   const navigate = useNavigate()
 
-  const categories = toolsData?.categories || []
-  const defaultCategory = paramCategory || categories[0]?.id || 'ai-llm-tools'
-
-  const [activeCategory, setActiveCategory] = useState(defaultCategory)
+  const [categories, setCategories] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [activeCategory, setActiveCategory] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState({
     pricing: [],
     rating: null,
     featured: false,
   })
+
+  useEffect(() => {
+    fetchCategories()
+  }, [])
+
+  useEffect(() => {
+    if (categories.length > 0 && !activeCategory) {
+      const defaultCat = paramCategory || categories[0]?.id
+      setActiveCategory(defaultCat)
+    }
+  }, [categories, paramCategory, activeCategory])
+
+  const fetchCategories = async () => {
+    try {
+      const res = await knowledgeHubAPI.getCategories()
+      setCategories(res.data)
+    } catch (err) {
+      console.error('Failed to fetch knowledge hub categories:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const current = categories.find((c) => c.id === activeCategory)
 
@@ -88,6 +109,8 @@ export default function KnowledgeHubPage() {
     filters.pricing.length > 0 ||
     filters.rating ||
     filters.featured
+
+  if (loading) return <PageLayout><div className="p-8">Loading...</div></PageLayout>
 
   return (
     <PageLayout

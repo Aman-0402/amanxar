@@ -27,6 +27,7 @@ const DashboardTechStack = lazy(() => import('@pages/dashboard/DashboardTechStac
 const DashboardTimeline = lazy(() => import('@pages/dashboard/DashboardTimelinePage'))
 const DashboardMessages = lazy(() => import('@pages/dashboard/DashboardMessagesPage'))
 const DashboardEbooks   = lazy(() => import('@pages/dashboard/DashboardEbooksPage'))
+const DashboardKnowledgeHub = lazy(() => import('@pages/dashboard/DashboardKnowledgeHubPage'))
 const DashboardTest     = lazy(() => import('@pages/dashboard/DashboardTestPage'))
 
 // ─── Router configuration ─────────────────────────────────────────────────────
@@ -112,6 +113,14 @@ const router = createBrowserRouter(
             element: (
               <Suspense fallback={<PageLoader />}>
                 <DashboardEbooks />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'knowledge-hub',
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <DashboardKnowledgeHub />
               </Suspense>
             ),
           },
