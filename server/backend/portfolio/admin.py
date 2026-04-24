@@ -1,5 +1,14 @@
 from django.contrib import admin
-from .models import Project, AboutStat, WhatIDo, BioParagraph, AboutHighlight
+from .models import (
+    Project,
+    AboutStat,
+    WhatIDo,
+    BioParagraph,
+    AboutHighlight,
+    SkillCategory,
+    TechStackCategory,
+    TimelineItem,
+)
 
 
 @admin.register(Project)
@@ -38,5 +47,27 @@ class BioParagraphAdmin(admin.ModelAdmin):
 @admin.register(AboutHighlight)
 class AboutHighlightAdmin(admin.ModelAdmin):
     list_display = ('text', 'order')
+    list_editable = ('order',)
+    ordering = ('order',)
+
+
+@admin.register(SkillCategory)
+class SkillCategoryAdmin(admin.ModelAdmin):
+    list_display = ('category', 'icon', 'order')
+    list_editable = ('order',)
+    ordering = ('order',)
+
+
+@admin.register(TechStackCategory)
+class TechStackCategoryAdmin(admin.ModelAdmin):
+    list_display = ('category', 'order')
+    list_editable = ('order',)
+    ordering = ('order',)
+
+
+@admin.register(TimelineItem)
+class TimelineItemAdmin(admin.ModelAdmin):
+    list_display = ('year', 'title', 'type', 'order')
+    list_filter = ('type',)
     list_editable = ('order',)
     ordering = ('order',)

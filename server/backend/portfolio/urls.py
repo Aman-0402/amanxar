@@ -7,6 +7,9 @@ from .views import (
     WhatIDoViewSet,
     BioParagraphViewSet,
     AboutHighlightViewSet,
+    SkillCategoryViewSet,
+    TechStackCategoryViewSet,
+    TimelineItemViewSet,
 )
 
 app_name = 'portfolio'
@@ -17,6 +20,9 @@ router.register(r'about/stats', AboutStatViewSet, basename='about-stat')
 router.register(r'about/what-i-do', WhatIDoViewSet, basename='about-what-i-do')
 router.register(r'about/bio', BioParagraphViewSet, basename='about-bio')
 router.register(r'about/highlights', AboutHighlightViewSet, basename='about-highlight')
+router.register(r'skills', SkillCategoryViewSet, basename='skill-category')
+router.register(r'tech-stack', TechStackCategoryViewSet, basename='tech-stack-category')
+router.register(r'timeline', TimelineItemViewSet, basename='timeline-item')
 
 urlpatterns = [
     *router.urls,

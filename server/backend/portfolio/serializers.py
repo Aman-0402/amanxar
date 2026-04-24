@@ -1,5 +1,14 @@
 from rest_framework import serializers
-from .models import Project, AboutStat, WhatIDo, BioParagraph, AboutHighlight
+from .models import (
+    Project,
+    AboutStat,
+    WhatIDo,
+    BioParagraph,
+    AboutHighlight,
+    SkillCategory,
+    TechStackCategory,
+    TimelineItem,
+)
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -50,4 +59,25 @@ class AboutHighlightSerializer(serializers.ModelSerializer):
     class Meta:
         model = AboutHighlight
         fields = ['id', 'text', 'order']
+        read_only_fields = ['id']
+
+
+class SkillCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SkillCategory
+        fields = ['id', 'category', 'icon', 'color', 'skills', 'order']
+        read_only_fields = ['id']
+
+
+class TechStackCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TechStackCategory
+        fields = ['id', 'category', 'techs', 'order']
+        read_only_fields = ['id']
+
+
+class TimelineItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TimelineItem
+        fields = ['id', 'year', 'title', 'type', 'description', 'tags', 'order']
         read_only_fields = ['id']
