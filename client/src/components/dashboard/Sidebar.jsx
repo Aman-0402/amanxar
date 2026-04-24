@@ -45,7 +45,7 @@ export default function DashboardSidebar({ onClose }) {
       {/* Logo Section */}
       <div className="p-6 border-b border-bg-border">
         <Link
-          to="/dashboard"
+          to="/"
           onClick={handleNavClick}
           className="flex items-center gap-3 group"
         >
