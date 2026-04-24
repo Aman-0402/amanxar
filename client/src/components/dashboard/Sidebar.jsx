@@ -40,7 +40,7 @@ export default function DashboardSidebar({ onClose }) {
       animate={{ x: 0 }}
       exit={{ x: -280 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="fixed left-0 top-0 h-screen w-64 bg-bg-surface border-r border-bg-border flex flex-col z-50 md:static md:z-auto"
+      className="fixed left-0 top-0 h-screen w-64 bg-bg-surface border-r border-bg-border flex flex-col z-50 md:fixed md:left-0 md:top-0"
     >
       {/* Logo Section */}
       <div className="p-6 border-b border-bg-border">

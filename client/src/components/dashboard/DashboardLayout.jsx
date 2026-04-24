@@ -16,7 +16,7 @@ export default function DashboardLayout() {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col md:ml-64">
         {/* Top bar with toggle */}
         <div className="border-b border-bg-border bg-bg-surface/50 backdrop-blur-sm sticky top-0 z-40 h-16 flex items-center px-6">
           <button
