@@ -10,6 +10,7 @@ from .models import (
     TechStackCategory,
     TimelineItem,
     Message,
+    EBook,
 )
 from .serializers import (
     ProjectSerializer,
@@ -21,6 +22,7 @@ from .serializers import (
     TechStackCategorySerializer,
     TimelineItemSerializer,
     MessageSerializer,
+    EBookSerializer,
 )
 
 
@@ -111,5 +113,16 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'create':
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+
+class EBookViewSet(viewsets.ModelViewSet):
+    queryset = EBook.objects.all()
+    serializer_class = EBookSerializer
+    lookup_field = 'slug'
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
             return [AllowAny()]
         return [IsAuthenticated()]

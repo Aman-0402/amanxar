@@ -9,6 +9,7 @@ from .models import (
     TechStackCategory,
     TimelineItem,
     Message,
+    EBook,
 )
 
 
@@ -88,4 +89,12 @@ class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ['id', 'name', 'email', 'subject', 'message', 'created_at', 'read']
+        read_only_fields = ['id', 'created_at']
+
+
+class EBookSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EBook
+        fields = ['id', 'slug', 'title', 'subtitle', 'description', 'category', 'tags',
+                  'gradient', 'icon', 'icon_white', 'read_url', 'is_free', 'order', 'created_at']
         read_only_fields = ['id', 'created_at']

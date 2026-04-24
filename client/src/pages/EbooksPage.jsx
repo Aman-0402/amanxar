@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BookOpen, ExternalLink, Sparkles, Users, BookMarked, Gift } from 'lucide-react'
 import PageLayout from '@components/layout/PageLayout'
 import { fadeUp, staggerContainer } from '@animations/variants'
 import { viewport } from '@animations/transitions'
-import ebooksData from '@data/ebooks.json'
+import { ebooksAPI } from '@services/api'
 
 // ─── Category meta (color tokens) ────────────────────────────────────────────
 
@@ -59,7 +59,7 @@ function EbookCard({ book }) {
             alt={book.title}
             width={72}
             height={72}
-            className={`h-[72px] w-[72px] object-contain drop-shadow-2xl ${book.iconWhite ? 'brightness-0 invert' : ''}`}
+            className={`h-[72px] w-[72px] object-contain drop-shadow-2xl ${book.icon_white ? 'brightness-0 invert' : ''}`}
             loading="lazy"
             onError={(e) => { e.target.style.display = 'none' }}
           />
@@ -108,7 +108,7 @@ function EbookCard({ book }) {
 
         {/* CTA */}
         <a
-          href={book.readUrl}
+          href={book.read_url}
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
@@ -163,7 +163,24 @@ function ComingSoonCard() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function EbooksPage() {
+  const [ebooksData, setEbooksData] = useState([])
+  const [loading, setLoading] = useState(true)
   const [activeCategory, setActiveCategory] = useState('All')
+
+  useEffect(() => {
+    fetchEbooks()
+  }, [])
+
+  const fetchEbooks = async () => {
+    try {
+      const res = await ebooksAPI.getAll()
+      setEbooksData(res.data)
+    } catch (err) {
+      console.error('Failed to fetch eBooks:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const categories = ['All', ...new Set(ebooksData.map((b) => b.category))]
 

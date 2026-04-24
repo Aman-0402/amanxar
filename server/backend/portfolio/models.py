@@ -161,3 +161,29 @@ class Message(models.Model):
 
     def __str__(self):
         return f'{self.subject} - {self.name}'
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# eBook Model
+# ────────────────────────────────────────────────────────────────────────────
+
+class EBook(models.Model):
+    slug = models.SlugField(unique=True)
+    title = models.CharField(max_length=255)
+    subtitle = models.CharField(max_length=255)
+    description = models.TextField()
+    category = models.CharField(max_length=100)
+    tags = models.JSONField(default=list)
+    gradient = models.CharField(max_length=100, default='from-blue-500 to-indigo-600')
+    icon = models.URLField()
+    icon_white = models.BooleanField(default=False)
+    read_url = models.URLField()
+    is_free = models.BooleanField(default=True)
+    order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return self.title

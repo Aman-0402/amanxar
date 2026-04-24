@@ -102,4 +102,12 @@ export const messagesAPI = {
   delete: (id) => api.delete(`/api/messages/${id}/`),
 }
 
+export const ebooksAPI = {
+  getAll: () => api.get('/api/ebooks/'),
+  getBySlug: (slug) => api.get(`/api/ebooks/${slug}/`),
+  create: (data) => api.post('/api/ebooks/', data),
+  update: (slug, data) => api.put(`/api/ebooks/${slug}/`, data),
+  delete: (slug) => api.delete(`/api/ebooks/${slug}/`),
+}
+
 export default api

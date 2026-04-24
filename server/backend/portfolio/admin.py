@@ -9,6 +9,7 @@ from .models import (
     TechStackCategory,
     TimelineItem,
     Message,
+    EBook,
 )
 
 
@@ -82,3 +83,13 @@ class MessageAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'name', 'email', 'subject', 'message')
     list_editable = ('read',)
     ordering = ('-created_at',)
+
+
+@admin.register(EBook)
+class EBookAdmin(admin.ModelAdmin):
+    list_display = ('title', 'category', 'is_free', 'order')
+    list_filter = ('category', 'is_free')
+    search_fields = ('title', 'subtitle')
+    prepopulated_fields = {'slug': ('title',)}
+    list_editable = ('order',)
+    ordering = ('order',)

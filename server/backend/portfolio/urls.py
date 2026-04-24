@@ -11,6 +11,7 @@ from .views import (
     TechStackCategoryViewSet,
     TimelineItemViewSet,
     MessageViewSet,
+    EBookViewSet,
 )
 
 app_name = 'portfolio'
@@ -25,6 +26,7 @@ router.register(r'skills', SkillCategoryViewSet, basename='skill-category')
 router.register(r'tech-stack', TechStackCategoryViewSet, basename='tech-stack-category')
 router.register(r'timeline', TimelineItemViewSet, basename='timeline-item')
 router.register(r'messages', MessageViewSet, basename='message')
+router.register(r'ebooks', EBookViewSet, basename='ebook')
 
 urlpatterns = [
     *router.urls,
