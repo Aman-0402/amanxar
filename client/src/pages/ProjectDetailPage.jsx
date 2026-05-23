@@ -1,9 +1,10 @@
 import { useParams, Link, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { ArrowLeft, ExternalLink, Github } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Github, CheckCircle2 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import PageLayout from '@components/layout/PageLayout'
+import ScreenshotCarousel from '@components/sections/ProjectDetailPage/ScreenshotCarousel'
 import { projectsAPI } from '@services/api'
 import { assetUrl } from '@utils/assetUrl'
 import { imageUrl } from '@utils/imageUrl'
@@ -73,20 +74,83 @@ export default function ProjectDetailPage() {
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{project.longDesc}</ReactMarkdown>
         </div>
 
-        {/* Image Gallery */}
+        {/* Screenshot Carousel */}
         {project.images && project.images.length > 0 && (
           <div className="mb-8">
             <h2 className="font-display font-semibold text-text-primary text-lg mb-4">Screenshots</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {project.images.map((img, index) => (
-                <img
-                  key={index}
-                  src={typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://')) ? img : imageUrl(img)}
-                  alt={`${project.title} screenshot ${index + 1}`}
-                  className="w-full rounded-lg object-cover border border-bg-border"
-                  onError={(e) => console.error(`Image ${index} load failed:`, img, e)}
-                />
+            <ScreenshotCarousel images={project.images} />
+          </div>
+        )}
+
+        {/* Project Goals */}
+        {project.goals && project.goals.length > 0 && (
+          <div className="mb-8">
+            <h2 className="font-display font-semibold text-text-primary text-lg mb-4">Project Goals</h2>
+            <ul className="space-y-2">
+              {project.goals.map((goal, idx) => (
+                <li key={idx} className="flex items-start gap-3">
+                  <CheckCircle2 size={20} className="text-brand-primary flex-shrink-0 mt-0.5" />
+                  <span className="text-text-secondary">{goal}</span>
+                </li>
               ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Before/After Comparison */}
+        {project.beforeAfterImages && (project.beforeAfterImages.before || project.beforeAfterImages.after) && (
+          <div className="mb-8">
+            <h2 className="font-display font-semibold text-text-primary text-lg mb-4">Before & After</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {project.beforeAfterImages.before && (
+                <div>
+                  <p className="text-sm text-text-muted mb-2 font-medium">Before</p>
+                  <img
+                    src={project.beforeAfterImages.before.startsWith('http') ? project.beforeAfterImages.before : imageUrl(project.beforeAfterImages.before)}
+                    alt="Before"
+                    className="w-full rounded-lg border border-bg-border object-cover"
+                  />
+                </div>
+              )}
+              {project.beforeAfterImages.after && (
+                <div>
+                  <p className="text-sm text-text-muted mb-2 font-medium">After</p>
+                  <img
+                    src={project.beforeAfterImages.after.startsWith('http') ? project.beforeAfterImages.after : imageUrl(project.beforeAfterImages.after)}
+                    alt="After"
+                    className="w-full rounded-lg border border-bg-border object-cover"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Mobile/Desktop Previews */}
+        {project.mobileDesktopPreviews && (project.mobileDesktopPreviews.mobile || project.mobileDesktopPreviews.desktop) && (
+          <div className="mb-8">
+            <h2 className="font-display font-semibold text-text-primary text-lg mb-4">Device Preview</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {project.mobileDesktopPreviews.mobile && (
+                <div>
+                  <p className="text-sm text-text-muted mb-2 font-medium">Mobile</p>
+                  <img
+                    src={project.mobileDesktopPreviews.mobile.startsWith('http') ? project.mobileDesktopPreviews.mobile : imageUrl(project.mobileDesktopPreviews.mobile)}
+                    alt="Mobile preview"
+                    className="w-full rounded-lg border border-bg-border object-cover"
+                  />
+                </div>
+              )}
+              {project.mobileDesktopPreviews.desktop && (
+                <div>
+                  <p className="text-sm text-text-muted mb-2 font-medium">Desktop</p>
+                  <img
+                    src={project.mobileDesktopPreviews.desktop.startsWith('http') ? project.mobileDesktopPreviews.desktop : imageUrl(project.mobileDesktopPreviews.desktop)}
+                    alt="Desktop preview"
+                    className="w-full rounded-lg border border-bg-border object-cover"
+                  />
+                </div>
+              )}
             </div>
           </div>
         )}

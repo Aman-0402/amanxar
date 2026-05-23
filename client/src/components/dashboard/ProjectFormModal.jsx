@@ -24,6 +24,9 @@ export default function ProjectFormModal({ isOpen, onClose, onSubmit, project = 
     links: { demo: '', github: '' },
     highlights: [],
     images: [],
+    goals: [],
+    beforeAfterImages: { before: '', after: '' },
+    mobileDesktopPreviews: { mobile: '', desktop: '' },
   })
 
   const [thumbnailId, setThumbnailId] = useState('')
@@ -61,6 +64,9 @@ export default function ProjectFormModal({ isOpen, onClose, onSubmit, project = 
         links: { demo: '', github: '' },
         highlights: [],
         images: [],
+        goals: [],
+        beforeAfterImages: { before: '', after: '' },
+        mobileDesktopPreviews: { mobile: '', desktop: '' },
       })
       setThumbnailId('')
       setImageIds('')

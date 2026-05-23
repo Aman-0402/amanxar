@@ -22,6 +22,9 @@ class Project(models.Model):
     duration = models.CharField(max_length=100, blank=True)
 
     highlights = models.JSONField(default=list)
+    goals = models.JSONField(default=list, blank=True)
+    beforeAfterImages = models.JSONField(default=dict, blank=True)
+    mobileDesktopPreviews = models.JSONField(default=dict, blank=True)
 
     def __str__(self):
         return self.title
@@ -152,8 +155,17 @@ class TimelineItem(models.Model):
 class Message(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField()
+    phone = models.CharField(max_length=20, blank=True, null=True)
     subject = models.CharField(max_length=255)
     message = models.TextField()
+
+    budget = models.CharField(max_length=100, blank=True, null=True)
+    timeline = models.CharField(max_length=100, blank=True, null=True)
+    project_type = models.CharField(max_length=100, blank=True, null=True)
+    features = models.JSONField(default=list, blank=True)
+    references_url = models.URLField(blank=True, null=True)
+    attachment_url = models.URLField(blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     read = models.BooleanField(default=False)
 
@@ -269,7 +281,7 @@ class Service(models.Model):
     icon = models.CharField(max_length=10)
     description = models.TextField()
     features = models.JSONField(default=list)
-    pricing = models.CharField(max_length=255, blank=True, null=True)
+    tiers = models.JSONField(default=list)
     cta = models.CharField(max_length=100, default='Learn More')
     cta_link = models.CharField(max_length=255)
     order = models.IntegerField(default=0)

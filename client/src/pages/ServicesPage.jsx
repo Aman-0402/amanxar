@@ -81,8 +81,30 @@ function ServiceCard({ svc, index }) {
         ))}
       </ul>
 
-      {svc.pricing && (
-        <p className="text-xs text-brand-primary font-medium mb-4">💰 {svc.pricing}</p>
+      {svc.tiers && svc.tiers.length > 0 && (
+        <div className="mb-4 space-y-2">
+          {svc.tiers.map((tier, idx) => (
+            <div
+              key={idx}
+              className={`p-2 rounded-lg text-xs ${
+                tier.highlighted
+                  ? 'border border-brand-primary/50 bg-brand-primary/10'
+                  : 'border border-bg-border/50 bg-bg-border/20'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-text-primary">{tier.name}</span>
+                <span className="text-brand-primary font-semibold">{tier.price}</span>
+              </div>
+              {tier.description && (
+                <p className="text-text-muted mt-1">{tier.description}</p>
+              )}
+              {tier.highlighted && (
+                <p className="text-xs text-brand-primary mt-1 font-medium">⭐ Most Popular</p>
+              )}
+            </div>
+          ))}
+        </div>
       )}
 
       <Link

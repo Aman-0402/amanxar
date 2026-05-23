@@ -11,13 +11,14 @@ export default function ServiceFormModal({ isOpen, onClose, onSubmit, service = 
     icon: '💻',
     description: '',
     features: [],
-    pricing: '',
+    tiers: [],
     cta: 'Learn More',
     cta_link: '/contact',
     order: 0,
   })
 
   const [newFeature, setNewFeature] = useState('')
+  const [newTier, setNewTier] = useState({ name: '', price: '', description: '', features: [], highlighted: false })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -32,7 +33,7 @@ export default function ServiceFormModal({ isOpen, onClose, onSubmit, service = 
         icon: '💻',
         description: '',
         features: [],
-        pricing: '',
+        tiers: [],
         cta: 'Learn More',
         cta_link: '/contact',
         order: 0,
@@ -40,6 +41,7 @@ export default function ServiceFormModal({ isOpen, onClose, onSubmit, service = 
     }
     setError('')
     setNewFeature('')
+    setNewTier({ name: '', price: '', description: '', features: [], highlighted: false })
   }, [service, isOpen])
 
   const handleChange = (e) => {
@@ -81,6 +83,32 @@ export default function ServiceFormModal({ isOpen, onClose, onSubmit, service = 
     setFormData((prev) => ({
       ...prev,
       features: prev.features.filter((_, i) => i !== index),
+    }))
+  }
+
+  const addTier = () => {
+    if (newTier.name.trim() && newTier.price.trim()) {
+      setFormData((prev) => ({
+        ...prev,
+        tiers: [...prev.tiers, { ...newTier }],
+      }))
+      setNewTier({ name: '', price: '', description: '', features: [], highlighted: false })
+    }
+  }
+
+  const removeTier = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      tiers: prev.tiers.filter((_, i) => i !== index),
+    }))
+  }
+
+  const handleTierChange = (index, field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      tiers: prev.tiers.map((tier, i) =>
+        i === index ? { ...tier, [field]: value } : tier
+      ),
     }))
   }
 
@@ -283,23 +311,89 @@ export default function ServiceFormModal({ isOpen, onClose, onSubmit, service = 
                   )}
                 </div>
 
-                {/* Pricing & CTA */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-text-primary mb-1">
-                      Pricing (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      name="pricing"
-                      value={formData.pricing}
-                      onChange={handleChange}
-                      placeholder="e.g., Pricing depends on..."
-                      className="w-full rounded-lg border border-bg-border bg-bg-elevated px-3 py-2 text-text-primary focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
+                {/* Pricing Tiers */}
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-3">
+                    Pricing Tiers ({formData.tiers.length})
+                  </label>
+
+                  {/* Add Tier Form */}
+                  <div className="space-y-2 mb-4 p-4 rounded-lg border border-bg-border bg-bg-elevated/50">
+                    <div className="grid grid-cols-2 gap-3">
+                      <input
+                        type="text"
+                        placeholder="Tier name (e.g., Basic)"
+                        value={newTier.name}
+                        onChange={(e) => setNewTier({ ...newTier, name: e.target.value })}
+                        className="rounded-lg border border-bg-border bg-bg-surface px-3 py-2 text-sm text-text-primary focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
+                        disabled={isLoading}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Price (e.g., $50/month)"
+                        value={newTier.price}
+                        onChange={(e) => setNewTier({ ...newTier, price: e.target.value })}
+                        className="rounded-lg border border-bg-border bg-bg-surface px-3 py-2 text-sm text-text-primary focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
+                        disabled={isLoading}
+                      />
+                    </div>
+                    <textarea
+                      placeholder="Description (optional)"
+                      value={newTier.description}
+                      onChange={(e) => setNewTier({ ...newTier, description: e.target.value })}
+                      rows="2"
+                      className="w-full rounded-lg border border-bg-border bg-bg-surface px-3 py-2 text-sm text-text-primary focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all resize-none"
                       disabled={isLoading}
                     />
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={newTier.highlighted}
+                        onChange={(e) => setNewTier({ ...newTier, highlighted: e.target.checked })}
+                        className="rounded"
+                        disabled={isLoading}
+                      />
+                      <span className="text-sm text-text-secondary">Highlight as recommended</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={addTier}
+                      className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-dark transition-colors text-sm"
+                      disabled={isLoading}
+                    >
+                      <Plus size={16} />
+                      Add Tier
+                    </button>
                   </div>
 
+                  {/* Tiers List */}
+                  {formData.tiers.length > 0 && (
+                    <div className="space-y-3">
+                      {formData.tiers.map((tier, idx) => (
+                        <div key={idx} className="p-3 rounded-lg border border-brand-primary/30 bg-brand-primary/5">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                              <p className="font-medium text-text-primary">{tier.name} — {tier.price}</p>
+                              {tier.highlighted && <span className="text-xs text-brand-primary">⭐ Recommended</span>}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeTier(idx)}
+                              className="p-1 hover:bg-red-500/10 rounded transition-colors"
+                              disabled={isLoading}
+                            >
+                              <Trash2 size={14} className="text-red-400" />
+                            </button>
+                          </div>
+                          <p className="text-xs text-text-secondary">{tier.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* CTA */}
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-text-primary mb-1">
                       CTA Button Text *
@@ -315,24 +409,24 @@ export default function ServiceFormModal({ isOpen, onClose, onSubmit, service = 
                       disabled={isLoading}
                     />
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1">
+                      CTA Link *
+                    </label>
+                    <input
+                      type="text"
+                      name="cta_link"
+                      value={formData.cta_link}
+                      onChange={handleChange}
+                      placeholder="/contact"
+                      className="w-full rounded-lg border border-bg-border bg-bg-elevated px-3 py-2 text-text-primary focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
                 </div>
 
-                {/* CTA Link */}
-                <div>
-                  <label className="block text-sm font-medium text-text-primary mb-1">
-                    CTA Link *
-                  </label>
-                  <input
-                    type="text"
-                    name="cta_link"
-                    value={formData.cta_link}
-                    onChange={handleChange}
-                    placeholder="/contact?service=..."
-                    className="w-full rounded-lg border border-bg-border bg-bg-elevated px-3 py-2 text-text-primary focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
 
                 {/* Submit Button */}
                 <div className="flex gap-3 pt-4">

@@ -110,8 +110,10 @@ export default function DashboardServicesPage() {
               )}
             </ul>
 
-            {service.pricing && (
-              <p className="text-xs text-brand-primary font-medium mb-3">💰 {service.pricing}</p>
+            {service.tiers && service.tiers.length > 0 && (
+              <p className="text-xs text-brand-primary font-medium mb-3">
+                💰 {service.tiers.length} tier{service.tiers.length !== 1 ? 's' : ''}: {service.tiers.map(t => t.name).join(', ')}
+              </p>
             )}
 
             {/* Actions */}

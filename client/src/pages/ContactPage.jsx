@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Mail, Github, Linkedin, Twitter, Phone, Send, MapPin, Clock } from 'lucide-react'
+import { Mail, Github, Linkedin, Twitter, Phone, Send, MapPin, Clock, MessageCircle, ChevronDown } from 'lucide-react'
 import PageLayout from '@components/layout/PageLayout'
 import { fadeUp, staggerContainer } from '@animations/variants'
 import { viewport } from '@animations/transitions'
@@ -14,8 +14,14 @@ const CONTACT_METHODS = [
     href: 'mailto:think.like.ai.aman@gmail.com',
   },
   {
+    icon: MessageCircle,
+    label: 'WhatsApp',
+    value: '+91 98521 04967',
+    href: 'https://wa.me/919852104967?text=Hi%20Aman%2C%20I%20have%20a%20project%20in%20mind',
+  },
+  {
     icon: Phone,
-    label: 'Phone / WhatsApp',
+    label: 'Phone',
     value: '+91 98521 04967',
     href: 'tel:+919852104967',
   },
@@ -40,8 +46,20 @@ const CONTACT_METHODS = [
 ]
 
 export default function ContactPage() {
-  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: '',
+    budget: '',
+    timeline: '',
+    project_type: '',
+    features: [],
+    references_url: '',
+  })
   const [status, setStatus] = useState('idle') // idle | sending | success | error
+  const [expandDetails, setExpandDetails] = useState(false)
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
@@ -54,7 +72,23 @@ export default function ContactPage() {
     try {
       await messagesAPI.create(form)
       setStatus('success')
-      setForm({ name: '', email: '', subject: '', message: '' })
+      setForm({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: '',
+        budget: '',
+        timeline: '',
+        project_type: '',
+        features: [],
+        references_url: '',
+      })
+      // Optional: Show WhatsApp follow-up option
+      setTimeout(() => {
+        const whatsappUrl = `https://wa.me/919852104967?text=Hi%20Aman%2C%20I%20just%20submitted%20a%20contact%20form.`
+        alert('Message sent! Would you like to continue on WhatsApp for faster response?')
+      }, 500)
     } catch (err) {
       console.error(err)
       setStatus('error')

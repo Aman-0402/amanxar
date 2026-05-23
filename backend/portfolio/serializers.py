@@ -43,6 +43,9 @@ class ProjectSerializer(serializers.ModelSerializer):
             'year',
             'duration',
             'highlights',
+            'goals',
+            'beforeAfterImages',
+            'mobileDesktopPreviews',
         ]
         read_only_fields = ['id']
 
@@ -99,7 +102,11 @@ class TimelineItemSerializer(serializers.ModelSerializer):
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
-        fields = ['id', 'name', 'email', 'subject', 'message', 'created_at', 'read']
+        fields = [
+            'id', 'name', 'email', 'phone', 'subject', 'message',
+            'budget', 'timeline', 'project_type', 'features', 'references_url', 'attachment_url',
+            'created_at', 'read'
+        ]
         read_only_fields = ['id', 'created_at']
 
 
@@ -139,7 +146,7 @@ class GalleryItemSerializer(serializers.ModelSerializer):
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
-        fields = ['id', 'slug', 'title', 'icon', 'description', 'features', 'pricing', 'cta', 'cta_link', 'order']
+        fields = ['id', 'slug', 'title', 'icon', 'description', 'features', 'tiers', 'cta', 'cta_link', 'order']
         read_only_fields = ['id']
 
 

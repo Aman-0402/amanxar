@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import PageLayout from '@components/layout/PageLayout'
+import ProjectShowcaseCarousel from '@components/sections/ProjectShowcaseCarousel'
 import { projectsAPI } from '@services/api'
 import { assetUrl } from '@utils/assetUrl'
 import { imageUrl } from '@utils/imageUrl'
@@ -34,6 +35,8 @@ export default function ProjectsPage() {
     return [ALL_CATEGORY, ...Array.from(new Set(cats))]
   }, [projects])
 
+  const featuredProjects = useMemo(() => projects.filter((p) => p.featured), [projects])
+
   const filtered = useMemo(
     () =>
       active === ALL_CATEGORY
@@ -64,6 +67,11 @@ export default function ProjectsPage() {
 
         {!isLoading && !error && (
           <>
+            {/* Carousel Hero — Featured Projects */}
+            {featuredProjects.length > 0 && (
+              <ProjectShowcaseCarousel projects={featuredProjects} />
+            )}
+
             {/* Category filter pills */}
             <div className="flex flex-wrap gap-2 mb-10">
               {categories.map((cat) => (
