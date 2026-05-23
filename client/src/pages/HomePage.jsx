@@ -293,14 +293,14 @@ export default function HomePage() {
               {/* Heading */}
               <motion.h1
                 variants={fadeUp}
-                className="font-display font-bold text-display-xl text-brutalism"
+                className="text-display-hero"
               >
                 Hi, I'm{' '}
                 <span className="gradient-text relative inline-block">
                   Aman Raj
                   {/* Animated underline */}
                   <motion.span
-                    className="absolute -bottom-1 left-0 h-px w-full rounded-full"
+                    className="absolute -bottom-2 left-0 h-1.5 w-full rounded-full"
                     style={{ background: 'linear-gradient(90deg, #6366f1, #22d3ee)' }}
                     initial={{ scaleX: 0, originX: 0 }}
                     animate={{ scaleX: 1 }}
@@ -312,7 +312,7 @@ export default function HomePage() {
               {/* Role row */}
               <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-x-4 gap-y-1">
                 {ROLES.map((role, i) => (
-                  <span key={role} className="flex items-center gap-2 text-text-secondary text-lg">
+                  <span key={role} className="flex items-center gap-2 text-body-xl font-medium text-text-secondary">
                     {i > 0 && <span className="text-brand-primary/40 select-none">·</span>}
                     {role}
                   </span>
@@ -421,10 +421,10 @@ export default function HomePage() {
             viewport={viewport}
             className="mb-12"
           >
-            <h2 className="font-display font-bold text-display-sm text-text-primary mb-2">
+            <h2 className="font-display text-display-lg font-bold text-text-primary mb-3">
               Featured Work
             </h2>
-            <p className="text-text-secondary">Showcase of recent projects and achievements</p>
+            <p className="text-body-lg text-text-secondary font-normal">Showcase of recent projects and achievements</p>
           </motion.div>
 
           <motion.div
@@ -466,10 +466,10 @@ export default function HomePage() {
             viewport={viewport}
             className="mb-12"
           >
-            <h2 className="font-display font-bold text-display-sm text-text-primary mb-2">
+            <h2 className="font-display text-display-lg font-bold text-text-primary mb-3">
               What I Offer
             </h2>
-            <p className="text-text-secondary">Services designed to bring your ideas to life</p>
+            <p className="text-body-lg text-text-secondary font-normal">Services designed to bring your ideas to life</p>
           </motion.div>
 
           <motion.div
@@ -510,10 +510,10 @@ export default function HomePage() {
           viewport={viewport}
           className="text-center space-y-6 max-w-2xl mx-auto"
         >
-          <h2 className="font-display font-bold text-display-sm text-text-primary">
+          <h2 className="font-display text-display-lg font-bold text-text-primary">
             Ready to work together?
           </h2>
-          <p className="text-text-secondary text-lg">
+          <p className="text-body-lg text-text-secondary font-normal">
             Have a project in mind or want to discuss ideas? Let's talk and create something amazing.
           </p>
           <div className="flex flex-wrap justify-center gap-4">

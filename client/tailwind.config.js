@@ -30,17 +30,44 @@ export default {
 
       // ─── Typography ──────────────────────────────────────────────
       fontFamily: {
-        display: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
-        body:    ['Inter', 'system-ui', 'sans-serif'],
+        display: ['"Space Grotesk"', '"Plus Jakarta Sans"', 'sans-serif'],
+        body:    ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+        accent:  ['"DM Sans"', 'sans-serif'],
         mono:    ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
       },
 
       fontSize: {
-        'display-2xl': ['4.5rem',   { lineHeight: '1.05', letterSpacing: '-0.02em' }],
-        'display-xl':  ['3.75rem',  { lineHeight: '1.1',  letterSpacing: '-0.02em' }],
-        'display-lg':  ['3rem',     { lineHeight: '1.15', letterSpacing: '-0.015em' }],
-        'display-md':  ['2.25rem',  { lineHeight: '1.2',  letterSpacing: '-0.01em' }],
-        'display-sm':  ['1.875rem', { lineHeight: '1.25' }],
+        'display-4xl': ['5.5rem',   { lineHeight: '1', letterSpacing: '-0.03em', fontWeight: '800' }],
+        'display-3xl': ['4.5rem',   { lineHeight: '1.05', letterSpacing: '-0.02em', fontWeight: '700' }],
+        'display-2xl': ['3.75rem',  { lineHeight: '1.1',  letterSpacing: '-0.02em', fontWeight: '700' }],
+        'display-xl':  ['3rem',     { lineHeight: '1.15', letterSpacing: '-0.015em', fontWeight: '700' }],
+        'display-lg':  ['2.25rem',  { lineHeight: '1.2',  letterSpacing: '-0.01em', fontWeight: '600' }],
+        'display-md':  ['1.875rem', { lineHeight: '1.25', fontWeight: '600' }],
+        'display-sm':  ['1.5rem',   { lineHeight: '1.3', fontWeight: '600' }],
+        'display-xs':  ['1.25rem',  { lineHeight: '1.35', fontWeight: '600' }],
+
+        'heading-xl':  ['2rem',     { lineHeight: '1.3', fontWeight: '700', letterSpacing: '-0.01em' }],
+        'heading-lg':  ['1.75rem',  { lineHeight: '1.35', fontWeight: '600', letterSpacing: '-0.005em' }],
+        'heading-md':  ['1.5rem',   { lineHeight: '1.4', fontWeight: '600' }],
+        'heading-sm':  ['1.25rem',  { lineHeight: '1.45', fontWeight: '600' }],
+
+        'body-xl':     ['1.125rem', { lineHeight: '1.6', letterSpacing: '0.3px' }],
+        'body-lg':     ['1rem',     { lineHeight: '1.6', letterSpacing: '0.2px' }],
+        'body-md':     ['0.95rem',  { lineHeight: '1.65' }],
+        'body-sm':     ['0.875rem', { lineHeight: '1.5' }],
+        'body-xs':     ['0.8125rem', { lineHeight: '1.5' }],
+      },
+
+      fontWeight: {
+        thin:     '100',
+        extralight: '200',
+        light:    '300',
+        normal:   '400',
+        medium:   '500',
+        semibold: '600',
+        bold:     '700',
+        extrabold: '800',
+        black:    '900',
       },
 
       // ─── Spacing ──────────────────────────────────────────────────
