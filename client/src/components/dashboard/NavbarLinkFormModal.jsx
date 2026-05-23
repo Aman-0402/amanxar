@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Loader2 } from 'lucide-react'
 import { modalBackdrop, modalContent } from '@animations/variants'
 import { navbarAPI } from '@services/api'
+import { showSuccess, showError } from '@utils/toast'
 
 export default function NavbarLinkFormModal({ isOpen, onClose, link, onSave }) {
   const [formData, setFormData] = useState({ label: '', href: '', order: 0 })
@@ -34,17 +35,17 @@ export default function NavbarLinkFormModal({ isOpen, onClose, link, onSave }) {
     try {
       if (link?.id) {
         await navbarAPI.update(link.id, formData)
-        alert('✅ Navigation link updated successfully!')
+        showSuccess('Navigation link updated successfully!')
       } else {
         await navbarAPI.create(formData)
-        alert('✅ Navigation link created successfully!')
+        showSuccess('Navigation link created successfully!')
       }
       onSave()
       onClose()
     } catch (err) {
       const errorMsg = err.response?.data?.detail || 'Failed to save'
       setError(`❌ ${errorMsg}`)
-      alert(`❌ Failed to save: ${errorMsg}`)
+      showError(`Failed to save: ${errorMsg}`)
     } finally {
       setIsLoading(false)
     }

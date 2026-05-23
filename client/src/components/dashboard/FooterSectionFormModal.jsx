@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Loader2 } from 'lucide-react'
 import { modalBackdrop, modalContent } from '@animations/variants'
 import { footerSectionsAPI } from '@services/api'
+import { showSuccess, showError } from '@utils/toast'
 
 export default function FooterSectionFormModal({ isOpen, onClose, section, onSave }) {
   const [formData, setFormData] = useState({ title: '', order: 0 })
@@ -34,17 +35,17 @@ export default function FooterSectionFormModal({ isOpen, onClose, section, onSav
     try {
       if (section?.id) {
         await footerSectionsAPI.update(section.id, formData)
-        alert('✅ Footer section updated successfully!')
+        showSuccess('Footer section updated successfully!')
       } else {
         await footerSectionsAPI.create(formData)
-        alert('✅ Footer section created successfully!')
+        showSuccess('Footer section created successfully!')
       }
       onSave()
       onClose()
     } catch (err) {
       const errorMsg = err.response?.data?.detail || 'Failed to save'
       setError(`❌ ${errorMsg}`)
-      alert(`❌ Failed to save: ${errorMsg}`)
+      showError(`Failed to save: ${errorMsg}`)
     } finally {
       setIsLoading(false)
     }

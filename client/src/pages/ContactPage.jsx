@@ -5,6 +5,7 @@ import PageLayout from '@components/layout/PageLayout'
 import { fadeUp, staggerContainer } from '@animations/variants'
 import { viewport } from '@animations/transitions'
 import { messagesAPI } from '@services/api'
+import { showSuccess } from '@utils/toast'
 
 const CONTACT_METHODS = [
   {
@@ -87,7 +88,7 @@ export default function ContactPage() {
       // Optional: Show WhatsApp follow-up option
       setTimeout(() => {
         const whatsappUrl = `https://wa.me/919852104967?text=Hi%20Aman%2C%20I%20just%20submitted%20a%20contact%20form.`
-        alert('Message sent! Would you like to continue on WhatsApp for faster response?')
+        showSuccess('Message sent! Would you like to continue on WhatsApp for faster response?')
       }, 500)
     } catch (err) {
       console.error(err)

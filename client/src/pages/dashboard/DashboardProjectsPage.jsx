@@ -5,6 +5,7 @@ import { projectsAPI } from '@services/api'
 import ProjectFormModal from '@components/dashboard/ProjectFormModal'
 import DeleteConfirmModal from '@components/dashboard/DeleteConfirmModal'
 import { fadeUp, staggerContainer } from '@animations/variants'
+import { showSuccess, showError } from '@utils/toast'
 
 export default function DashboardProjectsPage() {
   const [projects, setProjects] = useState([])
@@ -69,7 +70,7 @@ export default function DashboardProjectsPage() {
                       err.response?.data?.[Object.keys(err.response?.data || {})[0]]?.[0] ||
                       'Failed to save project'
       console.error('Project save error:', err.response?.data || err)
-      alert(`❌ Failed to save: ${errorMsg}`)
+      showError(`Failed to save: ${errorMsg}`)
     } finally {
       setIsFormSubmitting(false)
     }
@@ -90,12 +91,12 @@ export default function DashboardProjectsPage() {
     setIsDeleting(true)
     try {
       await projectsAPI.delete(projectToDelete.slug)
-      alert('✅ Project deleted successfully!')
+      showSuccess('Project deleted successfully!')
       await fetchProjects()
       handleCloseDeleteModal()
     } catch (err) {
       const errorMsg = err.response?.data?.detail || 'Failed to delete project'
-      alert(`❌ Failed to delete: ${errorMsg}`)
+      showError(`Failed to delete: ${errorMsg}`)
       console.error('Failed to delete project:', err)
     } finally {
       setIsDeleting(false)

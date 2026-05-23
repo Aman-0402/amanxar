@@ -1,5 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, RouterProvider, ScrollRestoration } from 'react-router-dom'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import RootLayout from '@components/layout/RootLayout'
 import DashboardLayout from '@components/dashboard/DashboardLayout'
 import ProtectedRoute from '@components/auth/ProtectedRoute'
@@ -271,5 +273,21 @@ const router = createBrowserRouter(
 
 // ─── App root ─────────────────────────────────────────────────────────────────
 export default function App() {
-  return <RouterProvider router={router} />
+  return (
+    <>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      <RouterProvider router={router} />
+    </>
+  )
 }

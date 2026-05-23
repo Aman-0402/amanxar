@@ -4,6 +4,7 @@ import { Plus, Edit2, Trash2 } from 'lucide-react'
 import { servicesAPI } from '@services/api'
 import DeleteConfirmModal from '@components/dashboard/DeleteConfirmModal'
 import ServiceFormModal from '@components/dashboard/ServiceFormModal'
+import { showSuccess, showError } from '@utils/toast'
 
 export default function DashboardServicesPage() {
   const [services, setServices] = useState([])
@@ -50,13 +51,13 @@ export default function DashboardServicesPage() {
     if (!deleteTarget) return
     try {
       await servicesAPI.delete(deleteTarget.id)
-      alert('✅ Service deleted successfully!')
+      showSuccess('Service deleted successfully!')
       setDeleteModalOpen(false)
       setDeleteTarget(null)
       fetchServices()
     } catch (err) {
       const errorMsg = err.response?.data?.detail || 'Failed to delete service'
-      alert(`❌ Failed to delete: ${errorMsg}`)
+      showError(`Failed to delete: ${errorMsg}`)
       console.error(err)
     }
   }

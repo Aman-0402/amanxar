@@ -4,6 +4,7 @@ import { Plus, Edit2, Trash2, ExternalLink } from 'lucide-react'
 import { galleryAPI } from '@services/api'
 import DeleteConfirmModal from '@components/dashboard/DeleteConfirmModal'
 import GalleryFormModal from '@components/dashboard/GalleryFormModal'
+import { showSuccess, showError } from '@utils/toast'
 
 export default function DashboardGalleryPage() {
   const [items, setItems] = useState([])
@@ -54,13 +55,13 @@ export default function DashboardGalleryPage() {
     if (!deleteTarget) return
     try {
       await galleryAPI.delete(deleteTarget.id)
-      alert('✅ Gallery item deleted successfully!')
+      showSuccess('Gallery item deleted successfully!')
       setDeleteModalOpen(false)
       setDeleteTarget(null)
       fetchItems()
     } catch (err) {
       const errorMsg = err.response?.data?.detail || 'Failed to delete item'
-      alert(`❌ Failed to delete: ${errorMsg}`)
+      showError(`Failed to delete: ${errorMsg}`)
       console.error(err)
     }
   }

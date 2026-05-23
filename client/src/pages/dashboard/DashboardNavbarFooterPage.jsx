@@ -8,6 +8,7 @@ import FooterSectionFormModal from '@components/dashboard/FooterSectionFormModal
 import FooterCTAFormModal from '@components/dashboard/FooterCTAFormModal'
 import SocialLinkFormModal from '@components/dashboard/SocialLinkFormModal'
 import { fadeUp, staggerContainer } from '@animations/variants'
+import { showSuccess, showError } from '@utils/toast'
 
 export default function DashboardNavbarFooterPage() {
   const [activeTab, setActiveTab] = useState('navbar')
@@ -81,12 +82,12 @@ export default function DashboardNavbarFooterPage() {
     if (!deleteTarget) return
     try {
       await navbarAPI.delete(deleteTarget.id)
-      alert('✅ Navigation link deleted!')
+      showSuccess('Navigation link deleted!')
       setDeleteModalOpen(false)
       setDeleteTarget(null)
       await fetchNavbarLinks()
     } catch (err) {
-      alert('❌ Failed to delete')
+      showError('Failed to delete')
       console.error(err)
     }
   }
@@ -100,13 +101,13 @@ export default function DashboardNavbarFooterPage() {
       } else if (deleteType === 'social') {
         await socialLinksAPI.delete(deleteTarget.id)
       }
-      alert('✅ Deleted successfully!')
+      showSuccess('Deleted successfully!')
       setDeleteModalOpen(false)
       setDeleteTarget(null)
       setDeleteType(null)
       await fetchData()
     } catch (err) {
-      alert('❌ Failed to delete')
+      showError('Failed to delete')
       console.error(err)
     }
   }
@@ -328,7 +329,7 @@ export default function DashboardNavbarFooterPage() {
                 setCtaFormOpen(false)
                 await fetchFooterData()
               } catch (err) {
-                alert('❌ Failed to save: ' + (err.response?.data?.detail || 'Unknown error'))
+                showError('Failed to save: ' + (err.response?.data?.detail || 'Unknown error'))
               } finally {
                 setCtaFormLoading(false)
               }
@@ -417,16 +418,16 @@ export default function DashboardNavbarFooterPage() {
               try {
                 if (editingSocial?.id) {
                   await socialLinksAPI.update(editingSocial.id, formData)
-                  alert('✅ Social link updated successfully!')
+                  showSuccess('Social link updated successfully!')
                 } else {
                   await socialLinksAPI.create(formData)
-                  alert('✅ Social link created successfully!')
+                  showSuccess('Social link created successfully!')
                 }
                 setSocialFormOpen(false)
                 setEditingSocial(null)
                 await fetchSocialLinks()
               } catch (err) {
-                alert('❌ Failed to save: ' + (err.response?.data?.detail || 'Unknown error'))
+                showError('Failed to save: ' + (err.response?.data?.detail || 'Unknown error'))
               } finally {
                 setSocialFormLoading(false)
               }

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Loader2, AlertCircle } from 'lucide-react'
 import { modalBackdrop, modalContent } from '@animations/variants'
 import { driveUrl, extractDriveId } from '@utils/driveUrl'
+import { showSuccess, showError } from '@utils/toast'
 
 const MAX_FILE_SIZE = 1024 * 1024 // 1 MB
 
@@ -132,17 +133,17 @@ export default function ProjectFormModal({ isOpen, onClose, onSubmit, project = 
     const fileSizeMB = file.size / (1024 * 1024)
 
     if (file.size > MAX_FILE_SIZE) {
-      const errorMsg = `❌ File too large! Max size is 1 MB, but your file is ${fileSizeMB.toFixed(2)} MB`
-      setError(errorMsg)
-      alert(errorMsg)
+      const errorMsg = `File too large! Max size is 1 MB, but your file is ${fileSizeMB.toFixed(2)} MB`
+      setError(`❌ ${errorMsg}`)
+      showError(errorMsg)
       e.target.value = ''
       return
     }
 
     if (!file.type.startsWith('image/')) {
-      const errorMsg = '❌ Please select a valid image file (PNG, JPG, WebP, etc.)'
-      setError(errorMsg)
-      alert(errorMsg)
+      const errorMsg = 'Please select a valid image file (PNG, JPG, WebP, etc.)'
+      setError(`❌ ${errorMsg}`)
+      showError(errorMsg)
       e.target.value = ''
       return
     }
@@ -211,13 +212,13 @@ export default function ProjectFormModal({ isOpen, onClose, onSubmit, project = 
         await onSubmit(dataWithoutThumbnail, false)
       }
 
-      const successMsg = project ? '✅ Project updated successfully!' : '✅ Project created successfully!'
-      alert(successMsg)
+      const successMsg = project ? 'Project updated successfully!' : 'Project created successfully!'
+      showSuccess(successMsg)
       onClose()
     } catch (err) {
       const errorMsg = err.response?.data?.detail || err.response?.data?.[Object.keys(err.response?.data || {})[0]]?.[0] || 'Failed to save project'
       setError(`❌ Error: ${errorMsg}`)
-      alert(`❌ Failed to save: ${errorMsg}`)
+      showError(`Failed to save: ${errorMsg}`)
     } finally {
       setIsLoading(false)
     }

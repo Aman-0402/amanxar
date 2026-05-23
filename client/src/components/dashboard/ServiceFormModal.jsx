@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Loader2, Plus, Trash2 } from 'lucide-react'
 import { modalBackdrop, modalContent } from '@animations/variants'
+import { showSuccess, showError } from '@utils/toast'
 
 export default function ServiceFormModal({ isOpen, onClose, onSubmit, service = null }) {
   const [formData, setFormData] = useState({
@@ -119,13 +120,13 @@ export default function ServiceFormModal({ isOpen, onClose, onSubmit, service = 
 
     try {
       await onSubmit(formData)
-      const successMsg = service ? '✅ Service updated successfully!' : '✅ Service created successfully!'
-      alert(successMsg)
+      const successMsg = service ? 'Service updated successfully!' : 'Service created successfully!'
+      showSuccess(successMsg)
       onClose()
     } catch (err) {
       const errorMsg = err.response?.data?.detail || 'Failed to save service'
       setError(`❌ Error: ${errorMsg}`)
-      alert(`❌ Failed to save: ${errorMsg}`)
+      showError(`Failed to save: ${errorMsg}`)
     } finally {
       setIsLoading(false)
     }
