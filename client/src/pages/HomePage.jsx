@@ -1,9 +1,13 @@
 import { Link } from 'react-router-dom'
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
-import { useEffect, useRef } from 'react'
-import { ArrowRight, Sparkles } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { ArrowRight, Sparkles, Briefcase, Code2, Users, Zap, Mail } from 'lucide-react'
 import PageLayout from '@components/layout/PageLayout'
 import { fadeUp, staggerContainer } from '@animations/variants'
+import { viewport } from '@animations/transitions'
+import { projectsAPI, servicesAPI } from '@services/api'
+import ProjectPreviewCard from '@components/home/ProjectPreviewCard'
+import ServicePeekCard from '@components/home/ServicePeekCard'
 
 // ─── Particle Network Canvas ──────────────────────────────────────────────────
 // Runs entirely on native Canvas 2D API — zero React re-renders during animation.
@@ -151,6 +155,10 @@ export default function HomePage() {
   const sectionRef = useRef(null)
   const mouseRef   = useRef({ x: -999, y: -999 })
 
+  // Featured content state
+  const [featuredProjects, setFeaturedProjects] = useState([])
+  const [topServices, setTopServices] = useState([])
+
   // Normalized mouse position (-0.5 → 0.5) for tilt + orbs
   const mouseX = useMotionValue(0)
   const mouseY = useMotionValue(0)
@@ -197,6 +205,34 @@ export default function HomePage() {
       document.removeEventListener('mouseleave', onLeave)
     }
   }, [mouseX, mouseY])
+
+  // Fetch featured projects
+  useEffect(() => {
+    const fetchFeaturedProjects = async () => {
+      try {
+        const { data } = await projectsAPI.getAll()
+        const featured = data.filter((p) => p.featured).slice(0, 2)
+        setFeaturedProjects(featured)
+      } catch (err) {
+        console.error('Failed to fetch featured projects:', err)
+      }
+    }
+    fetchFeaturedProjects()
+  }, [])
+
+  // Fetch top services
+  useEffect(() => {
+    const fetchTopServices = async () => {
+      try {
+        const { data } = await servicesAPI.getAll()
+        const sorted = data.sort((a, b) => (a.order || 0) - (b.order || 0)).slice(0, 3)
+        setTopServices(sorted)
+      } catch (err) {
+        console.error('Failed to fetch top services:', err)
+      }
+    }
+    fetchTopServices()
+  }, [])
 
   return (
     <PageLayout path="/" withTopPadding={false}>
@@ -253,16 +289,6 @@ export default function HomePage() {
               animate="visible"
               className="space-y-7 max-w-2xl mx-auto"
             >
-              {/* Pulsing status badge */}
-              <motion.div variants={fadeUp} className="flex justify-center">
-                <div className="inline-flex items-center gap-2 rounded-full border border-brand-primary/30 bg-brand-primary/10 px-4 py-1.5 text-sm text-brand-primary backdrop-blur-sm">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-primary opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-primary" />
-                  </span>
-                  Hey Guys, This is my Personal Website and I'm Still Working on it
-                </div>
-              </motion.div>
 
               {/* Heading */}
               <motion.h1
@@ -347,6 +373,163 @@ export default function HomePage() {
             animate={{ scaleY: [0, 1, 0] }}
             transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut', repeatDelay: 0.4 }}
           />
+        </motion.div>
+      </section>
+
+      {/* ── Stats Row ────────────────────────────────────────────────────────────── */}
+      <section className="section-container section-padding">
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewport}
+          className="grid gap-8 sm:grid-cols-3"
+        >
+          <motion.div variants={fadeUp} className="text-center">
+            <div className="flex justify-center mb-3">
+              <Briefcase size={32} className="text-brand-primary" />
+            </div>
+            <p className="text-3xl font-bold text-text-primary mb-1">5+</p>
+            <p className="text-sm text-text-secondary">Years Building</p>
+          </motion.div>
+
+          <motion.div variants={fadeUp} className="text-center">
+            <div className="flex justify-center mb-3">
+              <Code2 size={32} className="text-brand-primary" />
+            </div>
+            <p className="text-3xl font-bold text-text-primary mb-1">30+</p>
+            <p className="text-sm text-text-secondary">Projects Shipped</p>
+          </motion.div>
+
+          <motion.div variants={fadeUp} className="text-center">
+            <div className="flex justify-center mb-3">
+              <Users size={32} className="text-brand-primary" />
+            </div>
+            <p className="text-3xl font-bold text-text-primary mb-1">20+</p>
+            <p className="text-sm text-text-secondary">Happy Clients</p>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* ── Featured Work ─────────────────────────────────────────────────────────── */}
+      {featuredProjects.length > 0 && (
+        <section className="section-container section-padding">
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewport}
+            className="mb-12"
+          >
+            <h2 className="font-display font-bold text-display-sm text-text-primary mb-2">
+              Featured Work
+            </h2>
+            <p className="text-text-secondary">Showcase of recent projects and achievements</p>
+          </motion.div>
+
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewport}
+            className="grid gap-6 lg:grid-cols-2 mb-8"
+          >
+            {featuredProjects.map((project) => (
+              <ProjectPreviewCard key={project.id} project={project} />
+            ))}
+          </motion.div>
+
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewport}
+            className="text-center"
+          >
+            <Link
+              to="/projects"
+              className="inline-flex items-center gap-2 rounded-lg border-3 border-brand-primary bg-brand-primary px-8 py-3 text-sm font-semibold text-white hover:bg-brand-dark transition-all offset-shadow hover:translate-y-1"
+            >
+              View All Projects <ArrowRight size={14} />
+            </Link>
+          </motion.div>
+        </section>
+      )}
+
+      {/* ── Services Peek ─────────────────────────────────────────────────────────── */}
+      {topServices.length > 0 && (
+        <section className="section-container section-padding bg-bg-surface border-y border-text-primary/10">
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewport}
+            className="mb-12"
+          >
+            <h2 className="font-display font-bold text-display-sm text-text-primary mb-2">
+              What I Offer
+            </h2>
+            <p className="text-text-secondary">Services designed to bring your ideas to life</p>
+          </motion.div>
+
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewport}
+            className="grid gap-6 sm:grid-cols-3 mb-8"
+          >
+            {topServices.map((service) => (
+              <ServicePeekCard key={service.id} service={service} />
+            ))}
+          </motion.div>
+
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewport}
+            className="text-center"
+          >
+            <Link
+              to="/services"
+              className="inline-flex items-center gap-2 rounded-lg border-3 border-brand-primary bg-brand-primary px-8 py-3 text-sm font-semibold text-white hover:bg-brand-dark transition-all offset-shadow hover:translate-y-1"
+            >
+              Explore Services <ArrowRight size={14} />
+            </Link>
+          </motion.div>
+        </section>
+      )}
+
+      {/* ── CTA Band ──────────────────────────────────────────────────────────────── */}
+      <section className="section-container section-padding border-t-3 border-text-primary">
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewport}
+          className="text-center space-y-6 max-w-2xl mx-auto"
+        >
+          <h2 className="font-display font-bold text-display-sm text-text-primary">
+            Ready to work together?
+          </h2>
+          <p className="text-text-secondary text-lg">
+            Have a project in mind or want to discuss ideas? Let's talk and create something amazing.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              to="/contact"
+              className="inline-flex items-center gap-2 rounded-lg border-3 border-brand-primary bg-brand-primary px-8 py-3 text-sm font-semibold text-white hover:bg-brand-dark transition-all offset-shadow hover:translate-y-1"
+            >
+              Start a Project <Zap size={14} />
+            </Link>
+            <a
+              href="mailto:think.like.ai.aman@gmail.com"
+              className="inline-flex items-center gap-2 rounded-lg border-3 border-text-primary px-8 py-3 text-sm font-semibold text-text-primary hover:text-brand-primary transition-all offset-shadow hover:translate-y-1"
+            >
+              Get in Touch <Mail size={14} />
+            </a>
+          </div>
         </motion.div>
       </section>
     </PageLayout>

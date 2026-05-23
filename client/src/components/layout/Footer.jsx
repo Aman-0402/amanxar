@@ -40,7 +40,7 @@ export default function Footer() {
   }, [])
 
   return (
-    <footer className="relative overflow-hidden border-t-4 border-text-primary bg-bg-surface">
+    <footer className="relative overflow-hidden border-t-3 border-text-primary/50 bg-bg-surface">
 
       {/* ── Ambient glow background ─────────────────────────────────────────── */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
