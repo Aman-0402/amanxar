@@ -192,6 +192,43 @@ html:not(.dark) {
     );
     height: 1px;
   }
+
+  /* ─── Neo-Brutalism Utilities ────────────────────────────────── */
+  /* Hard-edge borders with offset shadow */
+  .border-brutalism {
+    @apply border-4 border-text-primary;
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.3);
+  }
+
+  .border-brutalism-accent {
+    @apply border-4 border-brand-primary;
+    box-shadow: 4px 4px 0px rgba(99, 102, 241, 0.3);
+  }
+
+  /* Geometric blocks */
+  .geometric-block {
+    @apply border-3 border-text-primary rounded-none;
+  }
+
+  /* Offset shadow effect (no blur) */
+  .offset-shadow {
+    box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
+  }
+
+  /* High-contrast text */
+  .text-brutalism {
+    @apply text-text-primary font-bold tracking-tight;
+    letter-spacing: -0.02em;
+  }
+
+  /* Asymmetric borders */
+  .border-top-bottom {
+    @apply border-t-4 border-b-4 border-text-primary rounded-none;
+  }
+
+  .border-left-right {
+    @apply border-l-4 border-r-4 border-text-primary rounded-none;
+  }
 }
 
 /* ─── Utility Layer ───────────────────────────────────────────── */

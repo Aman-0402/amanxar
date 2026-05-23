@@ -267,7 +267,7 @@ export default function HomePage() {
               {/* Heading */}
               <motion.h1
                 variants={fadeUp}
-                className="font-display font-bold text-display-xl text-text-primary"
+                className="font-display font-bold text-display-xl text-brutalism"
               >
                 Hi, I'm{' '}
                 <span className="gradient-text relative inline-block">
@@ -313,18 +313,18 @@ export default function HomePage() {
 
               {/* CTA buttons */}
               <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-4 pt-2">
-                <motion.div whileHover={{ scale: 1.06, y: -2 }} whileTap={{ scale: 0.97 }}>
+                <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
                   <Link
                     to="/projects"
-                    className="flex items-center gap-2 rounded-xl bg-brand-primary px-7 py-3.5 text-sm font-semibold text-white hover:bg-brand-dark transition-colors shadow-glow-primary"
+                    className="flex items-center gap-2 rounded-lg border-3 border-brand-primary bg-brand-primary px-7 py-3.5 text-sm font-semibold text-white hover:bg-brand-dark transition-all offset-shadow"
                   >
                     View Projects <ArrowRight size={14} />
                   </Link>
                 </motion.div>
-                <motion.div whileHover={{ scale: 1.06, y: -2 }} whileTap={{ scale: 0.97 }}>
+                <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
                   <Link
                     to="/contact"
-                    className="flex items-center gap-2 rounded-xl border border-bg-border glass px-7 py-3.5 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
+                    className="flex items-center gap-2 rounded-lg border-3 border-text-primary px-7 py-3.5 text-sm font-medium text-text-primary hover:text-brand-primary transition-all offset-shadow"
                   >
                     <Sparkles size={14} /> Let's Connect
                   </Link>

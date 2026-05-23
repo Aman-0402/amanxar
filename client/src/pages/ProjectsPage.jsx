@@ -96,26 +96,28 @@ export default function ProjectsPage() {
                   <Link
                     key={project.id}
                     to={`/projects/${project.slug}`}
-                    className="rounded-2xl border border-bg-border bg-bg-surface p-6 hover:border-brand-primary/30 transition-all duration-300 block"
+                    className="rounded-md border-3 border-text-primary/50 bg-bg-surface hover:border-brand-primary hover:scale-102 hover:translate-y-2 transition-all duration-200 block p-0 offset-shadow"
                   >
                     {project.thumbnail && (
                       <img
                         src={typeof project.thumbnail === 'string' && (project.thumbnail.startsWith('http://') || project.thumbnail.startsWith('https://')) ? project.thumbnail : imageUrl(project.thumbnail)}
                         alt={project.title}
-                        className="w-full rounded-lg mb-4 object-cover h-40"
+                        className="w-full rounded-none border-b-4 border-text-primary object-cover h-40"
                         onError={(e) => console.error('Image load failed:', project.thumbnail, e)}
                       />
                     )}
-                    <h3 className="font-display font-semibold text-text-primary mb-2">
-                      {project.title}
-                    </h3>
-                    <p className="text-sm text-text-secondary mb-4">{project.shortDesc}</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {project.techStack && project.techStack.slice(0, 4).map((tech) => (
-                        <span key={tech} className="tag text-xs">
-                          {tech}
-                        </span>
-                      ))}
+                    <div className="p-6">
+                      <h3 className="font-display font-semibold text-text-primary mb-2">
+                        {project.title}
+                      </h3>
+                      <p className="text-sm text-text-secondary mb-4">{project.shortDesc}</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {project.techStack && project.techStack.slice(0, 4).map((tech) => (
+                          <span key={tech} className="tag text-xs">
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </Link>
                 ))}

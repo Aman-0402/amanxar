@@ -72,6 +72,32 @@ export const scaleInBounce = {
   },
 }
 
+export const bounceIn = {
+  hidden:  { opacity: 0, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      type: 'spring',
+      stiffness: 100,
+      damping: 10,
+      mass: 1,
+    },
+  },
+}
+
+export const slideInSnap = {
+  hidden:  { opacity: 0, x: -30 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.35,
+      ease: EASE_SMOOTH,
+    },
+  },
+}
+
 // ─── Container / Stagger Variants ─────────────────────────────────────────────
 // Apply to a parent element — children inherit staggered timing
 
@@ -182,18 +208,16 @@ export const modalBackdrop = {
 }
 
 export const modalContent = {
-  hidden:  { opacity: 0, scale: 0.92, y: 20 },
+  hidden:  { opacity: 0, scale: 0.98 },
   visible: {
     opacity: 1,
     scale: 1,
-    y: 0,
-    transition: { duration: 0.35, ease: EASE_SMOOTH },
+    transition: { duration: 0.2, ease: EASE_SMOOTH },
   },
   exit: {
     opacity: 0,
     scale: 0.95,
-    y: 10,
-    transition: { duration: 0.2, ease: 'easeIn' },
+    transition: { duration: 0.15, ease: 'easeIn' },
   },
 }
 

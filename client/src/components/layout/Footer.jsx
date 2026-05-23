@@ -40,7 +40,7 @@ export default function Footer() {
   }, [])
 
   return (
-    <footer className="relative overflow-hidden border-t border-bg-border bg-bg-surface">
+    <footer className="relative overflow-hidden border-t-4 border-text-primary bg-bg-surface">
 
       {/* ── Ambient glow background ─────────────────────────────────────────── */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -50,7 +50,7 @@ export default function Footer() {
 
       {/* ── CTA Band ────────────────────────────────────────────────────────── */}
       {footerCTA && (
-        <div className="relative border-b border-bg-border">
+        <div className="relative border-b-3 border-text-primary/30">
           <motion.div
             variants={staggerContainer}
             initial="hidden"
@@ -71,7 +71,7 @@ export default function Footer() {
             <motion.div variants={fadeUp}>
               <Link
                 to={footerCTA.button_url}
-                className="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white shadow-glow-primary transition-all duration-200 hover:bg-brand-dark hover:shadow-glow-lg"
+                className="inline-flex items-center gap-2 rounded-lg border-3 border-brand-primary bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-brand-dark offset-shadow hover:translate-y-1"
               >
                 {footerCTA.button_text}
                 <ArrowUpRight size={14} />

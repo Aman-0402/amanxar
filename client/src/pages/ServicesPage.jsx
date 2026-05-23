@@ -49,8 +49,8 @@ function ServiceCard({ svc, index }) {
       style={{ rotateX, rotateY, transformPerspective: 800, transformStyle: 'preserve-3d' }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      whileHover={{ scale: 1.03 }}
-      className="gradient-border rounded-2xl bg-bg-surface p-8 flex flex-col cursor-default"
+      whileHover={{ scale: 1.02, y: -2 }}
+      className="border-3 border-text-primary rounded-lg bg-bg-surface p-8 flex flex-col cursor-default offset-shadow"
     >
       {/* Floating icon */}
       <motion.div
@@ -86,10 +86,10 @@ function ServiceCard({ svc, index }) {
           {svc.tiers.map((tier, idx) => (
             <div
               key={idx}
-              className={`p-2 rounded-lg text-xs ${
+              className={`p-2 text-xs ${
                 tier.highlighted
-                  ? 'border border-brand-primary/50 bg-brand-primary/10'
-                  : 'border border-bg-border/50 bg-bg-border/20'
+                  ? 'border-top-bottom bg-brand-primary/10'
+                  : 'border-b border-bg-border/50 bg-bg-border/20'
               }`}
             >
               <div className="flex items-center justify-between">
@@ -109,7 +109,7 @@ function ServiceCard({ svc, index }) {
 
       <Link
         to={svc.cta_link}
-        className="mt-auto flex items-center justify-center gap-2 rounded-xl bg-brand-primary px-5 py-3 text-sm font-semibold text-white hover:bg-brand-dark transition-colors"
+        className="mt-auto flex items-center justify-center gap-2 rounded-lg border-3 border-brand-primary bg-brand-primary px-5 py-3 text-sm font-semibold text-white hover:bg-brand-dark transition-all offset-shadow hover:translate-y-1"
       >
         {svc.cta} <ArrowRight size={14} />
       </Link>

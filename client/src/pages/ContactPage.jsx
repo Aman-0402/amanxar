@@ -96,7 +96,7 @@ export default function ContactPage() {
   }
 
   const inputBase =
-    'w-full rounded-xl border border-bg-border bg-bg-elevated px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary/50 transition-all duration-200'
+    'w-full rounded-lg border-2 border-text-primary bg-bg-elevated px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-brand-primary transition-all duration-200'
 
   return (
     <PageLayout
@@ -211,9 +211,9 @@ export default function ContactPage() {
               <motion.button
                 type="submit"
                 disabled={status === 'sending'}
-                whileHover={{ y: -1 }}
+                whileHover={{ y: 2 }}
                 whileTap={{ scale: 0.97 }}
-                className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-brand-primary px-8 py-3.5 text-sm font-semibold text-white shadow-glow-primary hover:bg-brand-dark disabled:opacity-60 transition-all duration-200"
+                className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg border-3 border-brand-primary bg-brand-primary px-8 py-3.5 text-sm font-semibold text-white hover:bg-brand-dark disabled:opacity-60 transition-all duration-200 offset-shadow"
               >
                 {status === 'sending' ? (
                   'Sending...'
@@ -235,8 +235,8 @@ export default function ContactPage() {
             className="space-y-6"
           >
             {/* Contact methods */}
-            <div className="rounded-2xl border border-bg-border bg-bg-surface p-6 space-y-4">
-              <h3 className="font-display font-semibold text-text-primary mb-4">
+            <div className="rounded-lg border-3 border-text-primary bg-bg-surface p-6 space-y-4 offset-shadow">
+              <h3 className="font-display font-semibold text-brutalism mb-4">
                 Reach Out Directly
               </h3>
               {CONTACT_METHODS.map(({ icon: Icon, label, value, href }) => (
@@ -264,7 +264,7 @@ export default function ContactPage() {
             {/* Availability card */}
             <motion.div
               variants={fadeUp}
-              className="rounded-2xl border border-green-500/20 bg-green-500/5 p-6"
+              className="rounded-lg border-3 border-green-500/50 bg-green-500/5 p-6 offset-shadow"
             >
               <div className="flex items-center gap-2 mb-3">
                 <span className="relative flex h-2.5 w-2.5">

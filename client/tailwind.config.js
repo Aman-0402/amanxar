@@ -73,6 +73,9 @@ export default {
         'card':         '0 4px 24px rgba(0, 0, 0, 0.4)',
         'card-hover':   '0 8px 48px rgba(0, 0, 0, 0.5)',
         'navbar':       '0 1px 0 rgba(255, 255, 255, 0.05)',
+        'brutalism':    '4px 4px 0px rgba(0, 0, 0, 0.3)',
+        'brutalism-lg': '6px 6px 0px rgba(0, 0, 0, 0.4)',
+        'brutalism-inset': 'inset 2px 2px 0px rgba(0, 0, 0, 0.2)',
       },
 
       // ─── Animation ────────────────────────────────────────────────
@@ -112,10 +115,20 @@ export default {
         xs: '2px',
       },
 
+      // ─── Border Width ─────────────────────────────────────────────
+      borderWidth: {
+        '3': '3px',
+        '4': '4px',
+      },
+
       // ─── Border Radius ────────────────────────────────────────────
       borderRadius: {
         '2xl': '1rem',
         '3xl': '1.5rem',
+        'none': '0px',
+        'sm': '2px',
+        'md': '4px',
+        'lg': '6px',
       },
 
       // ─── Transition ───────────────────────────────────────────────
