@@ -195,12 +195,14 @@ export default function Footer() {
 
           <p className="text-xs text-text-muted">
             © {year}{' '}
-            <Link
-              to="/login"
+            <a
+              href="/login"
+              target="_blank"
+              rel="noopener noreferrer"
               className="hover:text-brand-primary transition-colors duration-200"
             >
               Aman Raj
-            </Link>
+            </a>
             . All rights reserved.
           </p>
 
