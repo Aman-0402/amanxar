@@ -34,6 +34,8 @@ export const authAPI = {
     api.post('/api/auth/login/', { username, password }),
   refresh: (refresh) =>
     api.post('/api/auth/refresh/', { refresh }),
+  register: (data) =>
+    api.post('/api/auth/register/', data),
 }
 
 export const projectsAPI = {

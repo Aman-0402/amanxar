@@ -38,6 +38,11 @@ export function AuthProvider({ children }) {
     setUser(null)
   }
 
+  const register = async (userData) => {
+    const { data } = await authAPI.register(userData)
+    return data
+  }
+
   const value = {
     token,
     user,
@@ -45,6 +50,7 @@ export function AuthProvider({ children }) {
     isLoading,
     login,
     logout,
+    register,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
