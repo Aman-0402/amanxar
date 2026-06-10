@@ -98,43 +98,6 @@ function ParticleCanvas({ mouseRef }) {
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
 }
 
-// ─── Custom Cursor ────────────────────────────────────────────────────────────
-// Ring lags (spring stiffness 100), dot snaps instantly (stiffness 800).
-function CustomCursor() {
-  const mx = useMotionValue(-200)
-  const my = useMotionValue(-200)
-
-  const ringX = useSpring(mx, { stiffness: 100, damping: 15 })
-  const ringY = useSpring(my, { stiffness: 100, damping: 15 })
-  const dotX  = useSpring(mx, { stiffness: 800, damping: 40 })
-  const dotY  = useSpring(my, { stiffness: 800, damping: 40 })
-
-  useEffect(() => {
-    const move = (e) => { mx.set(e.clientX); my.set(e.clientY) }
-    window.addEventListener('mousemove', move)
-    return () => window.removeEventListener('mousemove', move)
-  }, [mx, my])
-
-  return (
-    <>
-      {/* Outer trailing ring */}
-      <motion.div
-        className="fixed top-0 left-0 z-[9999] pointer-events-none"
-        style={{ x: ringX, y: ringY, marginLeft: -20, marginTop: -20 }}
-      >
-        <div className="w-10 h-10 rounded-full border border-brand-primary/50" />
-      </motion.div>
-
-      {/* Inner snap dot */}
-      <motion.div
-        className="fixed top-0 left-0 z-[9999] pointer-events-none"
-        style={{ x: dotX, y: dotY, marginLeft: -3, marginTop: -3 }}
-      >
-        <div className="w-1.5 h-1.5 rounded-full bg-brand-primary shadow-glow-primary" />
-      </motion.div>
-    </>
-  )
-}
 
 // ─── Static data ──────────────────────────────────────────────────────────────
 const ROLES = ['Full-Stack Developer', 'AI/ML Engineer', 'Technical Trainer']
@@ -179,10 +142,8 @@ export default function HomePage() {
   const orb2X = useSpring(orb2XBase, { stiffness: 20, damping: 16 })
   const orb2Y = useSpring(orb2YBase, { stiffness: 20, damping: 16 })
 
-  // Hide native cursor + feed mouse to canvas and tilt systems
+  // Feed mouse to canvas and tilt systems
   useEffect(() => {
-    document.body.style.cursor = 'none'
-
     const onMove = (e) => {
       const rect = sectionRef.current?.getBoundingClientRect()
       if (!rect) return
@@ -200,7 +161,6 @@ export default function HomePage() {
     window.addEventListener('mousemove', onMove)
     document.addEventListener('mouseleave', onLeave)
     return () => {
-      document.body.style.cursor = ''
       window.removeEventListener('mousemove', onMove)
       document.removeEventListener('mouseleave', onLeave)
     }
@@ -236,8 +196,6 @@ export default function HomePage() {
 
   return (
     <PageLayout path="/" withTopPadding={false}>
-      <CustomCursor />
-
       <section
         ref={sectionRef}
         className="relative flex min-h-screen items-center justify-center overflow-hidden"
