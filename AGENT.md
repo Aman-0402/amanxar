@@ -1,17 +1,17 @@
 # AGENT.md — AI Agent Guidelines
 
-Instructions for Claude Code and other AI agents working on this portfolio project.
+Instructions for Claude Code and other AI agents working on this project.
 
 ---
 
 ## 🎯 Project Overview
 
-**Aman Raj Portfolio & Knowledge Hub** — Full-stack portfolio + admin CMS with:
-- Interactive landing pages (home, about, services, projects, gallery, etc.)
-- Knowledge Hub (26+ curated tools directory)
-- Blog & eBooks library
-- Admin dashboard (CRUD for content)
-- Modern UI with Framer Motion animations + Neo-brutalism design
+**Think With Aman — Portfolio & Student Learning Portal** — Full-stack website with:
+- Public portfolio (home, about, services, projects, gallery, knowledge hub, contact)
+- **Student portal** — ebooks, premium content, service booking, support, profile
+- Admin/employee dashboard — full CMS for all content
+- Session-based auth with role routing (admin → `/dashboard`, student → `/student`)
+- Navy/dark blue/black professional theme — single fixed theme, no toggle
 
 **Stack**: React 18 (Vite) + Express.js/Django (backend) + PostgreSQL + Tailwind CSS
 
@@ -19,115 +19,163 @@ Instructions for Claude Code and other AI agents working on this portfolio proje
 
 ## 📋 Before You Start
 
-1. **Read CLAUDE.md** — Contains project conventions, tech stack, API endpoints, key files
-2. **Check branch** — Always work on `main` or feature branches
-3. **Verify env** — Backend/DB must be running if testing API calls
-4. **Dev server** — Start with `cd client && npm run dev`
-5. **Install fonts** — Google Fonts auto-loaded (Space Grotesk, Poppins, DM Sans)
+1. **Read CLAUDE.md** — project conventions, tech stack, API endpoints, key files
+2. **Check branch** — work on `main` or feature branches
+3. **Verify env** — backend/DB must be running if testing API calls
+4. **Dev server** — `cd client && npm run dev` (port 3002)
+5. **Fonts** — Google Fonts auto-loaded (Space Grotesk, Poppins, DM Sans)
 
 ---
 
-## 🔧 Common Tasks
+## 🗂 Route Structure
 
-### Adding a Page
-1. Create component in `client/src/pages/PageName.jsx`
-2. Add route in main router
-3. Import animations from `@animations/variants`
-4. Use `PageLayout` wrapper for consistent styling
+| Path prefix | Access | Layout |
+|-------------|--------|--------|
+| `/` | Public | `RootLayout` + `Navbar` + `Footer` |
+| `/login` | Public | Standalone page |
+| `/student/*` | `role === student` | `StudentLayout` (top navbar) |
+| `/dashboard/*` | `role === admin \| employee` | `DashboardLayout` (sidebar) |
 
-**Example**:
+### Student portal routes
+```
+/student               → StudentHomePage
+/student/ebooks        → StudentEbooksPage
+/student/premium       → StudentPremiumPage
+/student/services      → StudentServicesPage  (book a session)
+/student/request       → StudentRequestPage   (support form)
+/student/profile       → StudentProfilePage
+```
+
+### Admin dashboard routes
+```
+/dashboard             → DashboardOverviewPage  (stats: projects, students, ebooks)
+/dashboard/users       → DashboardUsersPage     (students list + delete)
+/dashboard/ebooks      → DashboardEbooksPage
+/dashboard/projects    → DashboardProjectsPage
+/dashboard/about       → DashboardAboutPage
+/dashboard/skills      → DashboardSkillsPage
+/dashboard/tech-stack  → DashboardTechStackPage
+/dashboard/timeline    → DashboardTimelinePage
+/dashboard/messages    → DashboardMessagesPage
+/dashboard/knowledge-hub → DashboardKnowledgeHubPage
+/dashboard/gallery     → DashboardGalleryPage
+/dashboard/services    → DashboardServicesPage
+/dashboard/navbar-footer → DashboardNavbarFooterPage
+```
+
+---
+
+## 🔐 Auth & Roles
+
+**JWT-based auth** (token stored in `localStorage`):
+- Login: `POST /api/auth/login/` → returns `{ access }` JWT
+- Register: `POST /api/auth/register/` → creates student account
+- Refresh: `POST /api/auth/refresh/`
+
+**Roles** (from JWT payload `user.role`):
+- `admin` — full dashboard access
+- `employee` — dashboard access (same as admin for now)
+- `student` — student portal only
+
+**Redirect logic** (in `LoginPage.jsx` + `ProtectedRoute.jsx`):
+- After login: decode JWT → `role === 'student'` → `/student`, else → `/dashboard`
+- `ProtectedRoute` accepts `allowedRoles` prop; wrong role → redirects to their home
+
+**Student registration** — role hardcoded to `'student'` in request payload.
+
+---
+
+## 🎨 Theme
+
+**Single fixed theme — Navy/Dark Blue/Black.** No light/dark toggle.
+
+```css
+--bg-base:     #060C18   /* deep navy-black */
+--bg-surface:  #0C1628   /* dark navy surface */
+--bg-elevated: #122040   /* medium navy */
+--bg-border:   #1E3058   /* navy border */
+
+--text-primary:   #EEF4FF   /* near-white */
+--text-secondary: #8BAAC8   /* muted blue-gray */
+--text-muted:     #445E7A
+--text-accent:    #60A5FA   /* blue-400 */
+```
+
+**Brand colors** (Tailwind):
+```
+brand.primary:   #3B82F6   (blue-500 — buttons, links, active states)
+brand.secondary: #0EA5E9   (sky-500 — gradients, secondary accents)
+brand.dark:      #2563EB   (blue-600 — hover states)
+brand.amber:     #F59E0B   (amber-400 — IMPORTANT elements, premium, CTAs that must stand out)
+```
+
+**Gradient text** (`.gradient-text`): `#3B82F6 → #0EA5E9`
+
+**`ThemeContext`** is a stub — always returns `{ theme: 'light', isDark: false }`. No toggle exists anywhere.
+
+---
+
+## 🧩 Adding Pages
+
+### Public page
 ```jsx
 import PageLayout from '@components/layout/PageLayout'
-import { fadeUp, staggerContainer } from '@animations/variants'
-
 export default function NewPage() {
   return (
-    <PageLayout>
+    <PageLayout title="Page Title" description="SEO desc">
       <section className="section-container section-padding">
-        {/* Content */}
+        {/* content */}
       </section>
     </PageLayout>
   )
 }
 ```
+Then add route in `client/src/App.jsx` under the `/` `RootLayout` children.
 
-### Adding a Component
-1. Create in `client/src/components/category/ComponentName.jsx`
-2. Use Framer Motion for animations (`motion.div`, `variants`)
-3. Prefer Tailwind utilities over inline CSS
-4. Export as default
+### Student portal page
+- Create in `client/src/pages/student/`
+- Add route in `App.jsx` under `/student` children
+- No `PageLayout` needed — `StudentLayout` wraps all student pages
 
-### API Integration
-1. Add hook in `client/src/hooks/use-feature.ts`
-2. Use `TanStack Query` (useQuery, useMutation)
-3. Include `credentials: 'include'` for auth
-4. Handle errors with `showError()` from `@utils/toast`
-
-**Example**:
-```jsx
-import { useMutation } from '@tanstack/react-query'
-import { showSuccess, showError } from '@utils/toast'
-
-const { mutate } = useMutation({
-  mutationFn: (data) => projectsAPI.create(data),
-  onSuccess: () => showSuccess('Created!'),
-  onError: (err) => showError(err.message),
-})
-```
-
-### Updating Styles
-- Modify `client/tailwind.config.js` for design tokens
-- Add utilities to `client/src/styles/globals.css`
-- Use `.section-container` and `.section-padding` for layout
-- Neo-brutalism: `.border-3`, `.offset-shadow`, `.text-brutalism`
-
-### Creating Forms
-1. Use `react-hook-form` + Zod validators
-2. Import toast utilities for feedback
-3. Include file upload support if needed
-4. Use `.text-label` for form labels
+### Admin dashboard page
+- Create in `client/src/pages/dashboard/`
+- Add route in `App.jsx` under `/dashboard` children
+- Add nav item in `client/src/components/dashboard/Sidebar.jsx`
 
 ---
 
-## 🎨 Design Guidelines
+## 🔧 Common Tasks
 
-### Neo-Brutalism
-- **Borders**: Hard edges (3-4px), no curves
-- **Shadows**: Offset (3px 3px), no blur
-- **Text**: Bold, tight letter-spacing
-- **Colors**: High contrast, no opacity blending
+### API integration
+```jsx
+import { ebooksAPI } from '@services/api'
 
-**Utilities**:
-```css
-.border-3 .border-4        /* Hard borders */
-.offset-shadow             /* 3px offset, no blur */
-.text-brutalism            /* Bold + tight spacing */
-.border-top-bottom         /* Horizontal emphasis */
-.text-display-hero         /* Giant hero heading */
+useEffect(() => {
+  ebooksAPI.getAll()
+    .then(({ data }) => setItems(data))
+    .catch(() => {})
+}, [])
 ```
 
-### Typography
-- **Headers (h1-h3)**: Space Grotesk, bold
-- **Body text**: Poppins, 1rem
-- **Labels**: DM Sans, small caps
-- **Code**: JetBrains Mono
-
-**Font Classes**:
-```
-.text-display-4xl    /* 5.5rem, hero headings */
-.text-display-lg     /* 3rem, section headings */
-.text-heading-lg     /* 1.75rem, subsections */
-.text-body-lg        /* 1.125rem, lead paragraphs */
-.text-body-md        /* 1rem, normal body */
-.text-label          /* small caps, uppercase */
+### Form validation (manual, no react-hook-form installed)
+```js
+const validate = (form) => {
+  const errors = {}
+  if (!form.field.trim()) errors.field = 'Field is required'
+  return errors
+}
+// setErrors on submit + onBlur per field
 ```
 
-### Colors
-- **Primary**: `#6366F1` (Indigo)
-- **Secondary**: `#22D3EE` (Cyan)
-- **Text Primary**: `var(--text-primary)` (CSS var)
-- **Text Secondary**: `var(--text-secondary)`
-- Use Tailwind color tokens: `text-brand-primary`, `bg-bg-surface`
+### Toast notifications
+```jsx
+import { showSuccess, showError } from '@utils/toast'
+showSuccess('Saved!')
+showError(err.message)
+```
+
+### Protected API calls
+All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor in `api.js`. No manual headers needed.
 
 ---
 
@@ -135,77 +183,19 @@ const { mutate } = useMutation({
 
 | File | Purpose |
 |------|---------|
-| `client/src/App.jsx` | Router setup, ToastContainer |
-| `client/src/pages/HomePage.jsx` | Landing page (hero, featured work, CTA) |
-| `client/tailwind.config.js` | Design tokens, font families, sizes |
-| `client/src/styles/globals.css` | Global CSS, utilities, typography |
+| `client/src/App.jsx` | All routes (public, student, admin) |
+| `client/src/context/AuthContext.jsx` | JWT auth, login/logout/register, user state |
+| `client/src/context/ThemeContext.jsx` | Stub — always light, no toggle |
+| `client/src/components/auth/ProtectedRoute.jsx` | Role-based route guard |
+| `client/src/pages/auth/LoginPage.jsx` | Login + Student registration (tabs) |
+| `client/src/pages/student/StudentLayout.jsx` | Student top navbar layout |
+| `client/src/components/layout/Navbar.jsx` | Public navbar (ebooks link hidden) |
+| `client/src/components/dashboard/Sidebar.jsx` | Admin sidebar nav |
+| `client/src/services/api.js` | All API clients (authAPI, usersAPI, ebooksAPI…) |
+| `client/src/styles/globals.css` | CSS variables, theme tokens, component classes |
+| `client/tailwind.config.js` | Design tokens, brand colors, shadows |
 | `client/src/animations/variants.js` | Framer Motion animation presets |
-| `client/src/hooks/use-*.ts` | API + state management hooks |
 | `client/src/utils/toast.js` | Toast notifications & SweetAlert2 |
-| `client/src/services/api.ts` | API client setup + endpoints |
-| `.env` | Environment variables (DATABASE_URL, etc.) |
-
----
-
-## 🔐 Auth & API
-
-**Session-based auth** via Passport.js:
-- Login endpoint: `POST /api/auth/login`
-- Logout endpoint: `POST /api/auth/logout`
-- Current user: `GET /api/user`
-- All requests: include `credentials: 'include'`
-
-**Roles**: `admin`, `employee` (trainer), `student`
-
-**Protected routes**: Use `<ProtectedRoute>` wrapper (checks `req.user?.role`)
-
----
-
-## 🧪 Testing & Validation
-
-### Type Checking
-```bash
-npm run check  # Runs tsc --noEmit
-```
-
-### Dev Server
-```bash
-npm run dev    # Vite + hot reload (port 3002)
-```
-
-### Building
-```bash
-npm run build  # Production build → dist/
-```
-
-### Testing Pages
-- Visually inspect in browser
-- Check Neo-brutalism styling (borders, shadows visible)
-- Test animations (smooth, no jank)
-- Verify responsive (mobile, tablet, desktop)
-- Check console for errors
-
----
-
-## 📝 Commit Guidelines
-
-Use **Conventional Commits**:
-```
-feat: add X               # New feature
-fix: bug in X             # Bug fix
-refactor: improve X       # Code cleanup
-style: format X           # Styling only
-docs: update X            # Documentation
-chore: update deps        # Dependencies, config
-```
-
-**Example**:
-```
-feat: add sweetalert2 and toast notifications
-
-Replace all alert() calls with toast.showSuccess() and 
-showError() for better UX. Added ToastContainer to App.jsx.
-```
 
 ---
 
@@ -213,79 +203,46 @@ showError() for better UX. Added ToastContainer to App.jsx.
 
 ### ✅ DO:
 - Use Tailwind utilities (not inline styles)
-- Include `credentials: 'include'` on all API calls
+- Use `brand.amber` for important/premium elements that need to stand out
+- Use `credentials: 'include'` if switching to session auth (currently JWT)
 - Use Framer Motion for animations
 - Show toast notifications on success/error
-- Keep components under 300 lines (split if larger)
+- Keep components under 300 lines
 - Use font classes for typography (not raw `fontSize`)
+- Validate forms on both `onBlur` and `onSubmit`
+- Hardcode `role: 'student'` when registering from the public sign-up form
 
 ### ❌ DON'T:
+- Don't add a light/dark theme toggle — theme is fixed
+- Don't use `alert()` — use toast utilities
 - Don't create styled-components or CSS-in-JS
 - Don't use inline `style={{}}` for colors/layout
-- Don't forget error handling in forms
-- Don't hardcode colors (use CSS variables)
-- Don't create multi-level nested folders
-- Don't use `alert()` (use toast utilities instead)
+- Don't add Ebook link to the public navbar — it's hidden by design
+- Don't redirect students to `/dashboard` — they go to `/student`
+- Don't hardcode indigo `#6366F1` — that's the old brand color; use `#3B82F6`
+
+---
+
+## 📝 Commit Guidelines
+
+Use **Conventional Commits**:
+```
+feat: add X
+fix: bug in X
+refactor: improve X
+style: format X
+docs: update X
+chore: update deps
+```
 
 ---
 
 ## 🚀 Deployment
 
-### Frontend
 ```bash
-cd client && npm run build  # Creates dist/
-# Deploy dist/ to GitHub Pages or hosting
+cd client && npm run build   # → dist/
 ```
-
-### Backend
-- Django migrations: `python manage.py migrate`
-- Drizzle schema: `npm run db:push`
-- Server: `npm run dev` (tsx watch)
-
-### CI/CD
-- Runs on push to main
-- Validates TypeScript
-- Builds frontend
-- Deploys to GitHub Pages
-
----
-
-## 🤔 Questions & Debugging
-
-### "How do I add a new API endpoint?"
-1. Define route in `server/routes.ts`
-2. Add handler in `server/storage.ts` (DB layer)
-3. Create hook in `client/src/hooks/use-feature.ts`
-4. Call from component with error handling
-
-### "Where should I put this component?"
-- **Page wrapper**: `client/src/pages/`
-- **Reusable UI**: `client/src/components/`
-- **Feature-specific**: `client/src/components/feature-name/`
-- **Layout**: `client/src/components/layout/`
-
-### "How do I style this?"
-1. Tailwind utilities (preferred)
-2. CSS custom properties (colors, fonts)
-3. Component CSS in `globals.css` if reusable
-4. Never inline `style={{}}` for layout
-
-### "Why is my animation jank?"
-- Reduce motion on older devices
-- Use `will-change: transform` sparingly
-- Prefer `transform` over `top/left`
-- Profile with DevTools Performance tab
-
----
-
-## 📚 Resources
-
-- **Tailwind**: https://tailwindcss.com/docs
-- **Framer Motion**: https://www.framer.com/motion/
-- **React Query**: https://tanstack.com/query/latest
-- **Zod**: https://zod.dev
-- **Wouter**: https://github.com/molefrog/wouter
-- **SweetAlert2**: https://sweetalert2.github.io/
+Deploy `dist/` to GitHub Pages. CI/CD runs on push to `main`.
 
 ---
 
@@ -293,7 +250,5 @@ cd client && npm run build  # Creates dist/
 
 **Aman Raj** — think.like.ai.aman@gmail.com
 
----
-
-**Last Updated**: June 2026  
+**Last Updated**: June 2026
 **Status**: Active development
