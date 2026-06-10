@@ -68,13 +68,13 @@ function ParticleCanvas({ mouseRef }) {
 
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
-        ctx.fillStyle = 'rgba(99,102,241,0.55)'
+        ctx.fillStyle = 'rgba(37,99,235,0.55)'
         ctx.fill()
       }
 
       // Connections — single batched stroke call for GPU efficiency
       ctx.beginPath()
-      ctx.strokeStyle = 'rgba(99,102,241,0.18)'
+      ctx.strokeStyle = 'rgba(37,99,235,0.15)'
       ctx.lineWidth   = 0.7
       for (let i = 0; i < N; i++) {
         for (let j = i + 1; j < N; j++) {
@@ -205,7 +205,7 @@ export default function HomePage() {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.09) 1px, transparent 1px)',
+            backgroundImage: 'radial-gradient(circle, rgba(37,99,235,0.12) 1px, transparent 1px)',
             backgroundSize: '40px 40px',
           }}
         />
@@ -221,7 +221,7 @@ export default function HomePage() {
         <motion.div
           className="absolute w-[700px] h-[700px] rounded-full pointer-events-none"
           style={{
-            background: 'radial-gradient(circle, rgba(99,102,241,0.13) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(37,99,235,0.18) 0%, transparent 70%)',
             x: orb1X, y: orb1Y,
             top: '-5%', left: '10%',
           }}
@@ -229,7 +229,7 @@ export default function HomePage() {
         <motion.div
           className="absolute w-[550px] h-[550px] rounded-full pointer-events-none"
           style={{
-            background: 'radial-gradient(circle, rgba(34,211,238,0.10) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(14,165,233,0.14) 0%, transparent 70%)',
             x: orb2X, y: orb2Y,
             bottom: '5%', right: '5%',
           }}
@@ -259,7 +259,7 @@ export default function HomePage() {
                   {/* Animated underline */}
                   <motion.span
                     className="absolute -bottom-2 left-0 h-1.5 w-full rounded-full"
-                    style={{ background: 'linear-gradient(90deg, #6366f1, #22d3ee)' }}
+                    style={{ background: 'linear-gradient(90deg, #2563EB, #0EA5E9)' }}
                     initial={{ scaleX: 0, originX: 0 }}
                     animate={{ scaleX: 1 }}
                     transition={{ delay: 0.9, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
@@ -327,7 +327,7 @@ export default function HomePage() {
         >
           <motion.div
             className="w-px h-8 origin-top rounded-full"
-            style={{ background: 'linear-gradient(to bottom, #6366f1, transparent)' }}
+            style={{ background: 'linear-gradient(to bottom, #2563EB, transparent)' }}
             animate={{ scaleY: [0, 1, 0] }}
             transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut', repeatDelay: 0.4 }}
           />

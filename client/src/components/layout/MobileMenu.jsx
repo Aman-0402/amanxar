@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Download, Moon, Sun, Github, Linkedin, Twitter, Mail } from 'lucide-react'
+import { Download, Github, Linkedin, Twitter, Mail } from 'lucide-react'
 import {
   mobileMenuOverlay,
   mobileMenuDrawer,
@@ -15,7 +15,7 @@ const SOCIAL_LINKS = [
   { icon: Mail,     href: 'mailto:think.like.ai.aman@gmail.com',             label: 'Email' },
 ]
 
-export default function MobileMenu({ links, onClose, isDark, onToggleTheme }) {
+export default function MobileMenu({ links, onClose }) {
   return (
     <>
       {/* ── Backdrop overlay ─────────────────────────────────────────────────── */}
@@ -25,7 +25,7 @@ export default function MobileMenu({ links, onClose, isDark, onToggleTheme }) {
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+        className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm lg:hidden"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -44,7 +44,7 @@ export default function MobileMenu({ links, onClose, isDark, onToggleTheme }) {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-bg-border px-6 py-4">
           <span className="font-display font-bold text-text-primary">
-            Aman<span className="gradient-text">.ai</span>
+            Think With<span className="gradient-text"> Aman</span>
           </span>
           <button
             onClick={onClose}
@@ -86,8 +86,8 @@ export default function MobileMenu({ links, onClose, isDark, onToggleTheme }) {
           {/* Divider */}
           <div className="my-6 dotted-line" />
 
-          {/* CTA buttons */}
-          <motion.div variants={mobileMenuItem} className="space-y-3">
+          {/* CTA */}
+          <motion.div variants={mobileMenuItem}>
             <a
               href={`${import.meta.env.BASE_URL}assets/downloads/resume.pdf`}
               download="Aman_Raj_Resume.pdf"
@@ -96,21 +96,6 @@ export default function MobileMenu({ links, onClose, isDark, onToggleTheme }) {
               <Download size={15} />
               Download Resume
             </a>
-
-            <button
-              onClick={onToggleTheme}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-bg-border px-4 py-3 text-sm font-medium text-text-secondary hover:text-text-primary hover:border-brand-primary/40 transition-all"
-            >
-              {isDark ? (
-                <>
-                  <Sun size={15} /> Switch to Light Mode
-                </>
-              ) : (
-                <>
-                  <Moon size={15} /> Switch to Dark Mode
-                </>
-              )}
-            </button>
           </motion.div>
         </motion.nav>
 

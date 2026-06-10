@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { NavLink, Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Moon, Sun } from 'lucide-react'
-import { useTheme } from '@context/ThemeContext'
+import { Menu, X } from 'lucide-react'
 import { assetUrl } from '@utils/assetUrl'
 import { navbarAPI } from '@services/api'
 import MobileMenu from './MobileMenu'
@@ -14,7 +13,6 @@ const linkDefault = 'text-text-secondary hover:text-text-primary'
 const linkActive  = 'text-text-primary'
 
 export default function Navbar() {
-  const { isDark, toggleTheme } = useTheme()
   const [scrolled,       setScrolled]       = useState(false)
   const [mobileOpen,     setMobileOpen]     = useState(false)
   const [navLinks, setNavLinks] = useState([])
@@ -118,39 +116,6 @@ export default function Navbar() {
           {/* ── Right Actions ─────────────────────────────────────────────── */}
           <div className="flex items-center gap-2">
 
-            {/* Theme toggle */}
-            <motion.button
-              onClick={toggleTheme}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.92 }}
-              className="hidden sm:flex h-9 w-9 items-center justify-center rounded-lg border border-bg-border bg-bg-surface text-text-secondary hover:text-text-primary hover:border-brand-primary/40 transition-all duration-200"
-              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                {isDark ? (
-                  <motion.span
-                    key="sun"
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Sun size={16} />
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="moon"
-                    initial={{ rotate: 90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Moon size={16} />
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </motion.button>
-
             {/* Portfolio CTA */}
             <motion.a
               href="https://aman-0402.github.io/My-Portfolio/"
@@ -205,8 +170,6 @@ export default function Navbar() {
           <MobileMenu
             links={navLinks}
             onClose={() => setMobileOpen(false)}
-            isDark={isDark}
-            onToggleTheme={toggleTheme}
           />
         )}
       </AnimatePresence>

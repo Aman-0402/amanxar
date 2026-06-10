@@ -4,7 +4,7 @@ export default {
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}',
   ],
-  darkMode: 'class',
+  darkMode: false,
   theme: {
     extend: {
       // ─── Color System ────────────────────────────────────────────
@@ -16,9 +16,10 @@ export default {
           border:   'var(--bg-border)',
         },
         brand: {
-          primary:   '#6366F1',
-          secondary: '#22D3EE',
-          dark:      '#4F46E5',
+          primary:   '#2563EB',   /* blue-600 */
+          secondary: '#0EA5E9',   /* sky-500 */
+          dark:      '#1D4ED8',   /* blue-700 */
+          amber:     '#F59E0B',   /* amber-400 — important/CTA accent */
         },
         text: {
           primary:   'var(--text-primary)',
@@ -84,25 +85,25 @@ export default {
 
       // ─── Background Images ────────────────────────────────────────
       backgroundImage: {
-        'gradient-brand':    'linear-gradient(135deg, #6366F1, #22D3EE)',
-        'gradient-brand-v':  'linear-gradient(180deg, #6366F1, #22D3EE)',
-        'gradient-dark':     'linear-gradient(135deg, #0A0A0F 0%, #1A1A25 100%)',
-        'gradient-glow':     'radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15) 0%, transparent 70%)',
-        'gradient-glow-cyan':'radial-gradient(ellipse at bottom right, rgba(34, 211, 238, 0.1) 0%, transparent 60%)',
+        'gradient-brand':    'linear-gradient(135deg, #2563EB, #0EA5E9)',
+        'gradient-brand-v':  'linear-gradient(180deg, #2563EB, #0EA5E9)',
+        'gradient-dark':     'linear-gradient(135deg, #EEF4FF 0%, #DBEAFE 100%)',
+        'gradient-glow':     'radial-gradient(ellipse at top, rgba(37, 99, 235, 0.12) 0%, transparent 70%)',
+        'gradient-glow-cyan':'radial-gradient(ellipse at bottom right, rgba(14, 165, 233, 0.1) 0%, transparent 60%)',
         'noise':             "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E\")",
       },
 
       // ─── Box Shadow ───────────────────────────────────────────────
       boxShadow: {
-        'glow-primary': '0 0 30px rgba(99, 102, 241, 0.3)',
-        'glow-cyan':    '0 0 30px rgba(34, 211, 238, 0.25)',
-        'glow-lg':      '0 0 60px rgba(99, 102, 241, 0.2)',
-        'card':         '0 4px 24px rgba(0, 0, 0, 0.4)',
-        'card-hover':   '0 8px 48px rgba(0, 0, 0, 0.5)',
-        'navbar':       '0 1px 0 rgba(255, 255, 255, 0.05)',
-        'brutalism':    '4px 4px 0px rgba(0, 0, 0, 0.3)',
-        'brutalism-lg': '6px 6px 0px rgba(0, 0, 0, 0.4)',
-        'brutalism-inset': 'inset 2px 2px 0px rgba(0, 0, 0, 0.2)',
+        'glow-primary': '0 0 30px rgba(37, 99, 235, 0.25)',
+        'glow-cyan':    '0 0 30px rgba(14, 165, 233, 0.2)',
+        'glow-lg':      '0 0 60px rgba(37, 99, 235, 0.18)',
+        'card':         '0 4px 24px rgba(15, 23, 42, 0.08)',
+        'card-hover':   '0 8px 48px rgba(15, 23, 42, 0.14)',
+        'navbar':       '0 1px 0 rgba(15, 23, 42, 0.06)',
+        'brutalism':    '4px 4px 0px rgba(15, 23, 42, 0.2)',
+        'brutalism-lg': '6px 6px 0px rgba(15, 23, 42, 0.25)',
+        'brutalism-inset': 'inset 2px 2px 0px rgba(15, 23, 42, 0.1)',
       },
 
       // ─── Animation ────────────────────────────────────────────────
@@ -116,8 +117,8 @@ export default {
           to:   { opacity: '1', transform: 'translateY(0)' },
         },
         'pulse-glow': {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(99, 102, 241, 0.3)' },
-          '50%':       { boxShadow: '0 0 40px rgba(99, 102, 241, 0.6)' },
+          '0%, 100%': { boxShadow: '0 0 20px rgba(37, 99, 235, 0.25)' },
+          '50%':       { boxShadow: '0 0 40px rgba(37, 99, 235, 0.5)' },
         },
         'float': {
           '0%, 100%': { transform: 'translateY(0px)' },
