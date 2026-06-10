@@ -121,7 +121,7 @@ function Input({ icon: Icon, right, error, ...props }) {
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const { isAuthenticated, login, register, isLoading: authLoading } = useAuth()
+  const { isAuthenticated, user, login, register, isLoading: authLoading } = useAuth()
 
   const [tab, setTab] = useState('login')   // 'login' | 'register'
 
@@ -145,8 +145,11 @@ export default function LoginPage() {
   const [showConfirmPw, setShowConfirmPw] = useState(false)
 
   useEffect(() => {
-    if (isAuthenticated) navigate('/dashboard', { replace: true })
-  }, [isAuthenticated, navigate])
+    if (isAuthenticated) {
+      const dest = user?.role === 'student' ? '/student' : '/dashboard'
+      navigate(dest, { replace: true })
+    }
+  }, [isAuthenticated, navigate, user])
 
   // ── Login submit ────────────────────────────────────────────────────────────
   const handleLogin = async (e) => {
@@ -158,8 +161,8 @@ export default function LoginPage() {
     setLoginLoading(true)
     setLoginApiError('')
     try {
-      await login(loginForm.username, loginForm.password)
-      navigate('/dashboard', { replace: true })
+      const decoded = await login(loginForm.username, loginForm.password)
+      navigate(decoded?.role === 'student' ? '/student' : '/dashboard', { replace: true })
     } catch (err) {
       setLoginApiError(
         err.response?.data?.detail ||

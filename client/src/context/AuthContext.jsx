@@ -29,7 +29,7 @@ export function AuthProvider({ children }) {
     const decoded = jwtDecode(data.access)
     setToken(data.access)
     setUser(decoded)
-    return data
+    return decoded
   }
 
   const logout = () => {

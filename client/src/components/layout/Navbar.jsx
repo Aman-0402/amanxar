@@ -87,7 +87,7 @@ export default function Navbar() {
 
           {/* ── Desktop Nav Links ─────────────────────────────────────────── */}
           <ul className="hidden lg:flex items-center gap-1" role="list">
-            {navLinks.map((link) => (
+            {navLinks.filter(l => !l.href?.includes('/ebooks')).map((link) => (
               <li key={link.href}>
                 <NavLink
                   to={link.href}
@@ -167,7 +167,7 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <MobileMenu
-            links={navLinks}
+            links={navLinks.filter(l => !l.href?.includes('/ebooks'))}
             onClose={() => setMobileOpen(false)}
           />
         )}

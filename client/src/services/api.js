@@ -38,6 +38,20 @@ export const authAPI = {
     api.post('/api/auth/register/', data),
 }
 
+export const usersAPI = {
+  getAll:    ()       => api.get('/api/users/'),
+  getById:   (id)     => api.get(`/api/users/${id}/`),
+  update:    (id, data) => api.put(`/api/users/${id}/`, data),
+  delete:    (id)     => api.delete(`/api/users/${id}/`),
+  getProfile: ()      => api.get('/api/users/me/'),
+  updateProfile: (data) => api.patch('/api/users/me/', data),
+}
+
+export const supportAPI = {
+  create: (data) => api.post('/api/support/', data),
+  getAll: ()     => api.get('/api/support/'),
+}
+
 export const projectsAPI = {
   getAll: () => api.get('/api/projects/'),
   getBySlug: (slug) => api.get(`/api/projects/${slug}/`),

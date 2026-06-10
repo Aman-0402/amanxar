@@ -1,23 +1,24 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Home, FileText, MessageSquare, Settings, LogOut, User, BookOpen, Compass, Image, Briefcase, Menu } from 'lucide-react'
+import { Home, FileText, MessageSquare, Settings, LogOut, User, Users, BookOpen, Compass, Image, Briefcase, Menu } from 'lucide-react'
 import { useAuth } from '@context/AuthContext'
 import { assetUrl } from '@utils/assetUrl'
 
 const NAV_ITEMS = [
-  { label: 'Overview', href: '/dashboard', icon: Home },
-  { label: 'Projects', href: '/dashboard/projects', icon: FileText },
-  { label: 'About', href: '/dashboard/about', icon: User },
-  { label: 'Skills', href: '/dashboard/skills', icon: FileText },
-  { label: 'Tech Stack', href: '/dashboard/tech-stack', icon: FileText },
-  { label: 'Timeline', href: '/dashboard/timeline', icon: FileText },
-  { label: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
-  { label: 'eBooks', href: '/dashboard/ebooks', icon: BookOpen },
-  { label: 'Knowledge Hub', href: '/dashboard/knowledge-hub', icon: Compass },
-  { label: 'Gallery', href: '/dashboard/gallery', icon: Image },
-  { label: 'Services', href: '/dashboard/services', icon: Briefcase },
-  { label: 'Navbar & Footer', href: '/dashboard/navbar-footer', icon: Menu },
-  { label: 'Settings', href: '/dashboard/settings', icon: Settings },
+  { label: 'Overview',      href: '/dashboard',              icon: Home        },
+  { label: 'Users',         href: '/dashboard/users',        icon: Users       },
+  { label: 'Projects',      href: '/dashboard/projects',     icon: FileText    },
+  { label: 'eBooks',        href: '/dashboard/ebooks',       icon: BookOpen    },
+  { label: 'About',         href: '/dashboard/about',        icon: User        },
+  { label: 'Skills',        href: '/dashboard/skills',       icon: FileText    },
+  { label: 'Tech Stack',    href: '/dashboard/tech-stack',   icon: FileText    },
+  { label: 'Timeline',      href: '/dashboard/timeline',     icon: FileText    },
+  { label: 'Messages',      href: '/dashboard/messages',     icon: MessageSquare },
+  { label: 'Knowledge Hub', href: '/dashboard/knowledge-hub',icon: Compass     },
+  { label: 'Gallery',       href: '/dashboard/gallery',      icon: Image       },
+  { label: 'Services',      href: '/dashboard/services',     icon: Briefcase   },
+  { label: 'Navbar & Footer',href: '/dashboard/navbar-footer',icon: Menu       },
+  { label: 'Settings',      href: '/dashboard/settings',     icon: Settings    },
 ]
 
 export default function DashboardSidebar({ onClose }) {
@@ -60,7 +61,7 @@ export default function DashboardSidebar({ onClose }) {
             />
           </div>
           <span className="font-display font-bold text-lg text-text-primary">
-            Aman<span className="gradient-text">.ai</span>
+            Think With<span className="gradient-text"> Aman</span>
           </span>
         </Link>
       </div>

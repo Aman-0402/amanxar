@@ -1,54 +1,43 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { FileText, Star, Zap, Users } from 'lucide-react'
-import { projectsAPI } from '@services/api'
+import { FileText, Star, Zap, Users, BookOpen } from 'lucide-react'
+import { projectsAPI, usersAPI, ebooksAPI } from '@services/api'
 import { fadeUp, staggerContainer } from '@animations/variants'
-import { viewport } from '@animations/transitions'
-
-const STAT_CARDS = [
-  { label: 'Total Projects', icon: FileText, color: 'brand-primary' },
-  { label: 'Featured', icon: Star, color: 'yellow-400' },
-  { label: 'Active', icon: Zap, color: 'green-400' },
-  { label: 'Total Views', icon: Users, color: 'cyan-400' },
-]
 
 export default function DashboardOverviewPage() {
   const [projects, setProjects] = useState([])
-  const [stats, setStats] = useState({
-    total: 0,
-    featured: 0,
-    active: 0,
-    views: 0,
-  })
+  const [stats, setStats] = useState({ total: 0, featured: 0, active: 0, users: 0, ebooks: 0 })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const { data } = await projectsAPI.getAll()
-        setProjects(data)
+    Promise.allSettled([
+      projectsAPI.getAll(),
+      usersAPI.getAll(),
+      ebooksAPI.getAll(),
+    ]).then(([proj, users, ebooks]) => {
+      const pData = proj.status === 'fulfilled' ? proj.value.data : []
+      const uData = users.status === 'fulfilled' ? users.value.data : []
+      const eData = ebooks.status === 'fulfilled' ? ebooks.value.data : []
 
-        const featured = data.filter((p) => p.featured).length
-        const active = data.filter((p) => p.status === 'completed').length
-
-        setStats({
-          total: data.length,
-          featured,
-          active,
-          views: 0,
-        })
-      } catch (err) {
-        setError('Failed to fetch projects')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchProjects()
+      setProjects(pData)
+      setStats({
+        total:    pData.length,
+        featured: pData.filter(p => p.featured).length,
+        active:   pData.filter(p => p.status === 'completed').length,
+        users:    uData.filter(u => u.role === 'student' || !u.role).length,
+        ebooks:   eData.length,
+      })
+    }).catch(() => setError('Failed to load data')).finally(() => setIsLoading(false))
   }, [])
 
-  const statValues = [stats.total, stats.featured, stats.active, stats.views]
+  const STAT_CARDS = [
+    { label: 'Total Projects', value: stats.total,    icon: FileText, color: 'brand-primary' },
+    { label: 'Featured',       value: stats.featured, icon: Star,     color: 'yellow-400'   },
+    { label: 'Completed',      value: stats.active,   icon: Zap,      color: 'green-400'    },
+    { label: 'Students',       value: stats.users,    icon: Users,    color: 'cyan-400'     },
+    { label: 'Ebooks',         value: stats.ebooks,   icon: BookOpen, color: 'purple-400'   },
+  ]
 
   return (
     <div className="space-y-8">
@@ -71,12 +60,10 @@ export default function DashboardOverviewPage() {
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
       >
-        {STAT_CARDS.map((card, idx) => {
+        {STAT_CARDS.map((card) => {
           const Icon = card.icon
-          const value = statValues[idx]
-
           return (
             <motion.div
               key={card.label}
@@ -85,12 +72,8 @@ export default function DashboardOverviewPage() {
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <p className="text-sm text-text-muted font-medium">
-                    {card.label}
-                  </p>
-                  <p className="text-3xl font-bold text-text-primary mt-2">
-                    {value}
-                  </p>
+                  <p className="text-sm text-text-muted font-medium">{card.label}</p>
+                  <p className="text-3xl font-bold text-text-primary mt-2">{card.value}</p>
                 </div>
                 <div className={`p-3 rounded-lg bg-${card.color}/10`}>
                   <Icon size={20} className={`text-${card.color}`} />

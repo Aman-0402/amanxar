@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter, RouterProvider, ScrollRestoration } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import RootLayout from '@components/layout/RootLayout'
@@ -34,6 +34,16 @@ const DashboardGallery  = lazy(() => import('@pages/dashboard/DashboardGalleryPa
 const DashboardServices = lazy(() => import('@pages/dashboard/DashboardServicesPage'))
 const DashboardNavbarFooter = lazy(() => import('@pages/dashboard/DashboardNavbarFooterPage'))
 const DashboardTest     = lazy(() => import('@pages/dashboard/DashboardTestPage'))
+const DashboardUsers    = lazy(() => import('@pages/dashboard/DashboardUsersPage'))
+
+// ─── Student portal pages ──────────────────────────────────────────────────────
+const StudentLayout   = lazy(() => import('@pages/student/StudentLayout'))
+const StudentHome     = lazy(() => import('@pages/student/StudentHomePage'))
+const StudentEbooks   = lazy(() => import('@pages/student/StudentEbooksPage'))
+const StudentPremium  = lazy(() => import('@pages/student/StudentPremiumPage'))
+const StudentServices = lazy(() => import('@pages/student/StudentServicesPage'))
+const StudentRequest  = lazy(() => import('@pages/student/StudentRequestPage'))
+const StudentProfile  = lazy(() => import('@pages/student/StudentProfilePage'))
 
 // ─── Router configuration ─────────────────────────────────────────────────────
 // import.meta.env.BASE_URL is injected by Vite from the `base` option.
@@ -51,8 +61,29 @@ const router = createBrowserRouter(
     ),
   },
   {
+    path: '/student',
+    element: <ProtectedRoute allowedRoles={['student']} />,
+    children: [
+      {
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <StudentLayout />
+          </Suspense>
+        ),
+        children: [
+          { index: true,        element: <Suspense fallback={<PageLoader />}><StudentHome /></Suspense> },
+          { path: 'ebooks',     element: <Suspense fallback={<PageLoader />}><StudentEbooks /></Suspense> },
+          { path: 'premium',    element: <Suspense fallback={<PageLoader />}><StudentPremium /></Suspense> },
+          { path: 'services',   element: <Suspense fallback={<PageLoader />}><StudentServices /></Suspense> },
+          { path: 'request',    element: <Suspense fallback={<PageLoader />}><StudentRequest /></Suspense> },
+          { path: 'profile',    element: <Suspense fallback={<PageLoader />}><StudentProfile /></Suspense> },
+        ],
+      },
+    ],
+  },
+  {
     path: '/dashboard',
-    element: <ProtectedRoute />,
+    element: <ProtectedRoute allowedRoles={['admin', 'employee']} />,
     children: [
       {
         element: <DashboardLayout />,
@@ -158,6 +189,14 @@ const router = createBrowserRouter(
             element: (
               <Suspense fallback={<PageLoader />}>
                 <DashboardTest />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'users',
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <DashboardUsers />
               </Suspense>
             ),
           },
@@ -285,7 +324,7 @@ export default function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="light"
+        theme="dark"
       />
       <RouterProvider router={router} />
     </>
