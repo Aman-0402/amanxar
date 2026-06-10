@@ -50,9 +50,9 @@
   {
     "id": 7,
     "year": "2025",
-    "title": "Launched aman.ai — Personal Brand Platform",
+    "title": "Launched Think With Aman — Personal Brand Platform",
     "type": "launch",
-    "description": "Built and launched aman.ai — a unified personal brand platform combining projects, services, technical blog, eBooks, and the AI/ML Knowledge Hub.",
+    "description": "Built and launched Think With Aman — a unified personal brand platform combining projects, services, technical blog, eBooks, and the AI/ML Knowledge Hub.",
     "tags": ["React", "Vite", "TailwindCSS", "Personal Brand"]
   }
 ]

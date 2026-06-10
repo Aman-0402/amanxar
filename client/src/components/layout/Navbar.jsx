@@ -83,7 +83,7 @@ export default function Navbar() {
               />
             </div>
             <span className="font-display font-bold text-base text-text-primary">
-              Aman<span className="gradient-text">.ai</span>
+              Think With<span className="gradient-text"> Aman</span>
             </span>
           </Link>
 
