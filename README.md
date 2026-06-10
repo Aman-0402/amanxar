@@ -1,6 +1,6 @@
-# Aman Raj - Portfolio & Knowledge Hub
+# Think With Aman — Portfolio & Student Learning Portal
 
-A full-stack portfolio website featuring an interactive Knowledge Hub, project showcase, blog, resources, and services. Built with **React** (client) and **Express** (backend).
+A full-stack website combining a personal portfolio with a student learning portal. Built with **React** (client) and **Django/Express** (backend).
 
 **Live Site:** [https://aman-0402.github.io/aman.ai](https://aman-0402.github.io/aman.ai)
 
@@ -9,24 +9,28 @@ A full-stack portfolio website featuring an interactive Knowledge Hub, project s
 ## 📁 Project Structure
 
 ```
-aman.ai/
+amanxar/
 ├── client/                    # React + Vite frontend
 │   ├── src/
-│   │   ├── pages/            # Page components
-│   │   ├── components/       # Reusable UI components
-│   │   ├── hooks/            # Custom React hooks
-│   │   ├── services/         # API client layer
-│   │   ├── styles/           # Global CSS + Tailwind config
-│   │   └── assets/           # Images, icons, fonts
-│   ├── package.json
-│   └── tailwind.config.js
-│
-├── backend/                   # Express.js server (Django in progress)
-│   ├── routes/               # API endpoints
-│   ├── models/               # Database schemas
-│   ├── middleware/           # Auth, error handling
+│   │   ├── pages/
+│   │   │   ├── HomePage.jsx
+│   │   │   ├── auth/LoginPage.jsx      # Login + Student registration
+│   │   │   ├── student/               # Student portal pages
+│   │   │   └── dashboard/             # Admin CMS pages
+│   │   ├── components/
+│   │   │   ├── layout/               # Public Navbar, Footer, RootLayout
+│   │   │   ├── dashboard/            # Admin Sidebar, DashboardLayout
+│   │   │   └── auth/ProtectedRoute.jsx
+│   │   ├── context/
+│   │   │   ├── AuthContext.jsx        # JWT auth, login/register/logout
+│   │   │   └── ThemeContext.jsx       # Stub (fixed dark theme)
+│   │   ├── services/api.js            # All axios API clients
+│   │   ├── styles/globals.css         # CSS variables, theme tokens
+│   │   └── animations/variants.js    # Framer Motion presets
+│   ├── tailwind.config.js             # Design tokens, brand colors
 │   └── package.json
 │
+├── backend/                   # Django/Express API
 └── CLAUDE.md                  # Dev instructions for Claude Code
 ```
 
@@ -35,146 +39,148 @@ aman.ai/
 ## 🛠 Tech Stack
 
 ### Frontend
-- **React 18** + TypeScript
-- **Vite** (build tool)
-- **Framer Motion** (animations)
-- **Tailwind CSS v3** (styling)
-- **TanStack Query v5** (server state)
-- **Wouter** (routing)
-- **react-hook-form** + **Zod** (forms)
+- **React 18** + Vite
+- **Framer Motion** — animations
+- **Tailwind CSS v3** — utility-first styling, custom design tokens
+- **TanStack Query v5** — server state (where used)
+- **React Router v6** — routing
+- **Axios** — HTTP client with JWT interceptor
 
 ### Backend
-- **Express.js** (Node.js runtime)
-- **Passport.js** (auth)
-- **PostgreSQL** (database)
-- **Drizzle ORM** (database layer)
+- **Django** (primary) + **Express.js** (legacy)
+- **JWT auth** (via `rest_framework_simplejwt`)
+- **PostgreSQL** + Drizzle ORM
 
 ### Libraries
-- **Lucide React** (icons)
-- **SweetAlert2** (modal confirmations)
-- **React Toastify** (toast notifications)
-- **Nodemailer** (email)
+- **Lucide React** — icons
+- **SweetAlert2** — modal confirmations
+- **React Toastify** — toast notifications
+- **jwtDecode** — JWT decoding on client
 
 ---
 
-## 🚀 Quick Start
+## 🗂 Route Map
 
-### Prerequisites
-- Node.js 22+
-- PostgreSQL (for backend)
-- npm or yarn
-
-### Setup
-
-```bash
-# Install client dependencies
-cd client
-npm install
-
-# Start dev server
-npm run dev
+### Public
+```
+/              → HomePage
+/about         → AboutPage
+/projects      → ProjectsPage
+/projects/:slug → ProjectDetailPage
+/gallery       → GalleryPage
+/knowledge-hub → KnowledgeHubPage
+/services      → ServicesPage
+/resources     → ResourcesPage
+/contact       → ContactPage
+/login         → LoginPage (Sign In + Register tabs)
 ```
 
-Dev server runs on `http://localhost:3002`
-
-### Environment Variables
-
-Create `.env` in root (if using backend):
+### Student Portal (role: student)
 ```
-DATABASE_URL=postgresql://user:password@localhost:5432/aman_ai
-VITE_API_URL=http://localhost:5000
-```
-
----
-
-## 📋 Development
-
-### Running the App
-
-```bash
-# Frontend dev server (hot reload)
-cd client && npm run dev
-
-# Build for production
-npm run build
-
-# Type checking
-npm run check
-
-# Backend (if Django/Express running)
-cd backend && npm run dev
+/student           → Dashboard home
+/student/ebooks    → Free + premium ebook browser
+/student/premium   → Premium content page
+/student/services  → Book a service/session
+/student/request   → Support & content request form
+/student/profile   → Edit personal info
 ```
 
-### Adding Features
-
-1. **Pages**: Create component in `client/src/pages/`
-2. **Components**: Create reusable UI in `client/src/components/`
-3. **API Calls**: Use hooks in `client/src/hooks/` (wraps `@services/api`)
-4. **Styles**: Tailwind utilities preferred; custom CSS in `client/src/styles/`
-5. **Forms**: Use `react-hook-form` + `Zod` validators
-
-### Key Conventions
-
-- **Imports**: Use `@/` alias for `client/src/`
-- **Routing**: Wouter `<Link href="/path">`
-- **State**: TanStack Query for server state; React hooks for local
-- **CSS**: Tailwind utilities + Neo-brutalism design system
-- **Commits**: Conventional Commits format
+### Admin Dashboard (role: admin | employee)
+```
+/dashboard              → Overview (project + student + ebook stats)
+/dashboard/users        → All registered users (students)
+/dashboard/ebooks       → Ebooks CRUD
+/dashboard/projects     → Projects CRUD
+/dashboard/about        → About content management
+/dashboard/skills       → Skills management
+/dashboard/tech-stack   → Tech stack management
+/dashboard/timeline     → Timeline events
+/dashboard/messages     → Contact messages
+/dashboard/knowledge-hub → Knowledge Hub CMS
+/dashboard/gallery      → Gallery management
+/dashboard/services     → Services management
+/dashboard/navbar-footer → Navbar + footer link management
+```
 
 ---
 
 ## 🎨 Design System
 
-### Colors
-- **Primary**: `#6366F1` (Indigo)
-- **Secondary**: `#22D3EE` (Cyan)
-- **Dark mode** + **Light mode** with CSS variables
+### Theme
+**Single fixed theme — Navy / Dark Blue / Black.** No light/dark toggle.
 
-### Typography
-- **Display**: Space Grotesk (bold, modern headers)
-- **Body**: Poppins (friendly, readable text)
-- **Accent**: DM Sans (technical, emphasis)
-- **Mono**: JetBrains Mono (code)
-
-### Neo-Brutalism
-Hard edges, offset shadows, high contrast. Utilities:
-- `.border-3`, `.border-4` (hard borders)
-- `.offset-shadow` (3px offset, no blur)
-- `.text-brutalism` (bold, tight spacing)
-
----
-
-## 📦 Deployment
-
-### Client (GitHub Pages)
-```bash
-cd client
-npm run build
-# Outputs to dist/
+```
+--bg-base:      #060C18   deep navy-black
+--bg-surface:   #0C1628   dark navy
+--bg-elevated:  #122040   medium navy
+--bg-border:    #1E3058   border
+--text-primary: #EEF4FF   near-white
 ```
 
-### Environment
-- **Dev**: `npm run dev`
-- **Staging**: Manual build + test
-- **Production**: Deploy from `main` branch
+### Brand Colors
+```
+brand.primary:   #3B82F6   blue-500    buttons, links, active states
+brand.secondary: #0EA5E9   sky-500     gradients, secondary accents
+brand.dark:      #2563EB   blue-600    hover states
+brand.amber:     #F59E0B   amber-400   premium / important CTAs
+```
+
+### Typography
+- **Display/Headers**: Space Grotesk (bold)
+- **Body**: Poppins
+- **Accent labels**: DM Sans
+- **Code**: JetBrains Mono
+
+### Gradient Text
+`.gradient-text` — `#3B82F6 → #0EA5E9` (blue to sky)
 
 ---
 
-## 🤝 Contributing
+## 🔐 Authentication
 
-1. Create feature branch: `git checkout -b feature/my-feature`
-2. Make changes following conventions above
-3. Commit with Conventional Commits: `git commit -m "feat: add X"`
-4. Push and create PR
+**JWT-based** (token in `localStorage`):
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/auth/login/` | POST | Login — returns JWT access token |
+| `/api/auth/register/` | POST | Student self-registration |
+| `/api/auth/refresh/` | POST | Refresh access token |
+
+**Role routing:**
+- `admin` / `employee` → `/dashboard`
+- `student` → `/student`
+
+`ProtectedRoute` accepts `allowedRoles` prop. Wrong role redirects to correct home.
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# Install and run frontend
+cd client
+npm install
+npm run dev          # → http://localhost:3002
+
+# Type check
+npm run check
+
+# Build for production
+npm run build        # → dist/
+```
+
+### Environment Variables
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/db
+VITE_API_URL=http://localhost:8000
+```
 
 ---
 
 ## 📖 Documentation
 
-- **[CLAUDE.md](./CLAUDE.md)** - Dev instructions for Claude Code
-- **[AGENT.md](./AGENT.md)** - Guidelines for AI agents
-- **[client/README.md](./client/README.md)** - Frontend details
-- **[Modules & Features](./docs/modules.md)** (if exists)
+- **[CLAUDE.md](./CLAUDE.md)** — dev instructions for Claude Code
+- **[AGENT.md](./AGENT.md)** — guidelines for AI agents
 
 ---
 
@@ -182,8 +188,7 @@ npm run build
 
 - **Email**: think.like.ai.aman@gmail.com
 - **WhatsApp**: +91 98521 04967
-- **Portfolio**: https://aman-0402.github.io/aman.ai
 
 ---
 
-**Made with ❤️ by Aman Raj**
+**Made by Aman Raj** | **Think With Aman**
