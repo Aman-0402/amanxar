@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { NavLink, Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, LogIn } from 'lucide-react'
 import { assetUrl } from '@utils/assetUrl'
 import { navbarAPI } from '@services/api'
 import MobileMenu from './MobileMenu'
@@ -116,17 +116,16 @@ export default function Navbar() {
           {/* ── Right Actions ─────────────────────────────────────────────── */}
           <div className="flex items-center gap-2">
 
-            {/* Portfolio CTA */}
-            <motion.a
-              href="https://aman-0402.github.io/My-Portfolio/"
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ y: -1 }}
-              whileTap={{ scale: 0.96 }}
-              className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-primary text-white text-sm font-medium hover:bg-brand-dark transition-colors duration-200 shadow-glow-primary hover:shadow-glow-lg"
-            >
-              <span>Portfolio</span>
-            </motion.a>
+            {/* Sign In */}
+            <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.96 }} className="hidden sm:block">
+              <Link
+                to="/login"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-primary text-white text-sm font-medium hover:bg-brand-dark transition-colors duration-200 shadow-glow-primary hover:shadow-glow-lg"
+              >
+                <LogIn size={15} />
+                <span>Sign In</span>
+              </Link>
+            </motion.div>
 
             {/* Mobile hamburger */}
             <motion.button

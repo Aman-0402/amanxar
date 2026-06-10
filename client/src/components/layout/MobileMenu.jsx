@@ -1,6 +1,6 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Download, Github, Linkedin, Twitter, Mail } from 'lucide-react'
+import { Download, LogIn, Github, Linkedin, Twitter, Mail } from 'lucide-react'
 import {
   mobileMenuOverlay,
   mobileMenuDrawer,
@@ -86,12 +86,20 @@ export default function MobileMenu({ links, onClose }) {
           {/* Divider */}
           <div className="my-6 dotted-line" />
 
-          {/* CTA */}
-          <motion.div variants={mobileMenuItem}>
+          {/* CTAs */}
+          <motion.div variants={mobileMenuItem} className="space-y-3">
+            <Link
+              to="/login"
+              onClick={onClose}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-primary px-4 py-3 text-sm font-medium text-white shadow-glow-primary transition-all hover:bg-brand-dark"
+            >
+              <LogIn size={15} />
+              Sign In
+            </Link>
             <a
               href={`${import.meta.env.BASE_URL}assets/downloads/resume.pdf`}
               download="Aman_Raj_Resume.pdf"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-primary px-4 py-3 text-sm font-medium text-white shadow-glow-primary transition-all hover:bg-brand-dark"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-bg-border px-4 py-3 text-sm font-medium text-text-secondary hover:text-text-primary hover:border-brand-primary/40 transition-all"
             >
               <Download size={15} />
               Download Resume
