@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import (
     Project,
     AboutStat,
@@ -19,6 +21,8 @@ from .models import (
     FooterLink,
     FooterCTA,
     SocialLink,
+    UserProfile,
+    SupportTicket,
 )
 
 
@@ -185,3 +189,73 @@ class SocialLinkSerializer(serializers.ModelSerializer):
         model = SocialLink
         fields = ['id', 'platform', 'url', 'icon_name', 'order']
         read_only_fields = ['id']
+
+
+# ── Auth / User Serializers ──────────────────────────────────────────────────
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        profile = getattr(user, 'profile', None)
+        token['role'] = profile.role if profile else 'student'
+        token['full_name'] = profile.full_name if profile else (user.get_full_name() or user.username)
+        token['email'] = user.email
+        token['username'] = user.username
+        return token
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(write_only=True, required=True)
+    phone = serializers.CharField(write_only=True, required=False, allow_blank=True, default='')
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password', 'full_name', 'phone']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError('Username already taken.')
+        return value
+
+    def validate_email(self, value):
+        if value and User.objects.filter(email=value).exists():
+            raise serializers.ValidationError('Email already registered.')
+        return value
+
+    def create(self, validated_data):
+        full_name = validated_data.pop('full_name', '')
+        phone = validated_data.pop('phone', '')
+        user = User.objects.create_user(**validated_data)
+        UserProfile.objects.create(user=user, full_name=full_name, phone=phone, role='student')
+        return user
+
+
+class UserSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
+    phone = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'full_name', 'phone', 'role', 'date_joined']
+
+    def get_full_name(self, obj):
+        profile = getattr(obj, 'profile', None)
+        return profile.full_name if profile else ''
+
+    def get_phone(self, obj):
+        profile = getattr(obj, 'profile', None)
+        return profile.phone if profile else ''
+
+    def get_role(self, obj):
+        profile = getattr(obj, 'profile', None)
+        return profile.role if profile else 'student'
+
+
+class SupportTicketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupportTicket
+        fields = ['id', 'category', 'subject', 'message', 'created_at']
+        read_only_fields = ['id', 'created_at']

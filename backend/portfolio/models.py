@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 from .validators import validate_image_size
 
 class Project(models.Model):
@@ -379,3 +380,49 @@ class SocialLink(models.Model):
 
     def __str__(self):
         return self.platform
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# User Profile Model
+# ────────────────────────────────────────────────────────────────────────────
+
+class UserProfile(models.Model):
+    ROLE_CHOICES = [
+        ('admin', 'Admin'),
+        ('employee', 'Employee'),
+        ('student', 'Student'),
+    ]
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    full_name = models.CharField(max_length=100, blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user.username} ({self.role})'
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Support Ticket Model
+# ────────────────────────────────────────────────────────────────────────────
+
+class SupportTicket(models.Model):
+    CATEGORY_CHOICES = [
+        ('content', 'Content Request'),
+        ('technical', 'Technical Issue'),
+        ('billing', 'Billing'),
+        ('ebook', 'Ebook Request'),
+        ('session', 'Session Booking'),
+        ('other', 'Other'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='support_tickets')
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
+    subject = models.CharField(max_length=255)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.subject} - {self.user.username}'

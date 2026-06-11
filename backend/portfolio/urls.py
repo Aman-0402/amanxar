@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
+from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 from .views import (
     ProjectViewSet,
     AboutStatViewSet,
@@ -21,6 +21,12 @@ from .views import (
     FooterLinkViewSet,
     FooterCTAViewSet,
     SocialLinkViewSet,
+    CustomTokenObtainPairView,
+    RegisterView,
+    UserListView,
+    UserDetailView,
+    user_me,
+    SupportTicketView,
 )
 
 app_name = 'portfolio'
@@ -49,7 +55,14 @@ router.register(r'social-links', SocialLinkViewSet, basename='social-link')
 urlpatterns = [
     *router.urls,
 
-    path('auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('auth/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('auth/register/', RegisterView.as_view(), name='register'),
     path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('auth/verify/', TokenVerifyView.as_view(), name='token_verify'),
+
+    path('users/', UserListView.as_view(), name='user-list'),
+    path('users/me/', user_me, name='user-me'),
+    path('users/<int:pk>/', UserDetailView.as_view(), name='user-detail'),
+
+    path('support/', SupportTicketView.as_view(), name='support'),
 ]

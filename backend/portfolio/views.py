@@ -1,5 +1,9 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
+from django.contrib.auth.models import User
 from .models import (
     Project,
     AboutStat,
@@ -20,6 +24,8 @@ from .models import (
     FooterLink,
     FooterCTA,
     SocialLink,
+    UserProfile,
+    SupportTicket,
 )
 from .serializers import (
     ProjectSerializer,
@@ -41,6 +47,10 @@ from .serializers import (
     FooterLinkSerializer,
     FooterCTASerializer,
     SocialLinkSerializer,
+    CustomTokenObtainPairSerializer,
+    RegisterSerializer,
+    UserSerializer,
+    SupportTicketSerializer,
 )
 
 
@@ -234,3 +244,85 @@ class SocialLinkViewSet(viewsets.ModelViewSet):
         if self.action in ['list', 'retrieve']:
             return [AllowAny()]
         return [IsAuthenticated()]
+
+
+# ── Auth Views ───────────────────────────────────────────────────────────────
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = [AllowAny]
+    serializer_class = RegisterSerializer
+
+
+# ── Users Views ──────────────────────────────────────────────────────────────
+
+class UserListView(generics.ListAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        profile = getattr(self.request.user, 'profile', None)
+        if profile and profile.role in ('admin', 'employee'):
+            return User.objects.select_related('profile').filter(profile__isnull=False).order_by('-date_joined')
+        return User.objects.none()
+
+
+class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = User.objects.select_related('profile').all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+
+@api_view(['GET', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def user_me(request):
+    user = request.user
+    profile = getattr(user, 'profile', None)
+    if request.method == 'GET':
+        return Response({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'full_name': profile.full_name if profile else '',
+            'phone': profile.phone if profile else '',
+            'role': profile.role if profile else 'student',
+            'date_joined': user.date_joined,
+        })
+    # PATCH
+    if profile:
+        if 'full_name' in request.data:
+            profile.full_name = request.data['full_name']
+        if 'phone' in request.data:
+            profile.phone = request.data['phone']
+        profile.save()
+    if 'email' in request.data:
+        user.email = request.data['email']
+        user.save()
+    return Response({
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'full_name': profile.full_name if profile else '',
+        'phone': profile.phone if profile else '',
+        'role': profile.role if profile else 'student',
+    })
+
+
+# ── Support Ticket Views ──────────────────────────────────────────────────────
+
+class SupportTicketView(generics.ListCreateAPIView):
+    serializer_class = SupportTicketSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        profile = getattr(self.request.user, 'profile', None)
+        if profile and profile.role in ('admin', 'employee'):
+            return SupportTicket.objects.select_related('user').all()
+        return SupportTicket.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
