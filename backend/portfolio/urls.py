@@ -27,6 +27,10 @@ from .views import (
     UserDetailView,
     user_me,
     SupportTicketView,
+    SupportTicketDetailView,
+    ticket_reply,
+    ticket_mark_read,
+    ticket_set_status,
     StudentLearningView,
     StudentLearningDetailView,
     ServiceBookingListCreateView,
@@ -85,7 +89,11 @@ urlpatterns = [
     path('users/me/', user_me, name='user-me'),
     path('users/<int:pk>/', UserDetailView.as_view(), name='user-detail'),
 
-    path('support/', SupportTicketView.as_view(), name='support'),
+    path('support/',                         SupportTicketView.as_view(),       name='support'),
+    path('support/<int:pk>/',                SupportTicketDetailView.as_view(), name='support-detail'),
+    path('support/<int:pk>/reply/',          ticket_reply,                      name='ticket-reply'),
+    path('support/<int:pk>/read/',           ticket_mark_read,                  name='ticket-read'),
+    path('support/<int:pk>/status/',         ticket_set_status,                 name='ticket-status'),
 
     path('learning/',          StudentLearningView.as_view(),       name='learning-list'),
     path('learning/<int:pk>/', StudentLearningDetailView.as_view(), name='learning-detail'),

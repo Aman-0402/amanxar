@@ -48,8 +48,12 @@ export const usersAPI = {
 }
 
 export const supportAPI = {
-  create: (data) => api.post('/api/support/', data),
-  getAll: ()     => api.get('/api/support/'),
+  create:    (data) => api.post('/api/support/', data),
+  getAll:    ()     => api.get('/api/support/'),
+  getById:   (id)   => api.get(`/api/support/${id}/`),
+  reply:     (id, data) => api.post(`/api/support/${id}/reply/`, data),
+  markRead:  (id)   => api.post(`/api/support/${id}/read/`),
+  setStatus: (id, data) => api.patch(`/api/support/${id}/status/`, data),
 }
 
 export const learningAPI = {

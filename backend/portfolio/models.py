@@ -464,10 +464,16 @@ class SupportTicket(models.Model):
         ('feedback',  'Feedback / Suggestion'),
         ('other',     'Other'),
     ]
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='support_tickets')
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='general')
-    subject = models.CharField(max_length=255)
-    message = models.TextField()
+    STATUS_CHOICES = [
+        ('open',    'Open'),
+        ('replied', 'Replied'),
+        ('closed',  'Closed'),
+    ]
+    user       = models.ForeignKey(User, on_delete=models.CASCADE, related_name='support_tickets')
+    category   = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='general')
+    subject    = models.CharField(max_length=255)
+    message    = models.TextField()
+    status     = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -475,6 +481,22 @@ class SupportTicket(models.Model):
 
     def __str__(self):
         return f'{self.subject} - {self.user.username}'
+
+
+class SupportTicketReply(models.Model):
+    ticket          = models.ForeignKey(SupportTicket, on_delete=models.CASCADE, related_name='replies')
+    sender          = models.ForeignKey(User, on_delete=models.CASCADE)
+    message         = models.TextField()
+    is_admin        = models.BooleanField(default=False)
+    read_by_student = models.BooleanField(default=False)
+    read_by_admin   = models.BooleanField(default=False)
+    created_at      = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f'Reply #{self.ticket.id} by {self.sender.username}'
 
 
 # ────────────────────────────────────────────────────────────────────────────

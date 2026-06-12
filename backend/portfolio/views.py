@@ -28,6 +28,7 @@ from .models import (
     SocialLink,
     UserProfile,
     SupportTicket,
+    SupportTicketReply,
     StudentLearning,
     ServiceBooking,
     BookingReply,
@@ -62,6 +63,7 @@ from .serializers import (
     RegisterSerializer,
     UserSerializer,
     SupportTicketSerializer,
+    SupportTicketReplySerializer,
     StudentLearningSerializer,
     ServiceBookingSerializer,
     BookingReplySerializer,
@@ -344,12 +346,98 @@ class SupportTicketView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         profile = getattr(self.request.user, 'profile', None)
+        qs = SupportTicket.objects.select_related('user').prefetch_related('replies__sender__profile')
         if profile and profile.role in ('admin', 'employee'):
-            return SupportTicket.objects.select_related('user').all()
-        return SupportTicket.objects.filter(user=self.request.user)
+            return qs.all()
+        return qs.filter(user=self.request.user)
+
+    def get_serializer_context(self):
+        return {**super().get_serializer_context(), 'request': self.request}
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class SupportTicketDetailView(generics.RetrieveAPIView):
+    serializer_class = SupportTicketSerializer
+    permission_classes = [IsAuthenticated]
+
+    def _is_admin(self):
+        u = self.request.user
+        profile = getattr(u, 'profile', None)
+        return (profile and profile.role in ('admin', 'employee')) or u.is_staff or u.is_superuser
+
+    def get_queryset(self):
+        qs = SupportTicket.objects.select_related('user').prefetch_related('replies__sender__profile')
+        return qs.all() if self._is_admin() else qs.filter(user=self.request.user)
+
+    def get_serializer_context(self):
+        return {**super().get_serializer_context(), 'request': self.request}
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def ticket_reply(request, pk):
+    profile = getattr(request.user, 'profile', None)
+    is_admin = (profile and profile.role in ('admin', 'employee')) or request.user.is_staff or request.user.is_superuser
+    try:
+        ticket = SupportTicket.objects.get(pk=pk) if is_admin else SupportTicket.objects.get(pk=pk, user=request.user)
+    except SupportTicket.DoesNotExist:
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    message = request.data.get('message', '').strip()
+    if not message:
+        return Response({'error': 'Message required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    reply = SupportTicketReply.objects.create(
+        ticket=ticket,
+        sender=request.user,
+        is_admin=is_admin,
+        message=message,
+    )
+    ticket.status = 'replied' if is_admin else 'open'
+    ticket.save()
+
+    if not is_admin:
+        ticket.replies.filter(is_admin=True, read_by_student=False).update(read_by_student=True)
+
+    return Response(SupportTicketReplySerializer(reply).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def ticket_mark_read(request, pk):
+    profile = getattr(request.user, 'profile', None)
+    is_admin = (profile and profile.role in ('admin', 'employee')) or request.user.is_staff or request.user.is_superuser
+    try:
+        ticket = SupportTicket.objects.get(pk=pk) if is_admin else SupportTicket.objects.get(pk=pk, user=request.user)
+    except SupportTicket.DoesNotExist:
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if is_admin:
+        ticket.replies.filter(is_admin=False, read_by_admin=False).update(read_by_admin=True)
+    else:
+        ticket.replies.filter(is_admin=True, read_by_student=False).update(read_by_student=True)
+
+    return Response({'ok': True})
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def ticket_set_status(request, pk):
+    profile = getattr(request.user, 'profile', None)
+    is_admin = (profile and profile.role in ('admin', 'employee')) or request.user.is_staff or request.user.is_superuser
+    if not is_admin:
+        return Response({'error': 'Admin only'}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        ticket = SupportTicket.objects.get(pk=pk)
+    except SupportTicket.DoesNotExist:
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+    new_status = request.data.get('status')
+    if new_status in ('open', 'replied', 'closed'):
+        ticket.status = new_status
+        ticket.save()
+    return Response({'status': ticket.status})
 
 
 # ── Student Learning Views ────────────────────────────────────────────────────

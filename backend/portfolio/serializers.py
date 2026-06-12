@@ -23,6 +23,7 @@ from .models import (
     SocialLink,
     UserProfile,
     SupportTicket,
+    SupportTicketReply,
     StudentLearning,
     ServiceBooking,
     BookingReply,
@@ -269,11 +270,60 @@ class UserSerializer(serializers.ModelSerializer):
         return profile.role if profile else 'student'
 
 
+class SupportTicketReplySerializer(serializers.ModelSerializer):
+    sender_name     = serializers.SerializerMethodField()
+    sender_username = serializers.CharField(source='sender.username', read_only=True)
+
+    class Meta:
+        model = SupportTicketReply
+        fields = [
+            'id', 'is_admin', 'message', 'created_at',
+            'sender_name', 'sender_username', 'read_by_student', 'read_by_admin',
+        ]
+        read_only_fields = [
+            'id', 'created_at', 'is_admin',
+            'sender_name', 'sender_username', 'read_by_student', 'read_by_admin',
+        ]
+
+    def get_sender_name(self, obj):
+        profile = getattr(obj.sender, 'profile', None)
+        return profile.full_name if profile else obj.sender.username
+
+
 class SupportTicketSerializer(serializers.ModelSerializer):
+    replies      = SupportTicketReplySerializer(many=True, read_only=True)
+    unread_count = serializers.SerializerMethodField()
+    user_name    = serializers.SerializerMethodField()
+    user_email   = serializers.CharField(source='user.email', read_only=True)
+
     class Meta:
         model = SupportTicket
-        fields = ['id', 'category', 'subject', 'message', 'created_at']
-        read_only_fields = ['id', 'created_at']
+        fields = [
+            'id', 'category', 'subject', 'message', 'status', 'created_at',
+            'replies', 'unread_count', 'user_name', 'user_email',
+        ]
+        read_only_fields = [
+            'id', 'created_at', 'status',
+            'user_name', 'user_email', 'replies', 'unread_count',
+        ]
+
+    def get_user_name(self, obj):
+        profile = getattr(obj.user, 'profile', None)
+        return profile.full_name if profile else obj.user.username
+
+    def get_unread_count(self, obj):
+        request = self.context.get('request')
+        if request is None:
+            return 0
+        profile = getattr(request.user, 'profile', None)
+        is_admin = (
+            (profile and profile.role in ('admin', 'employee'))
+            or request.user.is_staff
+            or request.user.is_superuser
+        )
+        if is_admin:
+            return obj.replies.filter(is_admin=False, read_by_admin=False).count()
+        return obj.replies.filter(is_admin=True, read_by_student=False).count()
 
 
 class StudentLearningSerializer(serializers.ModelSerializer):
