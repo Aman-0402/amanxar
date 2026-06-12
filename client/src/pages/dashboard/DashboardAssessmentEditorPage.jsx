@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft, Plus, Trash2, Loader2, AlertCircle,
   CheckCircle, ChevronDown, ChevronUp, GripVertical,
+  Users, Search, UserPlus, Lock,
 } from 'lucide-react'
-import { assessmentsAPI } from '@services/api'
+import { assessmentsAPI, usersAPI } from '@services/api'
 import { fadeUp, staggerContainer } from '@animations/variants'
 import Swal from 'sweetalert2'
 
@@ -15,327 +16,169 @@ const Q_TYPES = [
   { value: 'true_false', label: 'True / False' },
 ]
 
+// ── Questions tab ─────────────────────────────────────────────────────────────
 
-export default function DashboardAssessmentEditorPage() {
-  const { id } = useParams()
-  const navigate = useNavigate()
-  const [assessment, setAssessment] = useState(null)
-  const [questions, setQuestions]   = useState([])
-  const [loading, setLoading]       = useState(true)
-  const [error, setError]           = useState('')
-  const [addingQ, setAddingQ]       = useState(false)
+function QuestionsTab({ id, assessment }) {
+  const [questions, setQuestions] = useState([])
+  const [loading, setLoading]     = useState(true)
+  const [error, setError]         = useState('')
+  const [addingQ, setAddingQ]     = useState(false)
 
-  const loadData = async () => {
-    setLoading(true)
-    try {
-      const [aRes, qRes] = await Promise.all([
-        assessmentsAPI.getById(id),
-        assessmentsAPI.getQuestions(id),
-      ])
-      setAssessment(aRes.data)
-      setQuestions(qRes.data.map(q => ({ ...q, _open: false, _saving: false })))
-    } catch {
-      setError('Failed to load assessment')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => { loadData() }, [id])
+  useEffect(() => {
+    assessmentsAPI.getQuestions(id)
+      .then(({ data }) => setQuestions(data.map(q => ({ ...q, _open: false }))))
+      .catch(() => setError('Failed to load questions'))
+      .finally(() => setLoading(false))
+  }, [id])
 
   const addQuestion = async () => {
     setAddingQ(true)
     try {
       const { data } = await assessmentsAPI.createQuestion(id, {
-        type: 'mcq_single',
-        text: '',
-        explanation: '',
-        order: questions.length,
+        type: 'mcq_single', text: '', explanation: '', order: questions.length,
       })
-      setQuestions(prev => [...prev, { ...data, _open: true, _saving: false }])
-    } catch {
-      setError('Failed to add question')
-    } finally {
-      setAddingQ(false)
-    }
+      setQuestions(prev => [...prev, { ...data, _open: true }])
+    } catch { setError('Failed to add question') }
+    finally  { setAddingQ(false) }
   }
 
   const updateQuestion = async (qId, patch) => {
     setQuestions(prev => prev.map(q => q.id === qId ? { ...q, ...patch } : q))
     try {
       const q = questions.find(q => q.id === qId)
-      const updated = { ...q, ...patch }
-      await assessmentsAPI.updateQuestion(qId, {
-        type:        updated.type,
-        text:        updated.text,
-        explanation: updated.explanation,
-        order:       updated.order,
-      })
-    } catch {
-      setError('Failed to save question')
-    }
+      const u = { ...q, ...patch }
+      await assessmentsAPI.updateQuestion(qId, { type: u.type, text: u.text, explanation: u.explanation, order: u.order })
+    } catch { setError('Failed to save question') }
   }
 
   const deleteQuestion = async (qId) => {
-    const result = await Swal.fire({
-      title: 'Delete question?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Delete',
-      confirmButtonColor: '#ef4444',
-      background: '#0C1628',
-      color: '#EEF4FF',
-    })
-    if (!result.isConfirmed) return
-    try {
-      await assessmentsAPI.deleteQuestion(qId)
-      setQuestions(prev => prev.filter(q => q.id !== qId))
-    } catch {
-      setError('Failed to delete question')
-    }
+    const r = await Swal.fire({ title: 'Delete question?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Delete', confirmButtonColor: '#ef4444', background: '#0C1628', color: '#EEF4FF' })
+    if (!r.isConfirmed) return
+    try { await assessmentsAPI.deleteQuestion(qId); setQuestions(prev => prev.filter(q => q.id !== qId)) }
+    catch { setError('Failed to delete question') }
   }
 
   const addOption = async (qId, init = {}) => {
     try {
       const order = questions.find(q => q.id === qId)?.options?.length ?? 0
-      const { data } = await assessmentsAPI.createOption(qId, {
-        text: '', is_correct: false, order, ...init,
-      })
-      setQuestions(prev => prev.map(q =>
-        q.id === qId ? { ...q, options: [...(q.options || []), data] } : q
-      ))
-    } catch {
-      setError('Failed to add option')
-    }
+      const { data } = await assessmentsAPI.createOption(qId, { text: '', is_correct: false, order, ...init })
+      setQuestions(prev => prev.map(q => q.id === qId ? { ...q, options: [...(q.options || []), data] } : q))
+    } catch { setError('Failed to add option') }
   }
 
   const addTFOptions = async (qId) => {
-    await addOption(qId, { text: 'True',  order: 0 })
+    await addOption(qId, { text: 'True', order: 0 })
     await addOption(qId, { text: 'False', order: 1 })
   }
 
   const updateOption = async (qId, oId, patch) => {
-    setQuestions(prev => prev.map(q =>
-      q.id === qId
-        ? { ...q, options: q.options.map(o => o.id === oId ? { ...o, ...patch } : o) }
-        : q
-    ))
-    try {
-      await assessmentsAPI.updateOption(oId, patch)
-    } catch {
-      setError('Failed to save option')
-    }
+    setQuestions(prev => prev.map(q => q.id === qId ? { ...q, options: q.options.map(o => o.id === oId ? { ...o, ...patch } : o) } : q))
+    try { await assessmentsAPI.updateOption(oId, patch) }
+    catch { setError('Failed to save option') }
   }
 
   const deleteOption = async (qId, oId) => {
-    try {
-      await assessmentsAPI.deleteOption(oId)
-      setQuestions(prev => prev.map(q =>
-        q.id === qId ? { ...q, options: q.options.filter(o => o.id !== oId) } : q
-      ))
-    } catch {
-      setError('Failed to delete option')
-    }
+    try { await assessmentsAPI.deleteOption(oId); setQuestions(prev => prev.map(q => q.id === qId ? { ...q, options: q.options.filter(o => o.id !== oId) } : q)) }
+    catch { setError('Failed to delete option') }
   }
 
   const setCorrect = (qId, oId, type) => {
     const q = questions.find(q => q.id === qId)
     if (!q) return
-
     if (type === 'true_false' || type === 'mcq_single') {
-      q.options.forEach(o => {
-        const should = o.id === oId
-        if (o.is_correct !== should) {
-          updateOption(qId, o.id, { is_correct: should })
-        }
-      })
+      q.options.forEach(o => { if (o.is_correct !== (o.id === oId)) updateOption(qId, o.id, { is_correct: o.id === oId }) })
     } else {
-      const current = q.options.find(o => o.id === oId)
-      updateOption(qId, oId, { is_correct: !current?.is_correct })
+      const cur = q.options.find(o => o.id === oId)
+      updateOption(qId, oId, { is_correct: !cur?.is_correct })
     }
   }
 
-  const toggleOpen = (qId) =>
-    setQuestions(prev => prev.map(q => q.id === qId ? { ...q, _open: !q._open } : q))
+  const toggleOpen = (qId) => setQuestions(prev => prev.map(q => q.id === qId ? { ...q, _open: !q._open } : q))
 
-  if (loading) return (
-    <div className="flex items-center justify-center py-24">
-      <Loader2 size={36} className="animate-spin text-brand-primary" />
-    </div>
-  )
+  if (loading) return <div className="flex justify-center py-12"><Loader2 size={28} className="animate-spin text-brand-primary" /></div>
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
+    <div className="space-y-4">
+      {error && <ErrBanner msg={error} />}
 
-      {/* Header */}
-      <motion.div variants={fadeUp} className="flex items-center gap-4">
-        <button
-          onClick={() => navigate('/dashboard/assessments')}
-          className="h-9 w-9 flex items-center justify-center rounded-xl border border-bg-border text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors"
-        >
-          <ArrowLeft size={18} />
-        </button>
-        <div>
-          <h1 className="font-display text-2xl font-bold text-text-primary">{assessment?.title}</h1>
-          <p className="text-text-muted text-sm">{questions.length} question{questions.length !== 1 ? 's' : ''}</p>
-        </div>
-      </motion.div>
-
-      {error && (
-        <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-          <AlertCircle size={15} /> {error}
+      {questions.length === 0 && !loading && (
+        <div className="text-center py-10 text-text-muted rounded-xl border border-dashed border-bg-border">
+          <p className="mb-3">No questions yet</p>
+          <p className="text-xs">Click "Add Question" below to start building the exam</p>
         </div>
       )}
 
-      {/* Questions */}
       <AnimatePresence initial={false}>
         {questions.map((q, idx) => (
-          <motion.div
-            key={q.id}
-            layout
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="rounded-xl border border-bg-border bg-bg-surface overflow-hidden"
-          >
-            {/* Question header */}
-            <div
-              className="flex items-center gap-3 px-5 py-4 cursor-pointer hover:bg-bg-elevated/40 transition-colors"
-              onClick={() => toggleOpen(q.id)}
-            >
+          <motion.div key={q.id} layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
+            className="rounded-xl border border-bg-border bg-bg-surface overflow-hidden">
+            <div className="flex items-center gap-3 px-5 py-4 cursor-pointer hover:bg-bg-elevated/40 transition-colors" onClick={() => toggleOpen(q.id)}>
               <GripVertical size={16} className="text-text-muted shrink-0" />
               <span className="text-xs font-mono text-text-muted shrink-0">Q{idx + 1}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-text-primary truncate">
-                  {q.text || <span className="text-text-muted italic">Untitled question</span>}
-                </p>
+                <p className="text-sm font-medium text-text-primary truncate">{q.text || <span className="text-text-muted italic">Untitled question</span>}</p>
                 <div className="flex items-center gap-3 mt-0.5">
                   <span className="text-xs text-text-muted">{Q_TYPES.find(t => t.value === q.type)?.label}</span>
                   <span className="text-xs text-text-muted">{q.options?.length || 0} options</span>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={e => { e.stopPropagation(); deleteQuestion(q.id) }}
-                  className="h-8 w-8 flex items-center justify-center rounded-lg text-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                >
-                  <Trash2 size={14} />
-                </button>
+                <button onClick={e => { e.stopPropagation(); deleteQuestion(q.id) }} className="h-8 w-8 flex items-center justify-center rounded-lg text-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors"><Trash2 size={14} /></button>
                 {q._open ? <ChevronUp size={16} className="text-text-muted" /> : <ChevronDown size={16} className="text-text-muted" />}
               </div>
             </div>
 
-            {/* Question body (expanded) */}
             <AnimatePresence initial={false}>
               {q._open && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
                   <div className="px-5 pb-5 space-y-4 border-t border-bg-border">
-
-                    {/* Type selector */}
                     <div className="flex gap-2 pt-4">
                       {Q_TYPES.map(t => (
-                        <button
-                          key={t.value}
-                          type="button"
-                          onClick={() => updateQuestion(q.id, { type: t.value })}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                            q.type === t.value
-                              ? 'bg-brand-primary/15 text-brand-primary border-brand-primary/40'
-                              : 'border-bg-border text-text-muted hover:text-text-primary hover:bg-bg-elevated'
-                          }`}
-                        >
+                        <button key={t.value} type="button" onClick={() => updateQuestion(q.id, { type: t.value })}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${q.type === t.value ? 'bg-brand-primary/15 text-brand-primary border-brand-primary/40' : 'border-bg-border text-text-muted hover:text-text-primary hover:bg-bg-elevated'}`}>
                           {t.label}
                         </button>
                       ))}
                     </div>
-
-                    {/* Question text */}
                     <div>
                       <label className="text-xs font-medium text-text-muted mb-1.5 block">Question Text</label>
-                      <textarea
-                        rows={2}
-                        value={q.text}
-                        onChange={e => updateQuestion(q.id, { text: e.target.value })}
+                      <textarea rows={2} value={q.text} onChange={e => updateQuestion(q.id, { text: e.target.value })}
                         className="w-full rounded-lg border border-bg-border bg-bg-elevated px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 resize-none"
-                        placeholder="Enter question text…"
-                      />
+                        placeholder="Enter question text…" />
                     </div>
-
-                    {/* Explanation */}
                     <div>
                       <label className="text-xs font-medium text-text-muted mb-1.5 block">Explanation (shown after submit)</label>
-                      <textarea
-                        rows={2}
-                        value={q.explanation}
-                        onChange={e => updateQuestion(q.id, { explanation: e.target.value })}
+                      <textarea rows={2} value={q.explanation} onChange={e => updateQuestion(q.id, { explanation: e.target.value })}
                         className="w-full rounded-lg border border-bg-border bg-bg-elevated px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 resize-none"
-                        placeholder="Why is this the correct answer?"
-                      />
+                        placeholder="Why is this the correct answer?" />
                     </div>
-
-                    {/* Options */}
                     <div>
                       <label className="text-xs font-medium text-text-muted mb-2 block">
                         Answer Options
-                        {q.type === 'mcq_multi' && (
-                          <span className="ml-2 text-brand-primary">(select all correct)</span>
-                        )}
-                        {q.type === 'mcq_single' && (
-                          <span className="ml-2 text-brand-primary">(select one correct)</span>
-                        )}
+                        {q.type === 'mcq_multi'  && <span className="ml-2 text-brand-primary">(select all correct)</span>}
+                        {q.type === 'mcq_single' && <span className="ml-2 text-brand-primary">(select one correct)</span>}
                       </label>
                       <div className="space-y-2">
                         {(q.options || []).map(o => (
                           <div key={o.id} className="flex items-center gap-3">
-                            <button
-                              type="button"
-                              onClick={() => setCorrect(q.id, o.id, q.type)}
-                              title={q.type === 'mcq_multi' ? 'Toggle correct' : 'Set as correct'}
-                              className={`h-5 w-5 shrink-0 rounded-full border-2 flex items-center justify-center transition-colors ${
-                                o.is_correct
-                                  ? 'bg-green-500 border-green-500'
-                                  : 'border-bg-border hover:border-green-500/50'
-                              }`}
-                            >
+                            <button type="button" onClick={() => setCorrect(q.id, o.id, q.type)}
+                              className={`h-5 w-5 shrink-0 rounded-full border-2 flex items-center justify-center transition-colors ${o.is_correct ? 'bg-green-500 border-green-500' : 'border-bg-border hover:border-green-500/50'}`}>
                               {o.is_correct && <CheckCircle size={10} className="text-white" />}
                             </button>
-                            <input
-                              value={o.text}
-                              onChange={e => updateOption(q.id, o.id, { text: e.target.value })}
+                            <input value={o.text} onChange={e => updateOption(q.id, o.id, { text: e.target.value })}
                               className="flex-1 rounded-lg border border-bg-border bg-bg-elevated px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-primary/20"
-                              placeholder={`Option ${q.options.indexOf(o) + 1}`}
-                            />
-                            <button
-                              type="button"
-                              onClick={() => deleteOption(q.id, o.id)}
-                              className="h-8 w-8 flex items-center justify-center rounded-lg text-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0"
-                            >
-                              <Trash2 size={13} />
-                            </button>
+                              placeholder={`Option ${(q.options || []).indexOf(o) + 1}`} />
+                            <button type="button" onClick={() => deleteOption(q.id, o.id)} className="h-8 w-8 flex items-center justify-center rounded-lg text-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0"><Trash2 size={13} /></button>
                           </div>
                         ))}
                       </div>
                       {q.type !== 'true_false' && (
-                        <button
-                          type="button"
-                          onClick={() => addOption(q.id)}
-                          className="mt-2 flex items-center gap-1.5 text-xs text-brand-primary hover:text-brand-dark transition-colors"
-                        >
+                        <button type="button" onClick={() => addOption(q.id)} className="mt-2 flex items-center gap-1.5 text-xs text-brand-primary hover:text-brand-dark transition-colors">
                           <Plus size={13} /> Add Option
                         </button>
                       )}
                       {q.type === 'true_false' && (q.options || []).length === 0 && (
-                        <button
-                          type="button"
-                          onClick={() => addTFOptions(q.id)}
-                          className="mt-2 flex items-center gap-1.5 text-xs text-brand-primary hover:text-brand-dark transition-colors"
-                        >
+                        <button type="button" onClick={() => addTFOptions(q.id)} className="mt-2 flex items-center gap-1.5 text-xs text-brand-primary hover:text-brand-dark transition-colors">
                           <Plus size={13} /> Add True / False options
                         </button>
                       )}
@@ -348,16 +191,247 @@ export default function DashboardAssessmentEditorPage() {
         ))}
       </AnimatePresence>
 
-      {/* Add Question */}
-      <motion.div variants={fadeUp}>
+      <button onClick={addQuestion} disabled={addingQ}
+        className="w-full py-4 rounded-xl border-2 border-dashed border-bg-border text-text-muted hover:border-brand-primary/50 hover:text-brand-primary transition-colors flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-60">
+        {addingQ ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+        Add Question
+      </button>
+    </div>
+  )
+}
+
+// ── Students / Enrollment tab ─────────────────────────────────────────────────
+
+function StudentsTab({ id, isPremium }) {
+  const [enrolled, setEnrolled]   = useState([])
+  const [allUsers, setAllUsers]   = useState([])
+  const [loading, setLoading]     = useState(true)
+  const [search, setSearch]       = useState('')
+  const [enrolling, setEnrolling] = useState(null)
+  const [removing, setRemoving]   = useState(null)
+  const [error, setError]         = useState('')
+
+  useEffect(() => {
+    Promise.all([
+      assessmentsAPI.getEnrollments(id),
+      usersAPI.getAll(),
+    ]).then(([e, u]) => {
+      setEnrolled(e.data)
+      setAllUsers(u.data.filter(u => u.role === 'student' || !u.role))
+    }).catch(() => setError('Failed to load')).finally(() => setLoading(false))
+  }, [id])
+
+  const enrolledIds = new Set(enrolled.map(e => e.user_id))
+
+  const handleEnroll = async (userId) => {
+    setEnrolling(userId)
+    try {
+      const { data } = await assessmentsAPI.enroll(id, userId)
+      setEnrolled(prev => [...prev, data])
+    } catch { setError('Failed to enroll student') }
+    finally { setEnrolling(null) }
+  }
+
+  const handleUnenroll = async (userId) => {
+    setRemoving(userId)
+    try {
+      await assessmentsAPI.unenroll(id, userId)
+      setEnrolled(prev => prev.filter(e => e.user_id !== userId))
+    } catch { setError('Failed to remove student') }
+    finally { setRemoving(null) }
+  }
+
+  const filteredUsers = allUsers.filter(u =>
+    u.username?.toLowerCase().includes(search.toLowerCase()) ||
+    u.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+    u.email?.toLowerCase().includes(search.toLowerCase())
+  )
+
+  if (loading) return <div className="flex justify-center py-12"><Loader2 size={28} className="animate-spin text-brand-primary" /></div>
+
+  return (
+    <div className="space-y-6">
+      {error && <ErrBanner msg={error} />}
+
+      {!isPremium && (
+        <div className="flex items-center gap-2 rounded-lg border border-brand-amber/30 bg-brand-amber/10 px-4 py-3 text-sm text-brand-amber">
+          <Lock size={14} /> This is a free exam — all students can access it automatically. Enrollment management applies only to premium exams.
+        </div>
+      )}
+
+      {/* Currently enrolled */}
+      <div>
+        <h3 className="text-sm font-semibold text-text-primary mb-3">
+          Enrolled Students <span className="text-text-muted font-normal">({enrolled.length})</span>
+        </h3>
+        {enrolled.length === 0 ? (
+          <p className="text-sm text-text-muted">No students enrolled yet.</p>
+        ) : (
+          <div className="space-y-2">
+            {enrolled.map(e => (
+              <div key={e.id} className="flex items-center justify-between gap-3 rounded-xl border border-bg-border bg-bg-elevated px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-brand-primary/20 border border-brand-primary/20 flex items-center justify-center text-xs font-bold text-brand-primary shrink-0">
+                    {(e.full_name || e.username || '?')[0].toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-text-primary">{e.full_name || e.username}</p>
+                    <p className="text-xs text-text-muted">@{e.username}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleUnenroll(e.user_id)}
+                  disabled={removing === e.user_id}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                >
+                  {removing === e.user_id ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Add students */}
+      <div>
+        <h3 className="text-sm font-semibold text-text-primary mb-3">Add Students</h3>
+        <div className="relative mb-3">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+          <input
+            type="text" value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Search by name, username, or email…"
+            className="w-full rounded-lg border border-bg-border bg-bg-elevated pl-9 pr-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+          />
+        </div>
+        <div className="space-y-2 max-h-64 overflow-y-auto">
+          {filteredUsers.length === 0 ? (
+            <p className="text-sm text-text-muted py-4 text-center">{search ? 'No students match search' : 'No students found'}</p>
+          ) : filteredUsers.map(u => (
+            <div key={u.id} className="flex items-center justify-between gap-3 rounded-xl border border-bg-border bg-bg-surface px-4 py-3">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full bg-bg-elevated border border-bg-border flex items-center justify-center text-xs font-bold text-text-muted shrink-0">
+                  {(u.full_name || u.username || '?')[0].toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-text-primary">{u.full_name || u.username}</p>
+                  <p className="text-xs text-text-muted">{u.email || `@${u.username}`}</p>
+                </div>
+              </div>
+              {enrolledIds.has(u.id) ? (
+                <span className="flex items-center gap-1 text-xs text-green-400 bg-green-400/10 px-3 py-1.5 rounded-lg font-medium">
+                  <CheckCircle size={12} /> Enrolled
+                </span>
+              ) : (
+                <button
+                  onClick={() => handleEnroll(u.id)}
+                  disabled={enrolling === u.id}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-brand-primary bg-brand-primary/10 hover:bg-brand-primary/20 transition-colors font-medium disabled:opacity-50"
+                >
+                  {enrolling === u.id ? <Loader2 size={12} className="animate-spin" /> : <UserPlus size={12} />}
+                  Enroll
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Error banner helper ───────────────────────────────────────────────────────
+function ErrBanner({ msg }) {
+  return (
+    <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+      <AlertCircle size={15} /> {msg}
+    </div>
+  )
+}
+
+// ── Main page ─────────────────────────────────────────────────────────────────
+
+export default function DashboardAssessmentEditorPage() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const [assessment, setAssessment] = useState(null)
+  const [loading, setLoading]       = useState(true)
+  const [tab, setTab]               = useState('questions')
+
+  useEffect(() => {
+    assessmentsAPI.getById(id)
+      .then(({ data }) => setAssessment(data))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [id])
+
+  if (loading) return (
+    <div className="flex items-center justify-center py-24">
+      <Loader2 size={36} className="animate-spin text-brand-primary" />
+    </div>
+  )
+
+  return (
+    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
+
+      {/* Header */}
+      <motion.div variants={fadeUp} className="flex items-center gap-4 flex-wrap">
         <button
-          onClick={addQuestion}
-          disabled={addingQ}
-          className="w-full py-4 rounded-xl border-2 border-dashed border-bg-border text-text-muted hover:border-brand-primary/50 hover:text-brand-primary transition-colors flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-60"
+          onClick={() => navigate('/dashboard/assessments')}
+          className="h-9 w-9 flex items-center justify-center rounded-xl border border-bg-border text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors shrink-0"
         >
-          {addingQ ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
-          Add Question
+          <ArrowLeft size={18} />
         </button>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="font-display text-2xl font-bold text-text-primary truncate">{assessment?.title}</h1>
+            <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${
+              assessment?.is_free
+                ? 'text-brand-primary bg-brand-primary/10 border-brand-primary/30'
+                : 'text-brand-amber bg-brand-amber/10 border-brand-amber/30'
+            }`}>
+              {assessment?.is_free ? 'Free' : 'Premium'}
+            </span>
+            <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${
+              assessment?.is_active
+                ? 'text-green-400 bg-green-400/10 border-green-400/30'
+                : 'text-text-muted bg-bg-elevated border-bg-border'
+            }`}>
+              {assessment?.is_active ? 'Active' : 'Draft'}
+            </span>
+          </div>
+          <p className="text-text-muted text-sm mt-0.5">{assessment?.question_count ?? 0} questions · {assessment?.enrolled_count ?? 0} enrolled</p>
+        </div>
+      </motion.div>
+
+      {/* Tabs */}
+      <motion.div variants={fadeUp} className="flex gap-1 p-1 rounded-xl bg-bg-elevated border border-bg-border w-fit">
+        {[
+          { key: 'questions', label: 'Questions',     icon: null    },
+          { key: 'students',  label: 'Students',      icon: Users   },
+        ].map(({ key, label, icon: Icon }) => (
+          <button
+            key={key}
+            onClick={() => setTab(key)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              tab === key
+                ? 'bg-bg-surface text-text-primary shadow-sm'
+                : 'text-text-muted hover:text-text-primary'
+            }`}
+          >
+            {Icon && <Icon size={15} />}
+            {label}
+            {key === 'students' && !assessment?.is_free && (
+              <span className="text-[10px] bg-brand-amber/20 text-brand-amber px-1.5 py-0.5 rounded-full font-semibold">Premium</span>
+            )}
+          </button>
+        ))}
+      </motion.div>
+
+      {/* Tab content */}
+      <motion.div variants={fadeUp}>
+        {tab === 'questions' && <QuestionsTab id={id} assessment={assessment} />}
+        {tab === 'students'  && <StudentsTab  id={id} isPremium={!assessment?.is_free} />}
       </motion.div>
 
     </motion.div>

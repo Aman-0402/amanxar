@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft, Clock, Target, CheckCircle, XCircle,
-  Loader2, AlertCircle, PlayCircle, Trophy, Tag,
+  Loader2, AlertCircle, PlayCircle, Trophy, Tag, Lock,
 } from 'lucide-react'
 import { assessmentsAPI } from '@services/api'
 
@@ -272,12 +272,21 @@ export default function StudentExamPage() {
                 </div>
               )}
 
-              <button
-                onClick={handleStart}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-brand-primary text-white font-semibold hover:bg-brand-dark transition-colors shadow-glow-primary"
-              >
-                <PlayCircle size={18} /> Start Exam
-              </button>
+              {assessment.is_enrolled === false ? (
+                <div className="rounded-xl border border-brand-amber/30 bg-brand-amber/10 px-5 py-4 text-center space-y-1">
+                  <div className="flex items-center justify-center gap-2 text-brand-amber font-semibold">
+                    <Lock size={16} /> Premium Exam — Access Required
+                  </div>
+                  <p className="text-sm text-text-muted">Contact the admin to get enrolled in this exam.</p>
+                </div>
+              ) : (
+                <button
+                  onClick={handleStart}
+                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-brand-primary text-white font-semibold hover:bg-brand-dark transition-colors shadow-glow-primary"
+                >
+                  <PlayCircle size={18} /> Start Exam
+                </button>
+              )}
             </div>
           </motion.div>
         )}

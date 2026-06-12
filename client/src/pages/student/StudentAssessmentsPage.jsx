@@ -159,9 +159,10 @@ export default function StudentAssessmentsPage() {
 
                 {/* CTA footer */}
                 <div className="px-5 pb-5">
-                  {isPremium ? (
-                    <div className="flex items-center gap-2 justify-center py-2.5 rounded-xl border border-brand-amber/30 bg-brand-amber/10 text-brand-amber text-sm font-medium">
-                      <Lock size={14} /> Premium
+                  {isPremium && item.is_enrolled === false ? (
+                    <div className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-brand-amber/30 bg-brand-amber/10 text-brand-amber text-sm font-medium">
+                      <div className="flex items-center gap-2"><Lock size={14} /> Premium — Not Enrolled</div>
+                      <span className="text-xs text-brand-amber/70">Contact admin for access</span>
                     </div>
                   ) : status === 'not_started' ? (
                     <Link

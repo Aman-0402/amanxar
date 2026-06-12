@@ -31,6 +31,7 @@ from .models import (
     AnswerOption,
     StudentAttempt,
     StudentAnswer,
+    AssessmentEnrollment,
 )
 
 
@@ -372,9 +373,11 @@ class QuestionPublicSerializer(serializers.ModelSerializer):
 
 
 class AssessmentListSerializer(serializers.ModelSerializer):
-    question_count = serializers.SerializerMethodField()
-    attempt_count  = serializers.SerializerMethodField()
-    user_attempt   = serializers.SerializerMethodField()
+    question_count  = serializers.SerializerMethodField()
+    attempt_count   = serializers.SerializerMethodField()
+    enrolled_count  = serializers.SerializerMethodField()
+    user_attempt    = serializers.SerializerMethodField()
+    is_enrolled     = serializers.SerializerMethodField()
 
     class Meta:
         model  = Assessment
@@ -382,7 +385,7 @@ class AssessmentListSerializer(serializers.ModelSerializer):
             'id', 'title', 'description', 'category', 'tags',
             'is_free', 'time_limit', 'pass_mark', 'is_active',
             'order', 'created_at', 'question_count', 'attempt_count',
-            'user_attempt',
+            'enrolled_count', 'user_attempt', 'is_enrolled',
         ]
         read_only_fields = ['id', 'created_at']
 
@@ -391,6 +394,9 @@ class AssessmentListSerializer(serializers.ModelSerializer):
 
     def get_attempt_count(self, obj):
         return obj.attempts.filter(status='completed').count()
+
+    def get_enrolled_count(self, obj):
+        return obj.enrollments.count()
 
     def get_user_attempt(self, obj):
         request = self.context.get('request')
@@ -407,6 +413,14 @@ class AssessmentListSerializer(serializers.ModelSerializer):
             'percentage': attempt.percentage,
             'passed':     attempt.passed,
         }
+
+    def get_is_enrolled(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return None
+        if obj.is_free:
+            return True
+        return obj.enrollments.filter(user=request.user).exists()
 
 
 class AssessmentDetailAdminSerializer(AssessmentListSerializer):
@@ -450,3 +464,19 @@ class StudentAttemptSerializer(serializers.ModelSerializer):
         fields = ['id', 'assessment', 'started_at', 'submitted_at',
                   'score', 'total', 'status', 'percentage', 'passed']
         read_only_fields = ['id', 'started_at']
+
+
+class AssessmentEnrollmentSerializer(serializers.ModelSerializer):
+    user_id       = serializers.IntegerField(source='user.id',       read_only=True)
+    username      = serializers.CharField(source='user.username',    read_only=True)
+    full_name     = serializers.SerializerMethodField()
+    email         = serializers.CharField(source='user.email',       read_only=True)
+
+    class Meta:
+        model  = AssessmentEnrollment
+        fields = ['id', 'user_id', 'username', 'full_name', 'email', 'enrolled_at']
+        read_only_fields = ['id', 'enrolled_at']
+
+    def get_full_name(self, obj):
+        profile = getattr(obj.user, 'profile', None)
+        return profile.full_name if profile else obj.user.username

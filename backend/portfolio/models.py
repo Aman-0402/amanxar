@@ -571,3 +571,16 @@ class StudentAnswer(models.Model):
 
     def __str__(self):
         return f'{self.attempt.user.username} → Q{self.question.id}'
+
+
+class AssessmentEnrollment(models.Model):
+    user        = models.ForeignKey(User, on_delete=models.CASCADE, related_name='exam_enrollments')
+    assessment  = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name='enrollments')
+    enrolled_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [('user', 'assessment')]
+        ordering = ['-enrolled_at']
+
+    def __str__(self):
+        return f'{self.user.username} → {self.assessment.title}'

@@ -36,6 +36,7 @@ from .models import (
     AnswerOption,
     StudentAttempt,
     StudentAnswer,
+    AssessmentEnrollment,
 )
 from .serializers import (
     ProjectSerializer,
@@ -70,6 +71,7 @@ from .serializers import (
     QuestionAdminSerializer,
     AnswerOptionSerializer,
     StudentAttemptSerializer,
+    AssessmentEnrollmentSerializer,
 )
 
 
@@ -622,6 +624,17 @@ def start_attempt(request, assessment_pk):
     except Assessment.DoesNotExist:
         return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
 
+    if not assessment.is_free:
+        is_admin = _is_admin_user(request.user)
+        enrolled = AssessmentEnrollment.objects.filter(
+            user=request.user, assessment=assessment
+        ).exists()
+        if not is_admin and not enrolled:
+            return Response(
+                {'error': 'not_enrolled', 'message': 'This is a premium exam. Contact admin to get access.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
     attempt, created = StudentAttempt.objects.get_or_create(
         user=request.user,
         assessment=assessment,
@@ -727,3 +740,56 @@ def assessment_leaderboard(request, assessment_pk):
         })
 
     return Response(data)
+
+
+# ── Enrollment Views (premium exam access) ───────────────────────────────────
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def enrollment_list(request, assessment_pk):
+    if not _is_admin_user(request.user):
+        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        assessment = Assessment.objects.get(pk=assessment_pk)
+    except Assessment.DoesNotExist:
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+    enrollments = assessment.enrollments.select_related('user__profile').all()
+    return Response(AssessmentEnrollmentSerializer(enrollments, many=True).data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def enroll_student(request, assessment_pk):
+    if not _is_admin_user(request.user):
+        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        assessment = Assessment.objects.get(pk=assessment_pk)
+    except Assessment.DoesNotExist:
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    user_id = request.data.get('user_id')
+    try:
+        student = User.objects.get(pk=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    enrollment, created = AssessmentEnrollment.objects.get_or_create(
+        user=student, assessment=assessment
+    )
+    return Response(
+        AssessmentEnrollmentSerializer(enrollment).data,
+        status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+    )
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def unenroll_student(request, assessment_pk, user_pk):
+    if not _is_admin_user(request.user):
+        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+    deleted, _ = AssessmentEnrollment.objects.filter(
+        assessment_id=assessment_pk, user_id=user_pk
+    ).delete()
+    if not deleted:
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+    return Response(status=status.HTTP_204_NO_CONTENT)
