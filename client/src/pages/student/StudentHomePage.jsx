@@ -101,12 +101,11 @@ export default function StudentHomePage() {
       </motion.div>
 
       {/* ── Stats row ─────────────────────────────────────────────────────────── */}
-      <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { label: 'Free Ebooks',     value: ebookCount ?? '…', color: 'text-brand-primary',   sub: 'available now'   },
-          { label: 'Premium Courses', value: 'Soon',            color: 'text-brand-amber',     sub: 'coming soon'     },
-          { label: 'Sessions Booked', value: 0,                 color: 'text-brand-secondary', sub: 'schedule more'   },
-          { label: 'Support Tickets', value: 0,                 color: 'text-green-400',       sub: 'all resolved'    },
+          { label: 'Total Courses',   value: courseCount ?? '…', color: 'text-brand-primary',   sub: 'free & premium'  },
+          { label: 'Sessions Booked', value: 0,                  color: 'text-brand-secondary', sub: 'schedule more'   },
+          { label: 'Support Tickets', value: 0,                  color: 'text-green-400',       sub: 'all resolved'    },
         ].map(({ label, value, color, sub }) => (
           <div key={label} className="rounded-xl border border-bg-border bg-bg-surface p-5 flex flex-col gap-1">
             <p className={`font-display text-3xl font-bold ${color}`}>{value}</p>
@@ -122,7 +121,7 @@ export default function StudentHomePage() {
         {/* Quick access — takes 2/3 */}
         <motion.div variants={fadeUp} className="lg:col-span-2 space-y-3">
           <h2 className="font-display text-base font-semibold text-text-primary">Quick Access</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {QUICK_LINKS.map(({ href, label, desc, icon: Icon, color, bg, border }) => (
               <Link
                 key={href}
