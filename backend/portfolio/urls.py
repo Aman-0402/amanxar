@@ -27,6 +27,11 @@ from .views import (
     UserDetailView,
     user_me,
     SupportTicketView,
+    ServiceBookingListCreateView,
+    ServiceBookingDetailView,
+    booking_reply,
+    booking_set_status,
+    booking_mark_read,
 )
 
 app_name = 'portfolio'
@@ -65,4 +70,10 @@ urlpatterns = [
     path('users/<int:pk>/', UserDetailView.as_view(), name='user-detail'),
 
     path('support/', SupportTicketView.as_view(), name='support'),
+
+    path('bookings/',                        ServiceBookingListCreateView.as_view(), name='booking-list'),
+    path('bookings/<int:pk>/',               ServiceBookingDetailView.as_view(),     name='booking-detail'),
+    path('bookings/<int:pk>/reply/',         booking_reply,                          name='booking-reply'),
+    path('bookings/<int:pk>/status/',        booking_set_status,                     name='booking-status'),
+    path('bookings/<int:pk>/read/',          booking_mark_read,                      name='booking-read'),
 ]

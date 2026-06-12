@@ -26,6 +26,8 @@ from .models import (
     SocialLink,
     UserProfile,
     SupportTicket,
+    ServiceBooking,
+    BookingReply,
 )
 from .serializers import (
     ProjectSerializer,
@@ -51,6 +53,8 @@ from .serializers import (
     RegisterSerializer,
     UserSerializer,
     SupportTicketSerializer,
+    ServiceBookingSerializer,
+    BookingReplySerializer,
 )
 
 
@@ -326,3 +330,89 @@ class SupportTicketView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+# ── Service Booking Views ─────────────────────────────────────────────────────
+
+class ServiceBookingListCreateView(generics.ListCreateAPIView):
+    serializer_class = ServiceBookingSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        profile = getattr(self.request.user, 'profile', None)
+        qs = ServiceBooking.objects.select_related('user', 'service').prefetch_related('replies__sender__profile')
+        if profile and profile.role in ('admin', 'employee'):
+            return qs.all()
+        return qs.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class ServiceBookingDetailView(generics.RetrieveUpdateAPIView):
+    serializer_class = ServiceBookingSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        profile = getattr(self.request.user, 'profile', None)
+        qs = ServiceBooking.objects.select_related('user', 'service').prefetch_related('replies__sender__profile')
+        if profile and profile.role in ('admin', 'employee'):
+            return qs.all()
+        return qs.filter(user=self.request.user)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def booking_reply(request, pk):
+    profile = getattr(request.user, 'profile', None)
+    is_admin = profile and profile.role in ('admin', 'employee')
+    try:
+        booking = ServiceBooking.objects.get(pk=pk) if is_admin else ServiceBooking.objects.get(pk=pk, user=request.user)
+    except ServiceBooking.DoesNotExist:
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    message = request.data.get('message', '').strip()
+    if not message:
+        return Response({'error': 'Message required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    reply = BookingReply.objects.create(
+        booking=booking,
+        sender=request.user,
+        is_admin=is_admin,
+        message=message,
+    )
+    booking.status = 'replied' if is_admin else 'pending'
+    booking.save()
+
+    if not is_admin:
+        booking.replies.filter(is_admin=True, read_by_student=False).update(read_by_student=True)
+
+    return Response(BookingReplySerializer(reply).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def booking_set_status(request, pk):
+    profile = getattr(request.user, 'profile', None)
+    if not profile or profile.role not in ('admin', 'employee'):
+        return Response({'error': 'Admin only'}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        booking = ServiceBooking.objects.get(pk=pk)
+    except ServiceBooking.DoesNotExist:
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+    new_status = request.data.get('status')
+    if new_status in ('pending', 'replied', 'closed'):
+        booking.status = new_status
+        booking.save()
+    return Response(ServiceBookingSerializer(booking).data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def booking_mark_read(request, pk):
+    try:
+        booking = ServiceBooking.objects.get(pk=pk, user=request.user)
+    except ServiceBooking.DoesNotExist:
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+    booking.replies.filter(is_admin=True, read_by_student=False).update(read_by_student=True)
+    return Response({'status': 'ok'})

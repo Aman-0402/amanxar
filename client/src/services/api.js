@@ -52,6 +52,15 @@ export const supportAPI = {
   getAll: ()     => api.get('/api/support/'),
 }
 
+export const bookingsAPI = {
+  getAll:       ()          => api.get('/api/bookings/'),
+  getById:      (id)        => api.get(`/api/bookings/${id}/`),
+  create:       (data)      => api.post('/api/bookings/', data),
+  reply:        (id, data)  => api.post(`/api/bookings/${id}/reply/`, data),
+  setStatus:    (id, data)  => api.patch(`/api/bookings/${id}/status/`, data),
+  markRead:     (id)        => api.post(`/api/bookings/${id}/read/`),
+}
+
 export const projectsAPI = {
   getAll: () => api.get('/api/projects/'),
   getBySlug: (slug) => api.get(`/api/projects/${slug}/`),

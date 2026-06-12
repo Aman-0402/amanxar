@@ -23,6 +23,8 @@ from .models import (
     SocialLink,
     UserProfile,
     SupportTicket,
+    ServiceBooking,
+    BookingReply,
 )
 
 
@@ -259,3 +261,41 @@ class SupportTicketSerializer(serializers.ModelSerializer):
         model = SupportTicket
         fields = ['id', 'category', 'subject', 'message', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+
+class BookingReplySerializer(serializers.ModelSerializer):
+    sender_name     = serializers.SerializerMethodField()
+    sender_username = serializers.CharField(source='sender.username', read_only=True)
+
+    class Meta:
+        model = BookingReply
+        fields = ['id', 'is_admin', 'message', 'created_at', 'sender_name', 'sender_username', 'read_by_student']
+        read_only_fields = ['id', 'created_at', 'is_admin', 'sender_name', 'sender_username', 'read_by_student']
+
+    def get_sender_name(self, obj):
+        profile = getattr(obj.sender, 'profile', None)
+        return profile.full_name if profile else obj.sender.username
+
+
+class ServiceBookingSerializer(serializers.ModelSerializer):
+    service_title = serializers.CharField(source='service.title', read_only=True, default='')
+    user_name     = serializers.SerializerMethodField()
+    user_email    = serializers.CharField(source='user.email', read_only=True)
+    replies       = BookingReplySerializer(many=True, read_only=True)
+    unread_count  = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ServiceBooking
+        fields = [
+            'id', 'service', 'service_title', 'user_name', 'user_email',
+            'message', 'status', 'created_at', 'updated_at',
+            'replies', 'unread_count',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at', 'service_title', 'user_name', 'user_email']
+
+    def get_user_name(self, obj):
+        profile = getattr(obj.user, 'profile', None)
+        return profile.full_name if profile else obj.user.username
+
+    def get_unread_count(self, obj):
+        return obj.replies.filter(is_admin=True, read_by_student=False).count()

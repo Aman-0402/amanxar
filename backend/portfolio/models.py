@@ -406,6 +406,42 @@ class UserProfile(models.Model):
 # Support Ticket Model
 # ────────────────────────────────────────────────────────────────────────────
 
+class ServiceBooking(models.Model):
+    STATUS_CHOICES = [
+        ('pending',  'Pending'),
+        ('replied',  'Replied'),
+        ('closed',   'Closed'),
+    ]
+    user     = models.ForeignKey(User, on_delete=models.CASCADE, related_name='service_bookings')
+    service  = models.ForeignKey('Service', on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings')
+    message  = models.TextField()
+    status   = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        svc = self.service.title if self.service else 'Unknown'
+        return f'{self.user.username} → {svc}'
+
+
+class BookingReply(models.Model):
+    booking          = models.ForeignKey(ServiceBooking, on_delete=models.CASCADE, related_name='replies')
+    sender           = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_admin         = models.BooleanField(default=False)
+    message          = models.TextField()
+    read_by_student  = models.BooleanField(default=False)
+    created_at       = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f'Reply #{self.booking.id} by {self.sender.username}'
+
+
 class SupportTicket(models.Model):
     CATEGORY_CHOICES = [
         ('content', 'Content Request'),
