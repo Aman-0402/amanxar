@@ -6,7 +6,6 @@ import {
 } from 'lucide-react'
 import Swal from 'sweetalert2'
 import { supportAPI } from '@services/api'
-import { useAuth } from '@context/AuthContext'
 import { fadeUp, staggerContainer } from '@animations/variants'
 
 const CATEGORIES = [
@@ -132,7 +131,6 @@ const EMPTY = { subject: '', category: CATEGORIES[0].value, message: '' }
 const ERRORS_EMPTY = { subject: '', message: '' }
 
 function NewRequestForm({ onSuccess }) {
-  const { user } = useAuth()
   const [form, setForm]       = useState(EMPTY)
   const [errors, setErrors]   = useState(ERRORS_EMPTY)
   const [loading, setLoading] = useState(false)
