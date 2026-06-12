@@ -457,15 +457,15 @@ class BookingReply(models.Model):
 
 class SupportTicket(models.Model):
     CATEGORY_CHOICES = [
-        ('content', 'Content Request'),
+        ('general',   'General Question'),
+        ('content',   'Content Request'),
         ('technical', 'Technical Issue'),
-        ('billing', 'Billing'),
-        ('ebook', 'Ebook Request'),
-        ('session', 'Session Booking'),
-        ('other', 'Other'),
+        ('premium',   'Premium Inquiry'),
+        ('feedback',  'Feedback / Suggestion'),
+        ('other',     'Other'),
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='support_tickets')
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='general')
     subject = models.CharField(max_length=255)
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

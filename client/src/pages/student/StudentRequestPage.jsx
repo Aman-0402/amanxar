@@ -6,15 +6,15 @@ import { useAuth } from '@context/AuthContext'
 import { fadeUp, staggerContainer } from '@animations/variants'
 
 const CATEGORIES = [
-  'General Question',
-  'Content Request',
-  'Technical Issue',
-  'Premium Inquiry',
-  'Feedback / Suggestion',
-  'Other',
+  { value: 'general',   label: 'General Question' },
+  { value: 'content',   label: 'Content Request' },
+  { value: 'technical', label: 'Technical Issue' },
+  { value: 'premium',   label: 'Premium Inquiry' },
+  { value: 'feedback',  label: 'Feedback / Suggestion' },
+  { value: 'other',     label: 'Other' },
 ]
 
-const EMPTY = { subject: '', category: CATEGORIES[0], message: '' }
+const EMPTY = { subject: '', category: CATEGORIES[0].value, message: '' }
 const ERRORS_EMPTY = { subject: '', message: '' }
 
 export default function StudentRequestPage() {
@@ -99,7 +99,7 @@ export default function StudentRequestPage() {
             onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
             className="w-full rounded-lg border border-bg-border bg-bg-elevated px-4 py-2.5 text-sm text-text-primary focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 cursor-pointer"
           >
-            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
         </div>
 
