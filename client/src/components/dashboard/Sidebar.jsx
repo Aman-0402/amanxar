@@ -1,6 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Home, FileText, MessageSquare, Settings, LogOut, User, Users, BookOpen, Compass, Image, Briefcase, Menu } from 'lucide-react'
+import { Home, FileText, MessageSquare, Settings, LogOut, User, Users, BookOpen, Compass, Image, Briefcase, Menu, X, LayoutDashboard } from 'lucide-react'
 import { useAuth } from '@context/AuthContext'
 import { assetUrl } from '@utils/assetUrl'
 
@@ -31,39 +30,31 @@ export default function DashboardSidebar({ onClose }) {
     navigate('/', { replace: true })
   }
 
-  // Close sidebar only on mobile (screen < 768px)
-  const handleNavClick = () => {
-    if (window.innerWidth < 768) {
-      onClose && onClose()
-    }
-  }
+  const handleNavClick = () => onClose?.()
 
   return (
-    <motion.aside
-      initial={{ x: -280 }}
-      animate={{ x: 0 }}
-      exit={{ x: -280 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="fixed left-0 top-0 h-screen w-64 bg-bg-surface border-r border-bg-border flex flex-col z-50 md:fixed md:left-0 md:top-0"
-    >
+    <aside className="h-screen w-64 bg-bg-surface border-r border-bg-border flex flex-col">
       {/* Logo Section */}
-      <div className="p-6 border-b border-bg-border">
-        <Link
-          to="/"
-          onClick={handleNavClick}
-          className="flex items-center gap-3 group"
-        >
-          <div className="h-10 w-10 rounded-lg overflow-hidden shadow-glow-primary">
-            <img
-              src={assetUrl('/assets/images/Extra/logo.jpg')}
-              alt="Logo"
-              className="h-full w-full object-cover"
-            />
+      <div className="p-5 border-b border-bg-border flex items-center justify-between shrink-0">
+        <Link to="/" onClick={handleNavClick} className="flex items-center gap-2.5 group">
+          <div className="h-9 w-9 rounded-xl overflow-hidden shadow-glow-primary shrink-0">
+            <img src={assetUrl('/assets/images/Extra/logo.jpg')} alt="Logo" className="h-full w-full object-cover" />
           </div>
-          <span className="font-display font-bold text-lg text-text-primary">
-            Think With<span className="gradient-text"> Aman</span>
-          </span>
+          <div className="min-w-0">
+            <span className="font-display font-bold text-sm text-text-primary leading-tight block">
+              Think With<span className="gradient-text"> Aman</span>
+            </span>
+            <span className="text-[10px] text-text-muted uppercase tracking-widest">Admin Panel</span>
+          </div>
         </Link>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="h-7 w-7 flex items-center justify-center rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors shrink-0"
+          >
+            <X size={15} />
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
@@ -101,6 +92,6 @@ export default function DashboardSidebar({ onClose }) {
           <span className="text-sm font-medium">Logout</span>
         </button>
       </div>
-    </motion.aside>
+    </aside>
   )
 }

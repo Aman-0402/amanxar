@@ -201,7 +201,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         profile = getattr(user, 'profile', None)
-        token['role'] = profile.role if profile else 'student'
+        if profile:
+            role = profile.role
+        elif user.is_superuser or user.is_staff:
+            role = 'admin'
+        else:
+            role = 'student'
+        token['role'] = role
         token['full_name'] = profile.full_name if profile else (user.get_full_name() or user.username)
         token['email'] = user.email
         token['username'] = user.username

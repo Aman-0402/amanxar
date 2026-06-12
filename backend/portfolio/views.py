@@ -271,9 +271,11 @@ class UserListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        profile = getattr(self.request.user, 'profile', None)
-        if profile and profile.role in ('admin', 'employee'):
-            return User.objects.select_related('profile').filter(profile__isnull=False).order_by('-date_joined')
+        u = self.request.user
+        profile = getattr(u, 'profile', None)
+        is_admin = (profile and profile.role in ('admin', 'employee')) or u.is_staff or u.is_superuser
+        if is_admin:
+            return User.objects.select_related('profile').order_by('-date_joined')
         return User.objects.none()
 
 
@@ -295,7 +297,7 @@ def user_me(request):
             'email': user.email,
             'full_name': profile.full_name if profile else '',
             'phone': profile.phone if profile else '',
-            'role': profile.role if profile else 'student',
+            'role': profile.role if profile else ('admin' if user.is_staff or user.is_superuser else 'student'),
             'date_joined': user.date_joined,
         })
     # PATCH
@@ -364,12 +366,14 @@ class ServiceBookingListCreateView(generics.ListCreateAPIView):
     serializer_class = ServiceBookingSerializer
     permission_classes = [IsAuthenticated]
 
+    def _is_admin(self):
+        u = self.request.user
+        profile = getattr(u, 'profile', None)
+        return (profile and profile.role in ('admin', 'employee')) or u.is_staff or u.is_superuser
+
     def get_queryset(self):
-        profile = getattr(self.request.user, 'profile', None)
         qs = ServiceBooking.objects.select_related('user', 'service').prefetch_related('replies__sender__profile')
-        if profile and profile.role in ('admin', 'employee'):
-            return qs.all()
-        return qs.filter(user=self.request.user)
+        return qs.all() if self._is_admin() else qs.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -379,19 +383,21 @@ class ServiceBookingDetailView(generics.RetrieveUpdateAPIView):
     serializer_class = ServiceBookingSerializer
     permission_classes = [IsAuthenticated]
 
+    def _is_admin(self):
+        u = self.request.user
+        profile = getattr(u, 'profile', None)
+        return (profile and profile.role in ('admin', 'employee')) or u.is_staff or u.is_superuser
+
     def get_queryset(self):
-        profile = getattr(self.request.user, 'profile', None)
         qs = ServiceBooking.objects.select_related('user', 'service').prefetch_related('replies__sender__profile')
-        if profile and profile.role in ('admin', 'employee'):
-            return qs.all()
-        return qs.filter(user=self.request.user)
+        return qs.all() if self._is_admin() else qs.filter(user=self.request.user)
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def booking_reply(request, pk):
     profile = getattr(request.user, 'profile', None)
-    is_admin = profile and profile.role in ('admin', 'employee')
+    is_admin = (profile and profile.role in ('admin', 'employee')) or request.user.is_staff or request.user.is_superuser
     try:
         booking = ServiceBooking.objects.get(pk=pk) if is_admin else ServiceBooking.objects.get(pk=pk, user=request.user)
     except ServiceBooking.DoesNotExist:
@@ -420,7 +426,8 @@ def booking_reply(request, pk):
 @permission_classes([IsAuthenticated])
 def booking_set_status(request, pk):
     profile = getattr(request.user, 'profile', None)
-    if not profile or profile.role not in ('admin', 'employee'):
+    is_admin = (profile and profile.role in ('admin', 'employee')) or request.user.is_staff or request.user.is_superuser
+    if not is_admin:
         return Response({'error': 'Admin only'}, status=status.HTTP_403_FORBIDDEN)
     try:
         booking = ServiceBooking.objects.get(pk=pk)
