@@ -35,6 +35,8 @@ const DashboardServices = lazy(() => import('@pages/dashboard/DashboardServicesP
 const DashboardNavbarFooter = lazy(() => import('@pages/dashboard/DashboardNavbarFooterPage'))
 const DashboardTest     = lazy(() => import('@pages/dashboard/DashboardTestPage'))
 const DashboardUsers    = lazy(() => import('@pages/dashboard/DashboardUsersPage'))
+const DashboardAssessments = lazy(() => import('@pages/dashboard/DashboardAssessmentsPage'))
+const DashboardAssessmentEditor = lazy(() => import('@pages/dashboard/DashboardAssessmentEditorPage'))
 
 // ─── Student portal pages ──────────────────────────────────────────────────────
 const StudentLayout   = lazy(() => import('@pages/student/StudentLayout'))
@@ -197,6 +199,22 @@ const router = createBrowserRouter(
             element: (
               <Suspense fallback={<PageLoader />}>
                 <DashboardUsers />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'assessments',
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <DashboardAssessments />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'assessments/:id/edit',
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <DashboardAssessmentEditor />
               </Suspense>
             ),
           },

@@ -58,6 +58,29 @@ export const learningAPI = {
   remove:  (id)     => api.delete(`/api/learning/${id}/`),
 }
 
+export const assessmentsAPI = {
+  getAll:       ()            => api.get('/api/assessments/'),
+  getById:      (id)          => api.get(`/api/assessments/${id}/`),
+  create:       (data)        => api.post('/api/assessments/', data),
+  update:       (id, data)    => api.patch(`/api/assessments/${id}/`, data),
+  delete:       (id)          => api.delete(`/api/assessments/${id}/`),
+  leaderboard:  (id)          => api.get(`/api/assessments/${id}/leaderboard/`),
+
+  getQuestions: (id)          => api.get(`/api/assessments/${id}/questions/`),
+  createQuestion: (id, data)  => api.post(`/api/assessments/${id}/questions/`, data),
+  updateQuestion: (qId, data) => api.patch(`/api/questions/${qId}/`, data),
+  deleteQuestion: (qId)       => api.delete(`/api/questions/${qId}/`),
+
+  getOptions:   (qId)         => api.get(`/api/questions/${qId}/options/`),
+  createOption: (qId, data)   => api.post(`/api/questions/${qId}/options/`, data),
+  updateOption: (oId, data)   => api.patch(`/api/options/${oId}/`, data),
+  deleteOption: (oId)         => api.delete(`/api/options/${oId}/`),
+
+  startAttempt:  (id)         => api.post(`/api/assessments/${id}/start/`),
+  submitAttempt: (aId, data)  => api.post(`/api/attempts/${aId}/submit/`, data),
+  getResult:     (aId)        => api.get(`/api/attempts/${aId}/result/`),
+}
+
 export const bookingsAPI = {
   getAll:       ()          => api.get('/api/bookings/'),
   getById:      (id)        => api.get(`/api/bookings/${id}/`),

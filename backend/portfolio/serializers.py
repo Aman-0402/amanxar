@@ -26,6 +26,11 @@ from .models import (
     StudentLearning,
     ServiceBooking,
     BookingReply,
+    Assessment,
+    Question,
+    AnswerOption,
+    StudentAttempt,
+    StudentAnswer,
 )
 
 
@@ -329,3 +334,101 @@ class ServiceBookingSerializer(serializers.ModelSerializer):
 
     def get_unread_count(self, obj):
         return obj.replies.filter(is_admin=True, read_by_student=False).count()
+
+
+# ── Assessment Serializers ────────────────────────────────────────────────────
+
+class AnswerOptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = AnswerOption
+        fields = ['id', 'text', 'is_correct', 'order']
+        read_only_fields = ['id']
+
+
+class AnswerOptionPublicSerializer(serializers.ModelSerializer):
+    """Hides is_correct — used when student is actively taking an exam."""
+    class Meta:
+        model  = AnswerOption
+        fields = ['id', 'text', 'order']
+        read_only_fields = ['id']
+
+
+class QuestionAdminSerializer(serializers.ModelSerializer):
+    options = AnswerOptionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model  = Question
+        fields = ['id', 'type', 'text', 'explanation', 'order', 'options']
+        read_only_fields = ['id']
+
+
+class QuestionPublicSerializer(serializers.ModelSerializer):
+    options = AnswerOptionPublicSerializer(many=True, read_only=True)
+
+    class Meta:
+        model  = Question
+        fields = ['id', 'type', 'text', 'order', 'options']
+        read_only_fields = ['id']
+
+
+class AssessmentListSerializer(serializers.ModelSerializer):
+    question_count = serializers.SerializerMethodField()
+    attempt_count  = serializers.SerializerMethodField()
+
+    class Meta:
+        model  = Assessment
+        fields = [
+            'id', 'title', 'description', 'category', 'tags',
+            'is_free', 'time_limit', 'pass_mark', 'is_active',
+            'order', 'created_at', 'question_count', 'attempt_count',
+        ]
+        read_only_fields = ['id', 'created_at']
+
+    def get_question_count(self, obj):
+        return obj.questions.count()
+
+    def get_attempt_count(self, obj):
+        return obj.attempts.filter(status='completed').count()
+
+
+class AssessmentDetailAdminSerializer(AssessmentListSerializer):
+    questions = QuestionAdminSerializer(many=True, read_only=True)
+
+    class Meta(AssessmentListSerializer.Meta):
+        fields = AssessmentListSerializer.Meta.fields + ['questions']
+
+
+class AssessmentDetailStudentSerializer(AssessmentListSerializer):
+    questions    = QuestionPublicSerializer(many=True, read_only=True)
+    user_attempt = serializers.SerializerMethodField()
+
+    class Meta(AssessmentListSerializer.Meta):
+        fields = AssessmentListSerializer.Meta.fields + ['questions', 'user_attempt']
+
+    def get_user_attempt(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return None
+        attempt = obj.attempts.filter(user=request.user).first()
+        if not attempt:
+            return None
+        return {
+            'id':           attempt.id,
+            'status':       attempt.status,
+            'score':        attempt.score,
+            'total':        attempt.total,
+            'percentage':   attempt.percentage,
+            'passed':       attempt.passed,
+            'submitted_at': attempt.submitted_at,
+        }
+
+
+class StudentAttemptSerializer(serializers.ModelSerializer):
+    percentage = serializers.ReadOnlyField()
+    passed     = serializers.ReadOnlyField()
+
+    class Meta:
+        model  = StudentAttempt
+        fields = ['id', 'assessment', 'started_at', 'submitted_at',
+                  'score', 'total', 'status', 'percentage', 'passed']
+        read_only_fields = ['id', 'started_at']

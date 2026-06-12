@@ -475,3 +475,99 @@ class SupportTicket(models.Model):
 
     def __str__(self):
         return f'{self.subject} - {self.user.username}'
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Assessment Models
+# ────────────────────────────────────────────────────────────────────────────
+
+class Assessment(models.Model):
+    title       = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    category    = models.CharField(max_length=100)
+    tags        = models.JSONField(default=list)
+    is_free     = models.BooleanField(default=True)
+    time_limit  = models.IntegerField(null=True, blank=True, help_text='Minutes, null = no limit')
+    pass_mark   = models.IntegerField(default=60, help_text='Minimum % to pass')
+    is_active   = models.BooleanField(default=True)
+    order       = models.IntegerField(default=0)
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', '-created_at']
+
+    def __str__(self):
+        return self.title
+
+
+class Question(models.Model):
+    TYPE_CHOICES = [
+        ('mcq_single', 'MCQ — Single correct'),
+        ('mcq_multi',  'MCQ — Multiple correct'),
+        ('true_false', 'True / False'),
+    ]
+    assessment  = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name='questions')
+    type        = models.CharField(max_length=20, choices=TYPE_CHOICES, default='mcq_single')
+    text        = models.TextField()
+    explanation = models.TextField(blank=True)
+    order       = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f'Q{self.order + 1}: {self.text[:60]}'
+
+
+class AnswerOption(models.Model):
+    question   = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='options')
+    text       = models.CharField(max_length=500)
+    is_correct = models.BooleanField(default=False)
+    order      = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f'{"✓" if self.is_correct else "✗"} {self.text[:40]}'
+
+
+class StudentAttempt(models.Model):
+    STATUS_CHOICES = [
+        ('in_progress', 'In Progress'),
+        ('completed',   'Completed'),
+    ]
+    user         = models.ForeignKey(User, on_delete=models.CASCADE, related_name='attempts')
+    assessment   = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name='attempts')
+    started_at   = models.DateTimeField(auto_now_add=True)
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    score        = models.IntegerField(default=0)
+    total        = models.IntegerField(default=0)
+    status       = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_progress')
+
+    class Meta:
+        unique_together = [('user', 'assessment')]
+        ordering = ['-started_at']
+
+    def __str__(self):
+        return f'{self.user.username} → {self.assessment.title}'
+
+    @property
+    def percentage(self):
+        return round(self.score / self.total * 100) if self.total else 0
+
+    @property
+    def passed(self):
+        return self.percentage >= self.assessment.pass_mark
+
+
+class StudentAnswer(models.Model):
+    attempt          = models.ForeignKey(StudentAttempt, on_delete=models.CASCADE, related_name='answers')
+    question         = models.ForeignKey(Question, on_delete=models.CASCADE)
+    selected_options = models.JSONField(default=list)
+
+    class Meta:
+        unique_together = [('attempt', 'question')]
+
+    def __str__(self):
+        return f'{self.attempt.user.username} → Q{self.question.id}'

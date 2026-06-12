@@ -34,6 +34,16 @@ from .views import (
     booking_reply,
     booking_set_status,
     booking_mark_read,
+    assessment_list_create,
+    assessment_detail,
+    question_list_create,
+    question_detail,
+    option_list_create,
+    option_detail,
+    start_attempt,
+    submit_attempt,
+    attempt_result,
+    assessment_leaderboard,
 )
 
 app_name = 'portfolio'
@@ -81,4 +91,15 @@ urlpatterns = [
     path('bookings/<int:pk>/reply/',         booking_reply,                          name='booking-reply'),
     path('bookings/<int:pk>/status/',        booking_set_status,                     name='booking-status'),
     path('bookings/<int:pk>/read/',          booking_mark_read,                      name='booking-read'),
+
+    path('assessments/',                                    assessment_list_create,  name='assessment-list'),
+    path('assessments/<int:pk>/',                           assessment_detail,       name='assessment-detail'),
+    path('assessments/<int:assessment_pk>/questions/',      question_list_create,    name='question-list'),
+    path('assessments/<int:assessment_pk>/start/',          start_attempt,           name='start-attempt'),
+    path('assessments/<int:assessment_pk>/leaderboard/',    assessment_leaderboard,  name='assessment-leaderboard'),
+    path('questions/<int:pk>/',                             question_detail,         name='question-detail'),
+    path('questions/<int:question_pk>/options/',            option_list_create,      name='option-list'),
+    path('options/<int:pk>/',                               option_detail,           name='option-detail'),
+    path('attempts/<int:attempt_pk>/submit/',               submit_attempt,          name='submit-attempt'),
+    path('attempts/<int:attempt_pk>/result/',               attempt_result,          name='attempt-result'),
 ]

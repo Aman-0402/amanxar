@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Home, FileText, MessageSquare, Settings, LogOut, User, Users, BookOpen, Compass, Image, Briefcase, Menu, X, LayoutDashboard } from 'lucide-react'
+import { Home, FileText, MessageSquare, Settings, LogOut, User, Users, BookOpen, Compass, Image, Briefcase, Menu, X, LayoutDashboard, ClipboardList } from 'lucide-react'
 import { useAuth } from '@context/AuthContext'
 import { assetUrl } from '@utils/assetUrl'
 
@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { label: 'Knowledge Hub', href: '/dashboard/knowledge-hub',icon: Compass     },
   { label: 'Gallery',       href: '/dashboard/gallery',      icon: Image       },
   { label: 'Services',      href: '/dashboard/services',     icon: Briefcase   },
+  { label: 'Assessments',   href: '/dashboard/assessments',  icon: ClipboardList },
   { label: 'Navbar & Footer',href: '/dashboard/navbar-footer',icon: Menu       },
   { label: 'Settings',      href: '/dashboard/settings',     icon: Settings    },
 ]
