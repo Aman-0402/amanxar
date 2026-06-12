@@ -52,7 +52,7 @@ export default function StudentServicesPage() {
   return (
     <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-8">
       <motion.div variants={fadeUp}>
-        <h1 className="font-display text-2xl font-bold text-text-primary">Book a Service</h1>
+        <h1 className="font-display text-2xl font-bold text-text-primary">Services</h1>
         <p className="text-text-secondary text-sm mt-1">Select a service and schedule a session with Aman</p>
       </motion.div>
 

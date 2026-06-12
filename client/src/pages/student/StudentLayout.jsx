@@ -11,7 +11,7 @@ import { assetUrl } from '@utils/assetUrl'
 const NAV_LINKS = [
   { href: '/student',           label: 'Dashboard',    icon: Home,          end: true },
   { href: '/student/courses',   label: 'Courses',      icon: GraduationCap           },
-  { href: '/student/services',  label: 'Book Services', icon: Briefcase              },
+  { href: '/student/services',  label: 'Services',      icon: Briefcase              },
   { href: '/student/request',   label: 'Request',      icon: MessageSquare           },
   { href: '/student/profile',   label: 'My Profile',   icon: User                   },
 ]

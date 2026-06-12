@@ -21,7 +21,7 @@ const QUICK_LINKS = [
   },
   {
     href: '/student/services',
-    label: 'Book a Session',
+    label: 'Services',
     desc: 'Schedule 1:1 with Aman',
     icon: Briefcase,
     color: 'text-brand-secondary',
