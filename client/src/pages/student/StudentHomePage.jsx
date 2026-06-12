@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   GraduationCap, Briefcase, MessageSquare, ArrowRight,
-  Sparkles, Clock, TrendingUp, Star, BookOpen,
+  Sparkles, Clock, TrendingUp, Star, BookOpen, Library,
 } from 'lucide-react'
 import { useAuth } from '@context/AuthContext'
-import { ebooksAPI } from '@services/api'
+import { ebooksAPI, learningAPI, bookingsAPI, supportAPI } from '@services/api'
 import { fadeUp, staggerContainer } from '@animations/variants'
 
 const QUICK_LINKS = [
@@ -20,13 +20,22 @@ const QUICK_LINKS = [
     border: 'hover:border-brand-primary/40',
   },
   {
-    href: '/student/services',
-    label: 'Services',
-    desc: 'Schedule 1:1 with Aman',
-    icon: Briefcase,
+    href: '/student/learning',
+    label: 'My Learning',
+    desc: 'Your claimed course library',
+    icon: Library,
     color: 'text-brand-secondary',
     bg: 'bg-brand-secondary/10',
     border: 'hover:border-brand-secondary/40',
+  },
+  {
+    href: '/student/services',
+    label: 'Services',
+    desc: 'Schedule a 1:1 with Aman',
+    icon: Briefcase,
+    color: 'text-brand-amber',
+    bg: 'bg-brand-amber/10',
+    border: 'hover:border-brand-amber/40',
   },
   {
     href: '/student/request',
@@ -40,10 +49,10 @@ const QUICK_LINKS = [
 ]
 
 const TIPS = [
-  { icon: Sparkles, text: 'Start with free ebooks — build your foundation first.' },
+  { icon: Sparkles,   text: 'Add free courses to My Learning — read anytime, anywhere.' },
   { icon: TrendingUp, text: 'Book a 1:1 session to get personalised guidance.' },
-  { icon: Star, text: 'Premium content unlocks in-depth AI & tech courses.' },
-  { icon: Clock, text: 'Use the Request form to suggest topics you want covered.' },
+  { icon: Star,       text: 'Premium content unlocks in-depth AI & tech courses.' },
+  { icon: Clock,      text: 'Use the Request form to suggest topics you want covered.' },
 ]
 
 function greeting() {
@@ -55,12 +64,22 @@ function greeting() {
 
 export default function StudentHomePage() {
   const { user } = useAuth()
-  const [courseCount, setCourseCount] = useState(null)
+  const [stats, setStats] = useState({ courses: null, learning: 0, bookings: 0, tickets: 0 })
 
   useEffect(() => {
-    ebooksAPI.getAll()
-      .then(({ data }) => setCourseCount(data?.length ?? 0))
-      .catch(() => {})
+    Promise.allSettled([
+      ebooksAPI.getAll(),
+      learningAPI.getAll(),
+      bookingsAPI.getAll(),
+      supportAPI.getAll(),
+    ]).then(([courses, learning, bookings, tickets]) => {
+      setStats({
+        courses:  courses.status  === 'fulfilled' ? courses.value.data.length  : 0,
+        learning: learning.status === 'fulfilled' ? learning.value.data.length : 0,
+        bookings: bookings.status === 'fulfilled' ? bookings.value.data.length : 0,
+        tickets:  tickets.status  === 'fulfilled' ? tickets.value.data.length  : 0,
+      })
+    })
   }, [])
 
   const firstName = user?.full_name?.split(' ')[0] || user?.username || 'Student'
@@ -73,7 +92,6 @@ export default function StudentHomePage() {
         variants={fadeUp}
         className="rounded-2xl border border-bg-border bg-bg-surface relative overflow-hidden"
       >
-        {/* Decorative glow */}
         <div className="absolute inset-0 pointer-events-none"
           style={{ background: 'radial-gradient(ellipse at top right, rgba(59,130,246,0.13) 0%, transparent 55%)' }} />
         <div className="absolute bottom-0 left-0 w-64 h-32 pointer-events-none"
@@ -88,11 +106,11 @@ export default function StudentHomePage() {
               {greeting()}, <span className="gradient-text">{firstName}</span>!
             </h1>
             <p className="text-text-secondary text-sm max-w-md leading-relaxed">
-              Welcome to Think With Aman learning portal. Explore ebooks, book personalised sessions, and level up your AI skills.
+              Welcome to Think With Aman learning portal. Explore courses, book personalised sessions, and level up your skills.
             </p>
           </div>
           <Link
-            to="/student/ebooks"
+            to="/student/courses"
             className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-primary text-white text-sm font-semibold hover:bg-brand-dark transition-colors shadow-glow-primary"
           >
             <BookOpen size={15} /> Start Learning
@@ -101,11 +119,12 @@ export default function StudentHomePage() {
       </motion.div>
 
       {/* ── Stats row ─────────────────────────────────────────────────────────── */}
-      <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: 'Total Courses',   value: courseCount ?? '…', color: 'text-brand-primary',   sub: 'free & premium'  },
-          { label: 'Sessions Booked', value: 0,                  color: 'text-brand-secondary', sub: 'schedule more'   },
-          { label: 'Support Tickets', value: 0,                  color: 'text-green-400',       sub: 'all resolved'    },
+          { label: 'Total Courses',   value: stats.courses  ?? '…', color: 'text-brand-primary',   sub: 'free & premium'  },
+          { label: 'My Learning',     value: stats.learning,         color: 'text-brand-secondary', sub: 'courses claimed' },
+          { label: 'Sessions',        value: stats.bookings,         color: 'text-brand-amber',     sub: 'service requests'},
+          { label: 'Support Tickets', value: stats.tickets,          color: 'text-green-400',       sub: 'total submitted' },
         ].map(({ label, value, color, sub }) => (
           <div key={label} className="rounded-xl border border-bg-border bg-bg-surface p-5 flex flex-col gap-1">
             <p className={`font-display text-3xl font-bold ${color}`}>{value}</p>
@@ -115,13 +134,13 @@ export default function StudentHomePage() {
         ))}
       </motion.div>
 
-      {/* ── Quick access + tips (two column on large) ─────────────────────────── */}
+      {/* ── Quick access + tips ────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* Quick access — takes 2/3 */}
         <motion.div variants={fadeUp} className="lg:col-span-2 space-y-3">
           <h2 className="font-display text-base font-semibold text-text-primary">Quick Access</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {QUICK_LINKS.map(({ href, label, desc, icon: Icon, color, bg, border }) => (
               <Link
                 key={href}

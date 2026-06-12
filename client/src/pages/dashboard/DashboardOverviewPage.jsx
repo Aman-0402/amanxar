@@ -36,7 +36,7 @@ export default function DashboardOverviewPage() {
     { label: 'Featured',       value: stats.featured, icon: Star,     color: 'yellow-400'   },
     { label: 'Completed',      value: stats.active,   icon: Zap,      color: 'green-400'    },
     { label: 'Students',       value: stats.users,    icon: Users,    color: 'cyan-400'     },
-    { label: 'Ebooks',         value: stats.ebooks,   icon: BookOpen, color: 'purple-400'   },
+    { label: 'Courses',        value: stats.ebooks,   icon: BookOpen, color: 'purple-400'   },
   ]
 
   return (

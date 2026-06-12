@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Users, Search, Trash2, Loader2, AlertCircle, UserCheck } from 'lucide-react'
 import { usersAPI } from '@services/api'
 import { fadeUp, staggerContainer } from '@animations/variants'
+import Swal from 'sweetalert2'
 
 export default function DashboardUsersPage() {
   const [users, setUsers]     = useState([])
@@ -25,7 +26,17 @@ export default function DashboardUsersPage() {
   )
 
   const handleDelete = async (id) => {
-    if (!confirm('Delete this user? This cannot be undone.')) return
+    const result = await Swal.fire({
+      title: 'Delete user?',
+      text: 'This cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Delete',
+      confirmButtonColor: '#ef4444',
+      background: '#0C1628',
+      color: '#EEF4FF',
+    })
+    if (!result.isConfirmed) return
     setDeleting(id)
     try {
       await usersAPI.delete(id)
