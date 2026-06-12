@@ -39,8 +39,7 @@ const DashboardUsers    = lazy(() => import('@pages/dashboard/DashboardUsersPage
 // ─── Student portal pages ──────────────────────────────────────────────────────
 const StudentLayout   = lazy(() => import('@pages/student/StudentLayout'))
 const StudentHome     = lazy(() => import('@pages/student/StudentHomePage'))
-const StudentEbooks   = lazy(() => import('@pages/student/StudentEbooksPage'))
-const StudentPremium  = lazy(() => import('@pages/student/StudentPremiumPage'))
+const StudentCourses  = lazy(() => import('@pages/student/StudentCoursesPage'))
 const StudentServices = lazy(() => import('@pages/student/StudentServicesPage'))
 const StudentRequest  = lazy(() => import('@pages/student/StudentRequestPage'))
 const StudentProfile  = lazy(() => import('@pages/student/StudentProfilePage'))
@@ -72,8 +71,7 @@ const router = createBrowserRouter(
         ),
         children: [
           { index: true,        element: <Suspense fallback={<PageLoader />}><StudentHome /></Suspense> },
-          { path: 'ebooks',     element: <Suspense fallback={<PageLoader />}><StudentEbooks /></Suspense> },
-          { path: 'premium',    element: <Suspense fallback={<PageLoader />}><StudentPremium /></Suspense> },
+          { path: 'courses',    element: <Suspense fallback={<PageLoader />}><StudentCourses /></Suspense> },
           { path: 'services',   element: <Suspense fallback={<PageLoader />}><StudentServices /></Suspense> },
           { path: 'request',    element: <Suspense fallback={<PageLoader />}><StudentRequest /></Suspense> },
           { path: 'profile',    element: <Suspense fallback={<PageLoader />}><StudentProfile /></Suspense> },

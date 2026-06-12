@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
-  BookOpen, Crown, Briefcase, MessageSquare, ArrowRight,
+  GraduationCap, Briefcase, MessageSquare, ArrowRight,
   Sparkles, Clock, TrendingUp, Star,
 } from 'lucide-react'
 import { useAuth } from '@context/AuthContext'
@@ -11,22 +11,13 @@ import { fadeUp, staggerContainer } from '@animations/variants'
 
 const QUICK_LINKS = [
   {
-    href: '/student/ebooks',
-    label: 'Browse Ebooks',
-    desc: 'Free learning resources',
-    icon: BookOpen,
+    href: '/student/courses',
+    label: 'Courses',
+    desc: 'Free & premium learning resources',
+    icon: GraduationCap,
     color: 'text-brand-primary',
     bg: 'bg-brand-primary/10',
     border: 'hover:border-brand-primary/40',
-  },
-  {
-    href: '/student/premium',
-    label: 'Premium Content',
-    desc: 'Unlock paid ebooks & courses',
-    icon: Crown,
-    color: 'text-brand-amber',
-    bg: 'bg-brand-amber/10',
-    border: 'hover:border-brand-amber/40',
   },
   {
     href: '/student/services',
@@ -64,11 +55,11 @@ function greeting() {
 
 export default function StudentHomePage() {
   const { user } = useAuth()
-  const [ebookCount, setEbookCount] = useState(null)
+  const [courseCount, setCourseCount] = useState(null)
 
   useEffect(() => {
     ebooksAPI.getAll()
-      .then(({ data }) => setEbookCount(data?.length ?? 0))
+      .then(({ data }) => setCourseCount(data?.length ?? 0))
       .catch(() => {})
   }, [])
 

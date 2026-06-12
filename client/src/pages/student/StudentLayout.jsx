@@ -3,18 +3,17 @@ import { NavLink, Link, Outlet, useNavigate, useLocation } from 'react-router-do
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   BookOpen, Crown, Briefcase, MessageSquare,
-  User, LogOut, Menu, X, Home, ChevronRight,
+  User, LogOut, Menu, X, Home, ChevronRight, GraduationCap,
 } from 'lucide-react'
 import { useAuth } from '@context/AuthContext'
 import { assetUrl } from '@utils/assetUrl'
 
 const NAV_LINKS = [
-  { href: '/student',          label: 'Dashboard',     icon: Home,           end: true },
-  { href: '/student/ebooks',   label: 'Ebooks',         icon: BookOpen },
-  { href: '/student/premium',  label: 'Premium',         icon: Crown },
-  { href: '/student/services', label: 'Book Services',   icon: Briefcase },
-  { href: '/student/request',  label: 'Request',         icon: MessageSquare },
-  { href: '/student/profile',  label: 'My Profile',      icon: User },
+  { href: '/student',           label: 'Dashboard',    icon: Home,          end: true },
+  { href: '/student/courses',   label: 'Courses',      icon: GraduationCap           },
+  { href: '/student/services',  label: 'Book Services', icon: Briefcase              },
+  { href: '/student/request',   label: 'Request',      icon: MessageSquare           },
+  { href: '/student/profile',   label: 'My Profile',   icon: User                   },
 ]
 
 const SIDEBAR_W = 'w-64'
