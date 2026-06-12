@@ -20,6 +20,8 @@ amanxar/
 │   │   │   │   ├── StudentHomePage.jsx
 │   │   │   │   ├── StudentCoursesPage.jsx   # Free/premium courses + Add to Learning
 │   │   │   │   ├── StudentMyLearningPage.jsx # Claimed courses library
+│   │   │   │   ├── StudentAssessmentsPage.jsx # Exam list (status badges, score bars, filters)
+│   │   │   │   ├── StudentExamPage.jsx      # Exam flow: intro → exam (timer) → results + review
 │   │   │   │   ├── StudentServicesPage.jsx  # Service booking + thread UI
 │   │   │   │   ├── StudentRequestPage.jsx
 │   │   │   │   └── StudentProfilePage.jsx
@@ -39,7 +41,7 @@ amanxar/
 │
 ├── backend/                   # Django REST API
 │   └── portfolio/
-│       ├── models.py          # UserProfile, StudentLearning, ServiceBooking, BookingReply…
+│       ├── models.py          # UserProfile, StudentLearning, ServiceBooking, BookingReply, Assessment, Question, AnswerOption, StudentAttempt, StudentAnswer
 │       ├── serializers.py     # DRF serializers + custom JWT serializer
 │       ├── views.py           # All API views
 │       └── urls.py            # API routes
@@ -91,29 +93,33 @@ amanxar/
 
 ### Student Portal (role: student)
 ```
-/student               → Dashboard home
-/student/courses       → Courses (free/premium filter, Add to Learning)
-/student/learning      → My Learning (claimed courses library)
-/student/services      → Services (browse + booking request + thread)
-/student/request       → Support & content request form
-/student/profile       → Edit personal info
+/student                    → Dashboard home (stats: courses, learning, exams done, sessions, tickets)
+/student/courses            → Courses (free/premium filter, Add to Learning)
+/student/learning           → My Learning (claimed courses library)
+/student/assessments        → Exam list (filter by free/premium/status, score bars)
+/student/assessments/:id    → Exam flow: intro → timed exam → results + per-question review
+/student/services           → Services (browse + booking request + thread)
+/student/request            → Support & content request form
+/student/profile            → Edit personal info
 ```
 
 ### Admin Dashboard (role: admin | employee)
 ```
-/dashboard              → Overview (project + student + ebook stats)
-/dashboard/users        → All registered users
-/dashboard/ebooks       → Courses CRUD (free/premium toggle)
-/dashboard/projects     → Projects CRUD
-/dashboard/about        → About content management
-/dashboard/skills       → Skills management
-/dashboard/tech-stack   → Tech stack management
-/dashboard/timeline     → Timeline events
-/dashboard/messages     → Contact messages
-/dashboard/knowledge-hub → Knowledge Hub CMS
-/dashboard/gallery      → Gallery management
-/dashboard/services     → Services CMS + booking threads
-/dashboard/navbar-footer → Navbar + footer link management
+/dashboard                       → Overview (project + student + ebook stats)
+/dashboard/users                 → All registered users
+/dashboard/ebooks                → Courses CRUD (free/premium toggle)
+/dashboard/assessments           → Assessments list + create/edit modal
+/dashboard/assessments/:id/edit  → Question builder (MCQ single/multi, True/False, explanations)
+/dashboard/projects              → Projects CRUD
+/dashboard/about                 → About content management
+/dashboard/skills                → Skills management
+/dashboard/tech-stack            → Tech stack management
+/dashboard/timeline              → Timeline events
+/dashboard/messages              → Contact messages
+/dashboard/knowledge-hub         → Knowledge Hub CMS
+/dashboard/gallery               → Gallery management
+/dashboard/services              → Services CMS + booking threads
+/dashboard/navbar-footer         → Navbar + footer link management
 ```
 
 ---
