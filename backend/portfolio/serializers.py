@@ -374,6 +374,7 @@ class QuestionPublicSerializer(serializers.ModelSerializer):
 class AssessmentListSerializer(serializers.ModelSerializer):
     question_count = serializers.SerializerMethodField()
     attempt_count  = serializers.SerializerMethodField()
+    user_attempt   = serializers.SerializerMethodField()
 
     class Meta:
         model  = Assessment
@@ -381,6 +382,7 @@ class AssessmentListSerializer(serializers.ModelSerializer):
             'id', 'title', 'description', 'category', 'tags',
             'is_free', 'time_limit', 'pass_mark', 'is_active',
             'order', 'created_at', 'question_count', 'attempt_count',
+            'user_attempt',
         ]
         read_only_fields = ['id', 'created_at']
 
@@ -389,6 +391,22 @@ class AssessmentListSerializer(serializers.ModelSerializer):
 
     def get_attempt_count(self, obj):
         return obj.attempts.filter(status='completed').count()
+
+    def get_user_attempt(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return None
+        attempt = obj.attempts.filter(user=request.user).first()
+        if not attempt:
+            return None
+        return {
+            'id':         attempt.id,
+            'status':     attempt.status,
+            'score':      attempt.score,
+            'total':      attempt.total,
+            'percentage': attempt.percentage,
+            'passed':     attempt.passed,
+        }
 
 
 class AssessmentDetailAdminSerializer(AssessmentListSerializer):

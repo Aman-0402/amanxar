@@ -478,7 +478,7 @@ def assessment_list_create(request):
 
     if request.method == 'GET':
         qs = Assessment.objects.all() if is_admin else Assessment.objects.filter(is_active=True)
-        return Response(AssessmentListSerializer(qs, many=True).data)
+        return Response(AssessmentListSerializer(qs, many=True, context={'request': request}).data)
 
     if not is_admin:
         return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)

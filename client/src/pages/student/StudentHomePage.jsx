@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   GraduationCap, Briefcase, MessageSquare, ArrowRight,
-  Sparkles, Clock, TrendingUp, Star, BookOpen, Library,
+  Sparkles, Clock, TrendingUp, Star, BookOpen, Library, ClipboardList,
 } from 'lucide-react'
 import { useAuth } from '@context/AuthContext'
-import { ebooksAPI, learningAPI, bookingsAPI, supportAPI } from '@services/api'
+import { ebooksAPI, learningAPI, bookingsAPI, supportAPI, assessmentsAPI } from '@services/api'
 import { fadeUp, staggerContainer } from '@animations/variants'
 
 const QUICK_LINKS = [
@@ -27,6 +27,15 @@ const QUICK_LINKS = [
     color: 'text-brand-secondary',
     bg: 'bg-brand-secondary/10',
     border: 'hover:border-brand-secondary/40',
+  },
+  {
+    href: '/student/assessments',
+    label: 'Assessments',
+    desc: 'Take exams and test knowledge',
+    icon: ClipboardList,
+    color: 'text-purple-400',
+    bg: 'bg-purple-400/10',
+    border: 'hover:border-purple-400/40',
   },
   {
     href: '/student/services',
@@ -64,7 +73,7 @@ function greeting() {
 
 export default function StudentHomePage() {
   const { user } = useAuth()
-  const [stats, setStats] = useState({ courses: null, learning: 0, bookings: 0, tickets: 0 })
+  const [stats, setStats] = useState({ courses: null, learning: 0, bookings: 0, tickets: 0, assessments: 0 })
 
   useEffect(() => {
     Promise.allSettled([
@@ -72,12 +81,15 @@ export default function StudentHomePage() {
       learningAPI.getAll(),
       bookingsAPI.getAll(),
       supportAPI.getAll(),
-    ]).then(([courses, learning, bookings, tickets]) => {
+      assessmentsAPI.getAll(),
+    ]).then(([courses, learning, bookings, tickets, exams]) => {
+      const examData = exams.status === 'fulfilled' ? exams.value.data : []
       setStats({
-        courses:  courses.status  === 'fulfilled' ? courses.value.data.length  : 0,
-        learning: learning.status === 'fulfilled' ? learning.value.data.length : 0,
-        bookings: bookings.status === 'fulfilled' ? bookings.value.data.length : 0,
-        tickets:  tickets.status  === 'fulfilled' ? tickets.value.data.length  : 0,
+        courses:     courses.status  === 'fulfilled' ? courses.value.data.length  : 0,
+        learning:    learning.status === 'fulfilled' ? learning.value.data.length : 0,
+        bookings:    bookings.status === 'fulfilled' ? bookings.value.data.length : 0,
+        tickets:     tickets.status  === 'fulfilled' ? tickets.value.data.length  : 0,
+        assessments: examData.filter(a => a.user_attempt?.status === 'completed').length,
       })
     })
   }, [])
@@ -119,12 +131,13 @@ export default function StudentHomePage() {
       </motion.div>
 
       {/* ── Stats row ─────────────────────────────────────────────────────────── */}
-      <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {[
-          { label: 'Total Courses',   value: stats.courses  ?? '…', color: 'text-brand-primary',   sub: 'free & premium'  },
-          { label: 'My Learning',     value: stats.learning,         color: 'text-brand-secondary', sub: 'courses claimed' },
-          { label: 'Sessions',        value: stats.bookings,         color: 'text-brand-amber',     sub: 'service requests'},
-          { label: 'Support Tickets', value: stats.tickets,          color: 'text-green-400',       sub: 'total submitted' },
+          { label: 'Total Courses',   value: stats.courses  ?? '…', color: 'text-brand-primary',   sub: 'free & premium'   },
+          { label: 'My Learning',     value: stats.learning,         color: 'text-brand-secondary', sub: 'courses claimed'  },
+          { label: 'Exams Done',      value: stats.assessments,      color: 'text-purple-400',      sub: 'completed exams'  },
+          { label: 'Sessions',        value: stats.bookings,         color: 'text-brand-amber',     sub: 'service requests' },
+          { label: 'Support Tickets', value: stats.tickets,          color: 'text-green-400',       sub: 'total submitted'  },
         ].map(({ label, value, color, sub }) => (
           <div key={label} className="rounded-xl border border-bg-border bg-bg-surface p-5 flex flex-col gap-1">
             <p className={`font-display text-3xl font-bold ${color}`}>{value}</p>
@@ -140,7 +153,7 @@ export default function StudentHomePage() {
         {/* Quick access — takes 2/3 */}
         <motion.div variants={fadeUp} className="lg:col-span-2 space-y-3">
           <h2 className="font-display text-base font-semibold text-text-primary">Quick Access</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {QUICK_LINKS.map(({ href, label, desc, icon: Icon, color, bg, border }) => (
               <Link
                 key={href}
