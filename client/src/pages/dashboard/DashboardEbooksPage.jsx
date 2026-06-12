@@ -63,7 +63,7 @@ export default function DashboardEbooksPage() {
 
   return (
     <div className="space-y-8 p-8">
-      <h1 className="text-3xl font-bold text-text-primary">Free eBooks</h1>
+      <h1 className="text-3xl font-bold text-text-primary">Courses</h1>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -71,7 +71,7 @@ export default function DashboardEbooksPage() {
         className="rounded-lg border border-bg-border bg-bg-surface p-6"
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-text-primary">eBooks ({ebooks.length})</h2>
+          <h2 className="text-xl font-bold text-text-primary">Courses ({ebooks.length})</h2>
           <button
             onClick={() => {
               setEditingItem(null)
@@ -80,7 +80,7 @@ export default function DashboardEbooksPage() {
             className="flex items-center gap-2 px-3 py-1.5 rounded bg-brand-primary text-white hover:bg-brand-primary/90 transition-colors text-sm"
           >
             <Plus size={16} />
-            Add eBook
+            Add Course
           </button>
         </div>
         <div className="space-y-3">

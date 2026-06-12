@@ -144,7 +144,7 @@ export default function EBookFormModal({ isOpen, onClose, onSubmit, ebook = null
             <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-bg-border bg-bg-surface shadow-card p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="font-display text-2xl font-bold text-text-primary">
-                  {ebook ? 'Edit eBook' : 'Add New eBook'}
+                  {ebook ? 'Edit Course' : 'Add New Course'}
                 </h2>
                 <button
                   onClick={onClose}
@@ -369,37 +369,55 @@ export default function EBookFormModal({ isOpen, onClose, onSubmit, ebook = null
                   />
                 </div>
 
-                {/* Checkboxes */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      id="icon_white"
-                      name="icon_white"
-                      checked={formData.icon_white}
-                      onChange={handleChange}
-                      className="w-4 h-4 rounded cursor-pointer"
+                {/* Access Type */}
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">
+                    Access Type *
+                  </label>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setFormData(p => ({ ...p, is_free: true }))}
                       disabled={isLoading}
-                    />
-                    <label htmlFor="icon_white" className="text-sm font-medium text-text-primary cursor-pointer">
-                      Icon is white (invert)
-                    </label>
+                      className={[
+                        'flex-1 flex items-center justify-center gap-2 rounded-xl border py-3 text-sm font-semibold transition-all',
+                        formData.is_free
+                          ? 'bg-green-500/15 border-green-500/50 text-green-400'
+                          : 'border-bg-border text-text-secondary hover:border-green-500/30',
+                      ].join(' ')}
+                    >
+                      <span className="text-base">🆓</span> Free
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData(p => ({ ...p, is_free: false }))}
+                      disabled={isLoading}
+                      className={[
+                        'flex-1 flex items-center justify-center gap-2 rounded-xl border py-3 text-sm font-semibold transition-all',
+                        !formData.is_free
+                          ? 'bg-brand-amber/15 border-brand-amber/50 text-brand-amber'
+                          : 'border-bg-border text-text-secondary hover:border-brand-amber/30',
+                      ].join(' ')}
+                    >
+                      <span className="text-base">👑</span> Premium
+                    </button>
                   </div>
+                </div>
 
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      id="is_free"
-                      name="is_free"
-                      checked={formData.is_free}
-                      onChange={handleChange}
-                      className="w-4 h-4 rounded cursor-pointer"
-                      disabled={isLoading}
-                    />
-                    <label htmlFor="is_free" className="text-sm font-medium text-text-primary cursor-pointer">
-                      Free eBook
-                    </label>
-                  </div>
+                {/* Icon white checkbox */}
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="icon_white"
+                    name="icon_white"
+                    checked={formData.icon_white}
+                    onChange={handleChange}
+                    className="w-4 h-4 rounded cursor-pointer"
+                    disabled={isLoading}
+                  />
+                  <label htmlFor="icon_white" className="text-sm font-medium text-text-primary cursor-pointer">
+                    Icon is white (invert on dark bg)
+                  </label>
                 </div>
 
                 {/* Submit Button */}
@@ -423,7 +441,7 @@ export default function EBookFormModal({ isOpen, onClose, onSubmit, ebook = null
                         Saving...
                       </>
                     ) : (
-                      ebook ? 'Update eBook' : 'Create eBook'
+                      ebook ? 'Update Course' : 'Create Course'
                     )}
                   </button>
                 </div>

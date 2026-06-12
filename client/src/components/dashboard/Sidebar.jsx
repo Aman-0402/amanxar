@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { label: 'Overview',      href: '/dashboard',              icon: Home        },
   { label: 'Users',         href: '/dashboard/users',        icon: Users       },
   { label: 'Projects',      href: '/dashboard/projects',     icon: FileText    },
-  { label: 'eBooks',        href: '/dashboard/ebooks',       icon: BookOpen    },
+  { label: 'Courses',       href: '/dashboard/ebooks',       icon: BookOpen    },
   { label: 'About',         href: '/dashboard/about',        icon: User        },
   { label: 'Skills',        href: '/dashboard/skills',       icon: FileText    },
   { label: 'Tech Stack',    href: '/dashboard/tech-stack',   icon: FileText    },
