@@ -5,6 +5,7 @@ import {
   BookOpen, Search, ExternalLink, Lock, Tag, Crown, ArrowRight,
   CheckCircle, PlusCircle, Loader2,
 } from 'lucide-react'
+import Swal from 'sweetalert2'
 import { ebooksAPI, learningAPI } from '@services/api'
 import { fadeUp, staggerContainer } from '@animations/variants'
 import { assetUrl } from '@utils/assetUrl'
@@ -54,6 +55,18 @@ export default function StudentCoursesPage() {
   const premiumCount = ebooks.filter(e => !e.is_free).length
 
   const handleClaim = async (book) => {
+    const { isConfirmed } = await Swal.fire({
+      title: 'Add to My Learning?',
+      html: `<span style="color:#8BAAC8">Add <strong style="color:#EEF4FF">${book.title}</strong> to your learning library?</span><br/><span style="font-size:12px;color:#445E7A;margin-top:6px;display:block">This cannot be removed once added.</span>`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Add It',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#3B82F6',
+      background: '#0C1628',
+      color: '#EEF4FF',
+    })
+    if (!isConfirmed) return
     setClaiming(book.id)
     try {
       await learningAPI.claim({ ebook: book.id })
@@ -143,27 +156,29 @@ export default function StudentCoursesPage() {
                 className="group rounded-xl border border-bg-border bg-bg-surface overflow-hidden hover:border-brand-primary/30 hover:shadow-card transition-all duration-200 flex flex-col"
               >
                 {/* Cover */}
-                <div className="h-36 bg-bg-elevated flex items-center justify-center relative overflow-hidden">
-                  {book.cover_image ? (
-                    <img
-                      src={assetUrl(book.cover_image)}
-                      alt={book.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center gap-2 opacity-40">
-                      {book.is_free
-                        ? <BookOpen size={36} className="text-brand-primary" />
-                        : <Crown size={36} className="text-brand-amber" />
-                      }
-                    </div>
-                  )}
+                <div className={`relative h-40 overflow-hidden flex items-center justify-center ${book.gradient ? `bg-gradient-to-br ${book.gradient}` : 'bg-bg-elevated'}`}>
+                  <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/10 pointer-events-none" />
+                  <div className="absolute -bottom-6 -left-6 h-20 w-20 rounded-full bg-black/15 pointer-events-none" />
+                  <div className="absolute inset-0 -translate-x-full skew-x-[-12deg] bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-[300%] transition-transform duration-700 ease-in-out pointer-events-none" />
+                  <div className="relative z-10 group-hover:scale-110 group-hover:-translate-y-1 transition-transform duration-300">
+                    {book.cover_image ? (
+                      <img src={assetUrl(book.cover_image)} alt={book.title} className="w-full h-full object-cover" />
+                    ) : book.icon ? (
+                      <img src={book.icon} alt={book.title} width={64} height={64}
+                        className={`h-16 w-16 object-contain drop-shadow-2xl ${book.icon_white ? 'brightness-0 invert' : ''}`}
+                        loading="lazy" onError={e => { e.target.style.display = 'none' }} />
+                    ) : (
+                      <div className="opacity-50">
+                        {book.is_free ? <BookOpen size={40} className="text-white" /> : <Crown size={40} className="text-white" />}
+                      </div>
+                    )}
+                  </div>
                   {book.is_free ? (
-                    <span className="absolute top-2 right-2 rounded-full bg-green-500/20 border border-green-500/30 px-2.5 py-0.5 text-xs font-semibold text-green-400">
+                    <span className="absolute top-2 right-2 rounded-full bg-green-500/30 backdrop-blur-sm border border-green-400/40 px-2.5 py-0.5 text-[11px] font-semibold text-green-300">
                       Free
                     </span>
                   ) : (
-                    <span className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-brand-amber/20 border border-brand-amber/40 px-2.5 py-0.5 text-xs font-semibold text-brand-amber">
+                    <span className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-brand-amber/30 backdrop-blur-sm border border-brand-amber/50 px-2.5 py-0.5 text-[11px] font-semibold text-brand-amber">
                       <Crown size={9} /> Premium
                     </span>
                   )}

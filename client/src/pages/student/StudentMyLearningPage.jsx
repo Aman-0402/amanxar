@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
-  Library, ExternalLink, Trash2, BookOpen, Crown, Tag, Loader2,
+  Library, ExternalLink, BookOpen, Crown, Tag,
 } from 'lucide-react'
 import { learningAPI } from '@services/api'
 import { fadeUp, staggerContainer } from '@animations/variants'
@@ -10,7 +10,6 @@ import { fadeUp, staggerContainer } from '@animations/variants'
 export default function StudentMyLearningPage() {
   const [items, setItems]     = useState([])
   const [loading, setLoading] = useState(true)
-  const [removing, setRemoving] = useState(null)
 
   const load = useCallback(async () => {
     try {
@@ -21,15 +20,6 @@ export default function StudentMyLearningPage() {
   }, [])
 
   useEffect(() => { load() }, [load])
-
-  const handleRemove = async (item) => {
-    setRemoving(item.id)
-    try {
-      await learningAPI.remove(item.id)
-      setItems(prev => prev.filter(i => i.id !== item.id))
-    } catch {}
-    finally { setRemoving(null) }
-  }
 
   return (
     <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
@@ -82,26 +72,27 @@ export default function StudentMyLearningPage() {
                 layout
                 className="group rounded-xl border border-bg-border bg-bg-surface overflow-hidden hover:border-brand-primary/30 hover:shadow-card transition-all duration-200 flex flex-col"
               >
-                {/* Cover placeholder */}
-                <div className="h-32 bg-bg-elevated flex items-center justify-center relative overflow-hidden">
-                  <div className="flex flex-col items-center gap-2 opacity-30">
-                    <BookOpen size={34} className="text-brand-primary" />
+                {/* Cover */}
+                <div className={`relative h-40 overflow-hidden flex items-center justify-center ${item.ebook_gradient ? `bg-gradient-to-br ${item.ebook_gradient}` : 'bg-bg-elevated'}`}>
+                  <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/10 pointer-events-none" />
+                  <div className="absolute -bottom-6 -left-6 h-20 w-20 rounded-full bg-black/15 pointer-events-none" />
+                  <div className="absolute inset-0 -translate-x-full skew-x-[-12deg] bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-[300%] transition-transform duration-700 ease-in-out pointer-events-none" />
+                  <div className="relative z-10 group-hover:scale-110 group-hover:-translate-y-1 transition-transform duration-300">
+                    {item.ebook_icon ? (
+                      <img src={item.ebook_icon} alt={item.ebook_title} width={64} height={64}
+                        className={`h-16 w-16 object-contain drop-shadow-2xl ${item.ebook_icon_white ? 'brightness-0 invert' : ''}`}
+                        loading="lazy" onError={e => { e.target.style.display = 'none' }} />
+                    ) : (
+                      <div className="opacity-50">
+                        {item.ebook_is_free ? <BookOpen size={40} className="text-white" /> : <Crown size={40} className="text-white" />}
+                      </div>
+                    )}
                   </div>
-                  <span className="absolute top-2 right-2 rounded-full bg-green-500/20 border border-green-500/30 px-2.5 py-0.5 text-xs font-semibold text-green-400">
-                    Free
-                  </span>
-                  {/* Remove btn */}
-                  <button
-                    onClick={() => handleRemove(item)}
-                    disabled={removing === item.id}
-                    className="absolute top-2 left-2 h-7 w-7 rounded-lg bg-red-500/15 border border-red-500/25 text-red-400 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-red-500/30 transition-all"
-                    title="Remove from My Learning"
-                  >
-                    {removing === item.id
-                      ? <Loader2 size={12} className="animate-spin" />
-                      : <Trash2 size={12} />
-                    }
-                  </button>
+                  {item.ebook_is_free ? (
+                    <span className="absolute top-2 right-2 rounded-full bg-green-500/30 backdrop-blur-sm border border-green-400/40 px-2.5 py-0.5 text-[11px] font-semibold text-green-300">Free</span>
+                  ) : (
+                    <span className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-brand-amber/30 backdrop-blur-sm border border-brand-amber/50 px-2.5 py-0.5 text-[11px] font-semibold text-brand-amber"><Crown size={9} /> Premium</span>
+                  )}
                 </div>
 
                 {/* Info */}
@@ -115,7 +106,10 @@ export default function StudentMyLearningPage() {
                     {item.ebook_title}
                   </h3>
                   {item.ebook_subtitle && (
-                    <p className="text-xs text-text-muted line-clamp-1">{item.ebook_subtitle}</p>
+                    <p className="text-xs text-text-secondary font-medium line-clamp-1">{item.ebook_subtitle}</p>
+                  )}
+                  {item.ebook_description && (
+                    <p className="text-xs text-text-muted line-clamp-2 leading-relaxed">{item.ebook_description}</p>
                   )}
 
                   <div className="mt-auto pt-3">

@@ -327,22 +327,23 @@ class SupportTicketSerializer(serializers.ModelSerializer):
 
 
 class StudentLearningSerializer(serializers.ModelSerializer):
-    ebook_title    = serializers.CharField(source='ebook.title',    read_only=True)
-    ebook_subtitle = serializers.CharField(source='ebook.subtitle', read_only=True)
-    ebook_slug     = serializers.CharField(source='ebook.slug',     read_only=True)
-    ebook_category = serializers.CharField(source='ebook.category', read_only=True)
-    ebook_gradient = serializers.CharField(source='ebook.gradient', read_only=True)
-    ebook_icon     = serializers.CharField(source='ebook.icon',     read_only=True)
-    ebook_icon_white = serializers.BooleanField(source='ebook.icon_white', read_only=True)
-    ebook_read_url = serializers.CharField(source='ebook.read_url', read_only=True)
-    ebook_is_free  = serializers.BooleanField(source='ebook.is_free', read_only=True)
-    ebook_tags     = serializers.JSONField(source='ebook.tags',     read_only=True)
+    ebook_title       = serializers.CharField(source='ebook.title',       read_only=True)
+    ebook_subtitle    = serializers.CharField(source='ebook.subtitle',    read_only=True)
+    ebook_description = serializers.CharField(source='ebook.description', read_only=True)
+    ebook_slug        = serializers.CharField(source='ebook.slug',        read_only=True)
+    ebook_category    = serializers.CharField(source='ebook.category',    read_only=True)
+    ebook_gradient    = serializers.CharField(source='ebook.gradient',    read_only=True)
+    ebook_icon        = serializers.CharField(source='ebook.icon',        read_only=True)
+    ebook_icon_white  = serializers.BooleanField(source='ebook.icon_white', read_only=True)
+    ebook_read_url    = serializers.CharField(source='ebook.read_url',    read_only=True)
+    ebook_is_free     = serializers.BooleanField(source='ebook.is_free',  read_only=True)
+    ebook_tags        = serializers.JSONField(source='ebook.tags',        read_only=True)
 
     class Meta:
         model = StudentLearning
         fields = [
             'id', 'ebook', 'claimed_at',
-            'ebook_title', 'ebook_subtitle', 'ebook_slug', 'ebook_category',
+            'ebook_title', 'ebook_subtitle', 'ebook_description', 'ebook_slug', 'ebook_category',
             'ebook_gradient', 'ebook_icon', 'ebook_icon_white', 'ebook_read_url',
             'ebook_is_free', 'ebook_tags',
         ]

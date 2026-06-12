@@ -45,7 +45,7 @@ function Sidebar({ onClose }) {
       <div className="p-5 border-b border-bg-border flex items-center justify-between shrink-0">
         <Link to="/student" onClick={handleNavClick} className="flex items-center gap-2.5 group">
           <div className="h-9 w-9 rounded-xl overflow-hidden shadow-glow-primary shrink-0">
-            <img src={assetUrl('/assets/images/Extra/logo.jpg')} alt="Logo" className="h-full w-full object-cover" />
+            <img src={assetUrl('/assets/images/Extra/logo.png')} alt="Logo" className="h-full w-full object-cover" />
           </div>
           <span className="font-display font-bold text-sm text-text-primary leading-tight">
             Think With<span className="gradient-text"> Aman</span>
@@ -164,7 +164,7 @@ export default function StudentLayout() {
           </button>
           <Link to="/student" className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-lg overflow-hidden">
-              <img src={assetUrl('/assets/images/Extra/logo.jpg')} alt="Logo" className="h-full w-full object-cover" />
+              <img src={assetUrl('/assets/images/Extra/logo.png')} alt="Logo" className="h-full w-full object-cover" />
             </div>
             <span className="font-display font-bold text-sm text-text-primary">
               Think With<span className="gradient-text"> Aman</span>

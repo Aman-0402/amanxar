@@ -103,7 +103,7 @@ export default function Footer() {
                 style={{ transformPerspective: 600 }}
               >
                 <img
-                  src={assetUrl('/assets/images/Extra/logo.jpg')}
+                  src={assetUrl('/assets/images/Extra/logo.png')}
                   alt="Aman Raj Logo"
                   className="h-full w-full object-cover"
                 />

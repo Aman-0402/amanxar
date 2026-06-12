@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Eye, EyeOff, Loader2, LogIn, UserPlus,
-  User, Mail, Lock, Phone, CheckCircle2, AlertCircle,
+  User, Mail, Lock, Phone, CheckCircle2, AlertCircle, ArrowLeft,
 } from 'lucide-react'
 import PageLayout from '@components/layout/PageLayout'
 import { useAuth } from '@context/AuthContext'
@@ -236,6 +236,15 @@ export default function LoginPage() {
           animate="visible"
           className="w-full max-w-md"
         >
+          {/* Back to home */}
+          <motion.div variants={fadeUp} className="mb-6 flex justify-center">
+            <button onClick={() => navigate('/')}
+              className="flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors group">
+              <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+              Back to home
+            </button>
+          </motion.div>
+
           {/* Header */}
           <motion.div variants={fadeUp} className="mb-8 text-center">
             <h1 className="font-display text-3xl font-bold text-text-primary mb-1">
