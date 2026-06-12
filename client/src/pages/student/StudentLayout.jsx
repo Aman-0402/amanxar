@@ -1,29 +1,28 @@
 import { useState } from 'react'
-import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   BookOpen, Crown, Briefcase, MessageSquare,
-  User, LogOut, Menu, X, ChevronDown,
+  User, LogOut, Menu, X, Home, ChevronRight,
 } from 'lucide-react'
 import { useAuth } from '@context/AuthContext'
 import { assetUrl } from '@utils/assetUrl'
 
 const NAV_LINKS = [
-  { href: '/student/ebooks',   label: 'Ebooks',        icon: BookOpen },
-  { href: '/student/premium',  label: 'Premium',        icon: Crown },
-  { href: '/student/services', label: 'Book Services',  icon: Briefcase },
-  { href: '/student/request',  label: 'Request',        icon: MessageSquare },
+  { href: '/student',          label: 'Dashboard',     icon: Home,           end: true },
+  { href: '/student/ebooks',   label: 'Ebooks',         icon: BookOpen },
+  { href: '/student/premium',  label: 'Premium',         icon: Crown },
+  { href: '/student/services', label: 'Book Services',   icon: Briefcase },
+  { href: '/student/request',  label: 'Request',         icon: MessageSquare },
+  { href: '/student/profile',  label: 'My Profile',      icon: User },
 ]
 
-const linkBase    = 'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200'
-const linkDefault = 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated'
-const linkActive  = 'text-brand-primary bg-brand-primary/10'
+const SIDEBAR_W = 'w-64'
 
-export default function StudentLayout() {
+function Sidebar({ onClose }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [profileOpen, setProfileOpen] = useState(false)
+  const location = useLocation()
 
   const handleLogout = () => {
     logout()
@@ -34,141 +33,156 @@ export default function StudentLayout() {
     ? user.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : (user?.username?.[0] || 'S').toUpperCase()
 
+  const handleNavClick = () => {
+    if (window.innerWidth < 768) onClose?.()
+  }
+
   return (
-    <div className="min-h-screen bg-bg-base text-text-primary flex flex-col">
+    <aside className={`flex flex-col h-full ${SIDEBAR_W} bg-bg-surface border-r border-bg-border`}>
 
-      {/* ── Top Navbar ─────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 border-b border-bg-border bg-bg-surface/80 backdrop-blur-md">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      {/* Logo */}
+      <div className="p-5 border-b border-bg-border flex items-center justify-between shrink-0">
+        <Link to="/student" onClick={handleNavClick} className="flex items-center gap-2.5 group">
+          <div className="h-9 w-9 rounded-xl overflow-hidden shadow-glow-primary shrink-0">
+            <img src={assetUrl('/assets/images/Extra/logo.jpg')} alt="Logo" className="h-full w-full object-cover" />
+          </div>
+          <span className="font-display font-bold text-sm text-text-primary leading-tight">
+            Think With<span className="gradient-text"> Aman</span>
+          </span>
+        </Link>
+        {/* Close button — mobile only */}
+        <button
+          onClick={onClose}
+          className="md:hidden h-7 w-7 flex items-center justify-center rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors"
+          aria-label="Close menu"
+        >
+          <X size={16} />
+        </button>
+      </div>
 
-          {/* Logo */}
-          <Link to="/student" className="flex items-center gap-2 shrink-0">
-            <div className="h-8 w-8 rounded-lg overflow-hidden shadow-glow-primary">
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
+        {NAV_LINKS.map(({ href, label, icon: Icon, end }) => {
+          const isActive = end
+            ? location.pathname === href
+            : location.pathname.startsWith(href)
+          return (
+            <Link
+              key={href}
+              to={href}
+              onClick={handleNavClick}
+              className={[
+                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group',
+                isActive
+                  ? 'bg-brand-primary/15 text-brand-primary'
+                  : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary',
+              ].join(' ')}
+            >
+              <Icon size={17} className="shrink-0" />
+              <span className="flex-1">{label}</span>
+              {isActive && <ChevronRight size={14} className="opacity-60" />}
+            </Link>
+          )
+        })}
+      </nav>
+
+      {/* Profile footer */}
+      <div className="border-t border-bg-border p-3 shrink-0 space-y-1">
+        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-bg-elevated">
+          <div className="h-8 w-8 rounded-full bg-brand-primary/20 border border-brand-primary/30 flex items-center justify-center text-xs font-bold text-brand-primary shrink-0">
+            {initials}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold text-text-primary truncate">{user?.full_name || user?.username || 'Student'}</p>
+            <p className="text-[11px] text-text-muted truncate">{user?.email || 'student'}</p>
+          </div>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-text-secondary hover:text-red-400 hover:bg-red-500/10 transition-all duration-150"
+        >
+          <LogOut size={16} className="shrink-0" />
+          Sign Out
+        </button>
+      </div>
+    </aside>
+  )
+}
+
+export default function StudentLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  return (
+    <div className="min-h-screen bg-bg-base text-text-primary flex">
+
+      {/* ── Desktop sidebar (fixed) ──────────────────────────────────────────── */}
+      <div className={`hidden md:flex flex-col fixed left-0 top-0 h-screen ${SIDEBAR_W} z-40`}>
+        <Sidebar />
+      </div>
+
+      {/* ── Mobile overlay + drawer ──────────────────────────────────────────── */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40 bg-black/60 md:hidden"
+              onClick={() => setSidebarOpen(false)}
+            />
+            {/* Drawer */}
+            <motion.div
+              key="drawer"
+              initial={{ x: -256 }}
+              animate={{ x: 0 }}
+              exit={{ x: -256 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+              className="fixed left-0 top-0 h-screen z-50 md:hidden flex flex-col"
+            >
+              <Sidebar onClose={() => setSidebarOpen(false)} />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ── Main content area ────────────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col md:ml-64 min-w-0">
+
+        {/* Mobile topbar */}
+        <header className="md:hidden sticky top-0 z-30 h-14 flex items-center gap-3 px-4 bg-bg-surface/90 backdrop-blur-md border-b border-bg-border">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="h-9 w-9 flex items-center justify-center rounded-lg border border-bg-border text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition-colors"
+            aria-label="Open menu"
+          >
+            <Menu size={18} />
+          </button>
+          <Link to="/student" className="flex items-center gap-2">
+            <div className="h-7 w-7 rounded-lg overflow-hidden">
               <img src={assetUrl('/assets/images/Extra/logo.jpg')} alt="Logo" className="h-full w-full object-cover" />
             </div>
-            <span className="font-display font-bold text-base text-text-primary hidden sm:block">
+            <span className="font-display font-bold text-sm text-text-primary">
               Think With<span className="gradient-text"> Aman</span>
             </span>
           </Link>
+        </header>
 
-          {/* Desktop nav links */}
-          <nav className="hidden md:flex items-center gap-1">
-            {NAV_LINKS.map(({ href, label, icon: Icon }) => (
-              <NavLink
-                key={href}
-                to={href}
-                className={({ isActive }) => `${linkBase} ${isActive ? linkActive : linkDefault}`}
-              >
-                <Icon size={15} />
-                {label}
-              </NavLink>
-            ))}
-          </nav>
-
-          {/* Right — profile + logout */}
-          <div className="flex items-center gap-2">
-
-            {/* Profile dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setProfileOpen(v => !v)}
-                className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-bg-elevated transition-colors"
-              >
-                <div className="h-8 w-8 rounded-full bg-brand-primary/20 border border-brand-primary/30 flex items-center justify-center text-xs font-bold text-brand-primary">
-                  {initials}
-                </div>
-                <span className="hidden sm:block text-sm font-medium text-text-primary max-w-[100px] truncate">
-                  {user?.full_name || user?.username || 'Student'}
-                </span>
-                <ChevronDown size={14} className={`text-text-muted transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              <AnimatePresence>
-                {profileOpen && (
-                  <>
-                    <div className="fixed inset-0 z-10" onClick={() => setProfileOpen(false)} />
-                    <motion.div
-                      initial={{ opacity: 0, y: -8, scale: 0.96 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -8, scale: 0.96 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-full mt-2 w-52 rounded-xl border border-bg-border bg-bg-surface shadow-card-hover z-20 overflow-hidden"
-                    >
-                      <div className="px-4 py-3 border-b border-bg-border">
-                        <p className="text-sm font-semibold text-text-primary truncate">{user?.full_name || user?.username}</p>
-                        <p className="text-xs text-text-muted truncate">{user?.email || 'Student'}</p>
-                      </div>
-                      <div className="p-2">
-                        <Link
-                          to="/student/profile"
-                          onClick={() => setProfileOpen(false)}
-                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition-colors w-full"
-                        >
-                          <User size={14} /> My Profile
-                        </Link>
-                        <button
-                          onClick={handleLogout}
-                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors w-full"
-                        >
-                          <LogOut size={14} /> Sign Out
-                        </button>
-                      </div>
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Mobile hamburger */}
-            <button
-              onClick={() => setMobileOpen(v => !v)}
-              className="md:hidden h-9 w-9 flex items-center justify-center rounded-lg border border-bg-border text-text-secondary"
-              aria-label="Menu"
-            >
-              {mobileOpen ? <X size={18} /> : <Menu size={18} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile nav */}
-        <AnimatePresence>
-          {mobileOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="md:hidden overflow-hidden border-t border-bg-border bg-bg-surface"
-            >
-              <nav className="px-4 py-3 flex flex-col gap-1">
-                {NAV_LINKS.map(({ href, label, icon: Icon }) => (
-                  <NavLink
-                    key={href}
-                    to={href}
-                    onClick={() => setMobileOpen(false)}
-                    className={({ isActive }) => `${linkBase} ${isActive ? linkActive : linkDefault}`}
-                  >
-                    <Icon size={15} />
-                    {label}
-                  </NavLink>
-                ))}
-              </nav>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </header>
-
-      {/* ── Page content ─────────────────────────────────────────────────────────── */}
-      <main className="flex-1">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25 }}
-          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8"
-        >
-          <Outlet />
-        </motion.div>
-      </main>
+        {/* Page */}
+        <main className="flex-1">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+            className="w-full px-4 sm:px-6 lg:px-8 py-8"
+          >
+            <Outlet />
+          </motion.div>
+        </main>
+      </div>
     </div>
   )
 }
