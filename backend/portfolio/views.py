@@ -344,12 +344,14 @@ class SupportTicketView(generics.ListCreateAPIView):
     serializer_class = SupportTicketSerializer
     permission_classes = [IsAuthenticated]
 
+    def _is_admin(self):
+        u = self.request.user
+        profile = getattr(u, 'profile', None)
+        return (profile and profile.role in ('admin', 'employee')) or u.is_staff or u.is_superuser
+
     def get_queryset(self):
-        profile = getattr(self.request.user, 'profile', None)
         qs = SupportTicket.objects.select_related('user').prefetch_related('replies__sender__profile')
-        if profile and profile.role in ('admin', 'employee'):
-            return qs.all()
-        return qs.filter(user=self.request.user)
+        return qs.all() if self._is_admin() else qs.filter(user=self.request.user)
 
     def get_serializer_context(self):
         return {**super().get_serializer_context(), 'request': self.request}

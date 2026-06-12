@@ -149,6 +149,7 @@ export default function DashboardMessagesPage() {
   const [tab, setTab]               = useState('messages')
   const [messages, setMessages]     = useState([])
   const [tickets, setTickets]       = useState([])
+  const [ticketFilter, setTicketFilter] = useState('all')
   const [loading, setLoading]       = useState(true)
   const [activeThread, setActiveThread] = useState(null)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -211,6 +212,14 @@ export default function DashboardMessagesPage() {
 
   const unreadMsgCount    = messages.filter(m => !m.read).length
   const unreadTicketCount = tickets.filter(t => t.unread_count > 0).length
+  const filteredTickets   = ticketFilter === 'all' ? tickets : tickets.filter(t => t.status === ticketFilter)
+
+  const filterCounts = {
+    all:     tickets.length,
+    open:    tickets.filter(t => t.status === 'open').length,
+    replied: tickets.filter(t => t.status === 'replied').length,
+    closed:  tickets.filter(t => t.status === 'closed').length,
+  }
 
   if (loading) return <div className="p-8 text-text-muted">Loading…</div>
 
@@ -309,13 +318,37 @@ export default function DashboardMessagesPage() {
       {/* ── Support Tickets tab ──────────────────────────────────────────────── */}
       {tab === 'support' && (
         <div className="space-y-3">
-          {tickets.length === 0 ? (
+          {/* Filter pills */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {[
+              { key: 'all',     label: 'All' },
+              { key: 'open',    label: 'Open' },
+              { key: 'replied', label: 'Replied' },
+              { key: 'closed',  label: 'Closed' },
+            ].map(f => (
+              <button key={f.key} onClick={() => setTicketFilter(f.key)}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-all ${
+                  ticketFilter === f.key
+                    ? 'bg-brand-primary text-white border-brand-primary'
+                    : 'bg-bg-elevated text-text-secondary border-bg-border hover:border-brand-primary/40 hover:text-text-primary'
+                }`}>
+                {f.label}
+                <span className={`inline-flex h-4 min-w-4 px-0.5 items-center justify-center rounded-full text-[10px] font-bold ${
+                  ticketFilter === f.key ? 'bg-white/20 text-white' : 'bg-bg-border text-text-muted'
+                }`}>
+                  {filterCounts[f.key]}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {filteredTickets.length === 0 ? (
             <div className="text-center py-16 text-text-muted">
               <MessageSquare size={36} className="mx-auto mb-3 opacity-30" />
-              <p className="text-sm">No support tickets yet</p>
+              <p className="text-sm">{ticketFilter === 'all' ? 'No support tickets yet' : `No ${ticketFilter} tickets`}</p>
             </div>
           ) : (
-            tickets.map(t => (
+            filteredTickets.map(t => (
               <button key={t.id} onClick={() => openThread(t)}
                 className="w-full text-left rounded-xl border border-bg-border bg-bg-surface p-4 hover:border-brand-primary/30 hover:shadow-card transition-all group">
                 <div className="flex items-center justify-between gap-3">
