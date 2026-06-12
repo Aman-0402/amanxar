@@ -47,6 +47,7 @@ from .views import (
     enrollment_list,
     enroll_student,
     unenroll_student,
+    assessment_attempts,
 )
 
 app_name = 'portfolio'
@@ -106,6 +107,7 @@ urlpatterns = [
     path('attempts/<int:attempt_pk>/submit/',               submit_attempt,          name='submit-attempt'),
     path('attempts/<int:attempt_pk>/result/',               attempt_result,          name='attempt-result'),
 
+    path('assessments/<int:assessment_pk>/all-attempts/',             assessment_attempts, name='assessment-attempts'),
     path('assessments/<int:assessment_pk>/enrollments/',              enrollment_list,   name='enrollment-list'),
     path('assessments/<int:assessment_pk>/enroll/',                   enroll_student,    name='enroll-student'),
     path('assessments/<int:assessment_pk>/enrollments/<int:user_pk>/', unenroll_student, name='unenroll-student'),

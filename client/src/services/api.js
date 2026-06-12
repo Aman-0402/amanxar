@@ -80,6 +80,7 @@ export const assessmentsAPI = {
   submitAttempt: (aId, data)  => api.post(`/api/attempts/${aId}/submit/`, data),
   getResult:     (aId)        => api.get(`/api/attempts/${aId}/result/`),
 
+  getAllAttempts:  (id)           => api.get(`/api/assessments/${id}/all-attempts/`),
   getEnrollments: (id)           => api.get(`/api/assessments/${id}/enrollments/`),
   enroll:         (id, userId)   => api.post(`/api/assessments/${id}/enroll/`, { user_id: userId }),
   unenroll:       (id, userId)   => api.delete(`/api/assessments/${id}/enrollments/${userId}/`),

@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft, Plus, Trash2, Loader2, AlertCircle,
   CheckCircle, ChevronDown, ChevronUp, GripVertical,
-  Users, Search, UserPlus, Lock,
+  Users, Search, UserPlus, Lock, BarChart2,
+  TrendingUp, TrendingDown, Clock, Calendar,
 } from 'lucide-react'
 import { assessmentsAPI, usersAPI } from '@services/api'
 import { fadeUp, staggerContainer } from '@animations/variants'
@@ -340,6 +341,157 @@ function StudentsTab({ id, isPremium }) {
   )
 }
 
+// ── Analytics tab ─────────────────────────────────────────────────────────────
+
+function AnalyticsTab({ id, assessment }) {
+  const [attempts, setAttempts] = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [error, setError]       = useState('')
+
+  useEffect(() => {
+    assessmentsAPI.getAllAttempts(id)
+      .then(({ data }) => setAttempts(data))
+      .catch(() => setError('Failed to load attempts'))
+      .finally(() => setLoading(false))
+  }, [id])
+
+  if (loading) return <div className="flex justify-center py-12"><Loader2 size={28} className="animate-spin text-brand-primary" /></div>
+
+  const completed   = attempts.filter(a => a.status === 'completed')
+  const inProgress  = attempts.filter(a => a.status === 'in_progress')
+  const passed      = completed.filter(a => a.passed)
+  const failed      = completed.filter(a => !a.passed)
+  const avgScore    = completed.length ? Math.round(completed.reduce((s, a) => s + a.percentage, 0) / completed.length) : 0
+
+  const fmtDate = (iso) => {
+    if (!iso) return '—'
+    return new Date(iso).toLocaleString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true,
+    })
+  }
+
+  const timeTaken = (a) => {
+    if (!a.submitted_at || !a.started_at) return '—'
+    const ms = new Date(a.submitted_at) - new Date(a.started_at)
+    const m  = Math.floor(ms / 60000)
+    const s  = Math.floor((ms % 60000) / 1000)
+    return `${m}m ${s}s`
+  }
+
+  return (
+    <div className="space-y-6">
+      {error && <ErrBanner msg={error} />}
+
+      {/* Summary cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        {[
+          { label: 'Enrolled',    value: assessment?.enrolled_count ?? '—', color: 'text-brand-primary',   icon: Users      },
+          { label: 'Started',     value: attempts.length,                    color: 'text-brand-secondary', icon: Calendar   },
+          { label: 'Completed',   value: completed.length,                   color: 'text-text-primary',    icon: Clock      },
+          { label: 'Passed',      value: passed.length,                      color: 'text-green-400',       icon: TrendingUp },
+          { label: 'Failed',      value: failed.length,                      color: 'text-red-400',         icon: TrendingDown},
+        ].map(({ label, value, color, icon: Icon }) => (
+          <div key={label} className="rounded-xl border border-bg-border bg-bg-surface p-4 flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-text-muted">{label}</p>
+              <Icon size={14} className={color} />
+            </div>
+            <p className={`text-2xl font-bold ${color}`}>{value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Avg score bar */}
+      {completed.length > 0 && (
+        <div className="rounded-xl border border-bg-border bg-bg-surface p-4 space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-text-muted">Average score</span>
+            <span className={`font-bold ${avgScore >= (assessment?.pass_mark ?? 60) ? 'text-green-400' : 'text-red-400'}`}>
+              {avgScore}% (pass mark: {assessment?.pass_mark ?? 60}%)
+            </span>
+          </div>
+          <div className="h-2 w-full rounded-full bg-bg-elevated overflow-hidden">
+            <div className={`h-full rounded-full transition-all ${avgScore >= (assessment?.pass_mark ?? 60) ? 'bg-green-400' : 'bg-red-400'}`}
+              style={{ width: `${avgScore}%` }} />
+          </div>
+        </div>
+      )}
+
+      {/* Attempts table */}
+      {attempts.length === 0 ? (
+        <div className="text-center py-10 text-text-muted rounded-xl border border-dashed border-bg-border">
+          <BarChart2 size={36} className="mx-auto mb-3 opacity-30" />
+          <p>No students have started this exam yet</p>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-bg-border bg-bg-surface overflow-hidden">
+          <div className="px-5 py-3 border-b border-bg-border bg-bg-elevated/50 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-text-primary">All Attempts</h3>
+            <span className="text-xs text-text-muted">{attempts.length} total</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-bg-border">
+                  {['Student', 'Email', 'Started', 'Submitted', 'Time Taken', 'Score', 'Status'].map(h => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider whitespace-nowrap">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-bg-border">
+                {attempts.map(a => (
+                  <tr key={a.id} className="hover:bg-bg-elevated/30 transition-colors">
+                    <td className="px-4 py-3">
+                      <div>
+                        <p className="font-medium text-text-primary">{a.full_name || a.username}</p>
+                        <p className="text-xs text-text-muted">@{a.username}</p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-text-secondary text-xs">{a.email || '—'}</td>
+                    <td className="px-4 py-3 text-text-muted text-xs whitespace-nowrap">{fmtDate(a.started_at)}</td>
+                    <td className="px-4 py-3 text-text-muted text-xs whitespace-nowrap">{fmtDate(a.submitted_at)}</td>
+                    <td className="px-4 py-3 text-text-muted text-xs whitespace-nowrap">
+                      <span className="flex items-center gap-1"><Clock size={11} />{timeTaken(a)}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {a.status === 'completed' ? (
+                        <div className="space-y-1">
+                          <span className={`font-semibold text-sm ${a.passed ? 'text-green-400' : 'text-red-400'}`}>
+                            {a.percentage}%
+                          </span>
+                          <div className="h-1 w-16 rounded-full bg-bg-elevated overflow-hidden">
+                            <div className={`h-full rounded-full ${a.passed ? 'bg-green-400' : 'bg-red-400'}`}
+                              style={{ width: `${a.percentage}%` }} />
+                          </div>
+                          <p className="text-[11px] text-text-muted">{a.score}/{a.total} correct</p>
+                        </div>
+                      ) : (
+                        <span className="text-text-muted text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      {a.status === 'in_progress' ? (
+                        <span className="text-xs px-2 py-1 rounded-full bg-brand-amber/10 text-brand-amber border border-brand-amber/30 font-medium">In Progress</span>
+                      ) : a.passed ? (
+                        <span className="text-xs px-2 py-1 rounded-full bg-green-400/10 text-green-400 border border-green-400/30 font-medium">Passed</span>
+                      ) : (
+                        <span className="text-xs px-2 py-1 rounded-full bg-red-400/10 text-red-400 border border-red-400/30 font-medium">Failed</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Error banner helper ───────────────────────────────────────────────────────
 function ErrBanner({ msg }) {
   return (
@@ -407,8 +559,9 @@ export default function DashboardAssessmentEditorPage() {
       {/* Tabs */}
       <motion.div variants={fadeUp} className="flex gap-1 p-1 rounded-xl bg-bg-elevated border border-bg-border w-fit">
         {[
-          { key: 'questions', label: 'Questions',     icon: null    },
-          { key: 'students',  label: 'Students',      icon: Users   },
+          { key: 'questions',  label: 'Questions', icon: null      },
+          { key: 'analytics',  label: 'Analytics', icon: BarChart2 },
+          { key: 'students',   label: 'Students',  icon: Users     },
         ].map(({ key, label, icon: Icon }) => (
           <button
             key={key}
@@ -430,8 +583,9 @@ export default function DashboardAssessmentEditorPage() {
 
       {/* Tab content */}
       <motion.div variants={fadeUp}>
-        {tab === 'questions' && <QuestionsTab id={id} assessment={assessment} />}
-        {tab === 'students'  && <StudentsTab  id={id} isPremium={!assessment?.is_free} />}
+        {tab === 'questions' && <QuestionsTab  id={id} assessment={assessment} />}
+        {tab === 'analytics' && <AnalyticsTab  id={id} assessment={assessment} />}
+        {tab === 'students'  && <StudentsTab   id={id} isPremium={!assessment?.is_free} />}
       </motion.div>
 
     </motion.div>

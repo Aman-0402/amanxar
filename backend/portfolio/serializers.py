@@ -480,3 +480,25 @@ class AssessmentEnrollmentSerializer(serializers.ModelSerializer):
     def get_full_name(self, obj):
         profile = getattr(obj.user, 'profile', None)
         return profile.full_name if profile else obj.user.username
+
+
+class AttemptAdminSerializer(serializers.ModelSerializer):
+    user_id    = serializers.IntegerField(source='user.id',      read_only=True)
+    username   = serializers.CharField(source='user.username',   read_only=True)
+    email      = serializers.CharField(source='user.email',      read_only=True)
+    full_name  = serializers.SerializerMethodField()
+    percentage = serializers.ReadOnlyField()
+    passed     = serializers.ReadOnlyField()
+
+    class Meta:
+        model  = StudentAttempt
+        fields = [
+            'id', 'user_id', 'username', 'full_name', 'email',
+            'started_at', 'submitted_at', 'score', 'total',
+            'status', 'percentage', 'passed',
+        ]
+        read_only_fields = fields
+
+    def get_full_name(self, obj):
+        profile = getattr(obj.user, 'profile', None)
+        return profile.full_name if profile else obj.user.username

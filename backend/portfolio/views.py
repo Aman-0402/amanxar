@@ -72,6 +72,7 @@ from .serializers import (
     AnswerOptionSerializer,
     StudentAttemptSerializer,
     AssessmentEnrollmentSerializer,
+    AttemptAdminSerializer,
 )
 
 
@@ -780,6 +781,23 @@ def enroll_student(request, assessment_pk):
         AssessmentEnrollmentSerializer(enrollment).data,
         status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
     )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def assessment_attempts(request, assessment_pk):
+    if not _is_admin_user(request.user):
+        return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        assessment = Assessment.objects.get(pk=assessment_pk)
+    except Assessment.DoesNotExist:
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    attempts = (StudentAttempt.objects
+                .filter(assessment=assessment)
+                .select_related('user__profile')
+                .order_by('-started_at'))
+    return Response(AttemptAdminSerializer(attempts, many=True).data)
 
 
 @api_view(['DELETE'])
