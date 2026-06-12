@@ -44,7 +44,7 @@ Instructions for Claude Code and other AI agents working on this project.
 /student/assessments     → StudentAssessmentsPage   (exam cards, filter by free/premium/status)
 /student/assessments/:id → StudentExamPage          (intro → timed exam → results + review)
 /student/services        → StudentServicesPage      (browse services + booking threads)
-/student/request         → StudentRequestPage       (support form)
+/student/request         → StudentRequestPage       (two tabs: New Request form | My Tickets chat thread)
 /student/profile         → StudentProfilePage
 ```
 
@@ -60,7 +60,7 @@ Instructions for Claude Code and other AI agents working on this project.
 /dashboard/skills               → DashboardSkillsPage
 /dashboard/tech-stack           → DashboardTechStackPage
 /dashboard/timeline             → DashboardTimelinePage
-/dashboard/messages             → DashboardMessagesPage
+/dashboard/messages             → DashboardMessagesPage     (two tabs: Contact submissions | Support Tickets with filter + thread)
 /dashboard/knowledge-hub        → DashboardKnowledgeHubPage
 /dashboard/gallery              → DashboardGalleryPage
 /dashboard/services             → DashboardServicesPage     (services CRUD + booking threads)
@@ -82,6 +82,10 @@ Instructions for Claude Code and other AI agents working on this project.
 | `/api/users/me/` | GET/PATCH | any | Current user profile (read + update) |
 | `/api/users/<id>/` | GET/DELETE | admin | User detail / delete |
 | `/api/support/` | GET/POST | any | Support tickets (admin sees all; student sees own) |
+| `/api/support/<id>/` | GET | auth | Ticket detail with all replies |
+| `/api/support/<id>/reply/` | POST | auth | Add reply `{ message }` — sets `is_admin` from role, updates status |
+| `/api/support/<id>/read/` | POST | auth | Mark replies as read (admin marks student replies; student marks admin replies) |
+| `/api/support/<id>/status/` | PATCH | admin | Set ticket status `{ status: 'open'\|'replied'\|'closed' }` |
 | `/api/learning/` | GET/POST | student | List / claim a course (`ebook` id in POST body) |
 | `/api/learning/<id>/` | DELETE | student | Remove course from My Learning |
 | `/api/bookings/` | GET/POST | any | List / create service bookings |
@@ -218,6 +222,21 @@ await bookingsAPI.reply(bookingId, { message })
 await bookingsAPI.markRead(bookingId)
 ```
 
+### Support ticket thread
+```jsx
+// Student creates ticket
+await supportAPI.create({ category: 'general', subject: '...', message: '...' })
+// Admin or student replies
+await supportAPI.reply(ticketId, { message })
+// Mark replies as read (perspective-aware — each side marks the other's replies)
+await supportAPI.markRead(ticketId)
+// Admin closes / reopens
+await supportAPI.setStatus(ticketId, { status: 'closed' })
+await supportAPI.setStatus(ticketId, { status: 'open' })
+// Fetch ticket detail with replies
+const { data } = await supportAPI.getById(ticketId)
+```
+
 ### Form validation (manual, no react-hook-form installed)
 ```js
 const validate = (form) => {
@@ -285,7 +304,7 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 ### Backend
 | File | Purpose |
 |------|---------|
-| `backend/portfolio/models.py` | All DB models: `UserProfile`, `StudentLearning`, `ServiceBooking`, `BookingReply`, `SupportTicket`, `Assessment`, `Question`, `AnswerOption`, `StudentAttempt`, `StudentAnswer`, `AssessmentEnrollment` |
+| `backend/portfolio/models.py` | All DB models: `UserProfile`, `StudentLearning`, `ServiceBooking`, `BookingReply`, `SupportTicket`, `SupportTicketReply`, `Assessment`, `Question`, `AnswerOption`, `StudentAttempt`, `StudentAnswer`, `AssessmentEnrollment` |
 | `backend/portfolio/serializers.py` | DRF serializers + `CustomTokenObtainPairSerializer` (adds role/full_name/email) |
 | `backend/portfolio/views.py` | All views: auth, users, learning, bookings, support |
 | `backend/portfolio/urls.py` | All API routes |
@@ -312,6 +331,18 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 ### BookingReply
 - ForeignKey ServiceBooking + sender User
 - `is_admin`, `read_by_student` — drives unread count badge
+
+### SupportTicket
+- ForeignKey User
+- Fields: `category` (slug: general/content/technical/premium/feedback/other), `subject`, `message`
+- `status`: `open` (new/student replied) → `replied` (admin replied) → `closed` (admin only)
+- `ordering = ['-created_at']`
+
+### SupportTicketReply
+- ForeignKey SupportTicket + sender User
+- `is_admin`, `read_by_student`, `read_by_admin` — drives perspective-aware `unread_count` in serializer
+- `ordering = ['created_at']` (oldest first for chat display)
+- Admin closes ticket → student reply input locked
 
 ### Assessment
 - Fields: `title`, `description`, `category`, `tags` (JSON), `is_free`, `time_limit` (nullable, minutes), `pass_mark` (int %, default 60), `is_active`, `order`

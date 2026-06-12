@@ -41,7 +41,7 @@ amanxar/
 │
 ├── backend/                   # Django REST API
 │   └── portfolio/
-│       ├── models.py          # UserProfile, StudentLearning, ServiceBooking, BookingReply, Assessment, Question, AnswerOption, StudentAttempt, StudentAnswer, AssessmentEnrollment
+│       ├── models.py          # UserProfile, StudentLearning, ServiceBooking, BookingReply, SupportTicket, SupportTicketReply, Assessment, Question, AnswerOption, StudentAttempt, StudentAnswer, AssessmentEnrollment
 │       ├── serializers.py     # DRF serializers + custom JWT serializer
 │       ├── views.py           # All API views
 │       └── urls.py            # API routes
@@ -99,7 +99,7 @@ amanxar/
 /student/assessments        → Exam list (filter by free/premium/status, score bars)
 /student/assessments/:id    → Exam flow: intro → timed exam → results + per-question review
 /student/services           → Services (browse + booking request + thread)
-/student/request            → Support & content request form
+/student/request            → Support & Requests (New Request form + My Tickets chat thread)
 /student/profile            → Edit personal info
 ```
 
@@ -115,7 +115,7 @@ amanxar/
 /dashboard/skills                → Skills management
 /dashboard/tech-stack            → Tech stack management
 /dashboard/timeline              → Timeline events
-/dashboard/messages              → Contact messages
+/dashboard/messages              → Messages (Contact tab + Support Tickets tab with filter pills + thread view + close/reopen)
 /dashboard/knowledge-hub         → Knowledge Hub CMS
 /dashboard/gallery               → Gallery management
 /dashboard/services              → Services CMS + booking threads
@@ -168,7 +168,11 @@ brand.amber:     #F59E0B   amber-400   premium / important CTAs
 | `/api/users/` | GET | admin | List all registered users |
 | `/api/users/me/` | GET/PATCH | any | View/update own profile |
 | `/api/users/<id>/` | GET/DELETE | admin | User detail / delete |
-| `/api/support/` | GET/POST | any | Support tickets |
+| `/api/support/` | GET/POST | any | Support tickets (admin: all; student: own) |
+| `/api/support/<id>/` | GET | auth | Ticket detail with replies |
+| `/api/support/<id>/reply/` | POST | auth | Add reply — `is_admin` set from role |
+| `/api/support/<id>/read/` | POST | auth | Mark replies read (perspective-aware) |
+| `/api/support/<id>/status/` | PATCH | admin | Set status `open\|replied\|closed` |
 | `/api/learning/` | GET/POST | student | List / claim a free course |
 | `/api/learning/<id>/` | DELETE | student | Remove from My Learning |
 | `/api/bookings/` | GET/POST | any | List / create service bookings |
