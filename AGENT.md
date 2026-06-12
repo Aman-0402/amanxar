@@ -8,9 +8,9 @@ Instructions for Claude Code and other AI agents working on this project.
 
 **Think With Aman — Portfolio & Student Learning Portal** — Full-stack website with:
 - Public portfolio (home, about, services, projects, gallery, knowledge hub, contact)
-- **Student portal** — ebooks, premium content, service booking, support, profile
-- Admin/employee dashboard — full CMS for all content
-- Session-based auth with role routing (admin → `/dashboard`, student → `/student`)
+- **Student portal** — courses (free/premium), my learning library, service booking, support, profile
+- Admin/employee dashboard — full CMS for all content + booking management
+- JWT-based auth with role routing (admin → `/dashboard`, student → `/student`)
 - Navy/dark blue/black professional theme — single fixed theme, no toggle
 
 **Stack**: React 18 (Vite) + Django (backend) + MariaDB + Tailwind CSS
@@ -33,16 +33,16 @@ Instructions for Claude Code and other AI agents working on this project.
 |-------------|--------|--------|
 | `/` | Public | `RootLayout` + `Navbar` + `Footer` |
 | `/login` | Public | Standalone page |
-| `/student/*` | `role === student` | `StudentLayout` (top navbar) |
-| `/dashboard/*` | `role === admin \| employee` | `DashboardLayout` (sidebar) |
+| `/student/*` | `role === student` | `StudentLayout` (fixed sidebar + mobile drawer) |
+| `/dashboard/*` | `role === admin \| employee` | `DashboardLayout` (fixed sidebar + topbar) |
 
 ### Student portal routes
 ```
 /student               → StudentHomePage
-/student/ebooks        → StudentEbooksPage
-/student/premium       → StudentPremiumPage
-/student/services      → StudentServicesPage  (book a session)
-/student/request       → StudentRequestPage   (support form)
+/student/courses       → StudentCoursesPage   (free + premium, filter, "Add to Learning")
+/student/learning      → StudentMyLearningPage (claimed courses library)
+/student/services      → StudentServicesPage   (browse services + booking threads)
+/student/request       → StudentRequestPage    (support form)
 /student/profile       → StudentProfilePage
 ```
 
@@ -50,7 +50,7 @@ Instructions for Claude Code and other AI agents working on this project.
 ```
 /dashboard             → DashboardOverviewPage  (stats: projects, students, ebooks)
 /dashboard/users       → DashboardUsersPage     (students list + delete)
-/dashboard/ebooks      → DashboardEbooksPage
+/dashboard/ebooks      → DashboardEbooksPage    (courses CRUD, free/premium toggle)
 /dashboard/projects    → DashboardProjectsPage
 /dashboard/about       → DashboardAboutPage
 /dashboard/skills      → DashboardSkillsPage
@@ -59,7 +59,7 @@ Instructions for Claude Code and other AI agents working on this project.
 /dashboard/messages    → DashboardMessagesPage
 /dashboard/knowledge-hub → DashboardKnowledgeHubPage
 /dashboard/gallery     → DashboardGalleryPage
-/dashboard/services    → DashboardServicesPage
+/dashboard/services    → DashboardServicesPage  (services CRUD + booking threads)
 /dashboard/navbar-footer → DashboardNavbarFooterPage
 ```
 
@@ -78,6 +78,13 @@ Instructions for Claude Code and other AI agents working on this project.
 | `/api/users/me/` | GET/PATCH | any | Current user profile (read + update) |
 | `/api/users/<id>/` | GET/DELETE | admin | User detail / delete |
 | `/api/support/` | GET/POST | any | Support tickets (admin sees all; student sees own) |
+| `/api/learning/` | GET/POST | student | List / claim a course (`ebook` id in POST body) |
+| `/api/learning/<id>/` | DELETE | student | Remove course from My Learning |
+| `/api/bookings/` | GET/POST | any | List / create service bookings |
+| `/api/bookings/<id>/` | GET/PATCH | any | Booking detail |
+| `/api/bookings/<id>/reply/` | POST | any | Add message to booking thread |
+| `/api/bookings/<id>/status/` | PATCH | admin | Set booking status (pending/replied/closed) |
+| `/api/bookings/<id>/read/` | POST | student | Mark admin replies as read |
 
 **JWT payload** (decoded via `jwtDecode`):
 ```json
@@ -85,7 +92,7 @@ Instructions for Claude Code and other AI agents working on this project.
 ```
 
 **Roles** (from JWT `payload.role`):
-- `admin` — full dashboard access
+- `admin` — full dashboard access; superusers/staff without a profile also get `admin`
 - `employee` — dashboard access (same as admin for now)
 - `student` — student portal only
 
@@ -153,12 +160,13 @@ Then add route in `client/src/App.jsx` under the `/` `RootLayout` children.
 ### Student portal page
 - Create in `client/src/pages/student/`
 - Add route in `App.jsx` under `/student` children
+- Add nav link in `client/src/pages/student/StudentLayout.jsx` `NAV_LINKS` array
 - No `PageLayout` needed — `StudentLayout` wraps all student pages
 
 ### Admin dashboard page
 - Create in `client/src/pages/dashboard/`
 - Add route in `App.jsx` under `/dashboard` children
-- Add nav item in `client/src/components/dashboard/Sidebar.jsx`
+- Add nav item in `client/src/components/dashboard/Sidebar.jsx` `NAV_ITEMS` array
 
 ---
 
@@ -166,13 +174,30 @@ Then add route in `client/src/App.jsx` under the `/` `RootLayout` children.
 
 ### API integration
 ```jsx
-import { ebooksAPI } from '@services/api'
+import { ebooksAPI, learningAPI } from '@services/api'
 
 useEffect(() => {
   ebooksAPI.getAll()
     .then(({ data }) => setItems(data))
     .catch(() => {})
 }, [])
+```
+
+### Claiming a free course (My Learning)
+```jsx
+// POST /api/learning/ with { ebook: id }
+// Uses get_or_create — safe to call multiple times
+await learningAPI.claim({ ebook: book.id })
+```
+
+### Service booking thread
+```jsx
+// Create booking
+await bookingsAPI.create({ service: serviceId, message })
+// Reply
+await bookingsAPI.reply(bookingId, { message })
+// Mark admin replies read
+await bookingsAPI.markRead(bookingId)
 ```
 
 ### Form validation (manual, no react-hook-form installed)
@@ -207,10 +232,14 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 | `client/src/context/ThemeContext.jsx` | Stub — always light, no toggle |
 | `client/src/components/auth/ProtectedRoute.jsx` | Role-based route guard |
 | `client/src/pages/auth/LoginPage.jsx` | Login + Student registration (tabs) |
-| `client/src/pages/student/StudentLayout.jsx` | Student top navbar layout |
-| `client/src/components/layout/Navbar.jsx` | Public navbar (ebooks link hidden) |
+| `client/src/pages/student/StudentLayout.jsx` | Student sidebar layout (fixed desktop, drawer mobile) |
+| `client/src/pages/student/StudentCoursesPage.jsx` | Courses with filter + Add to Learning + success popup |
+| `client/src/pages/student/StudentMyLearningPage.jsx` | Claimed courses library |
+| `client/src/pages/student/StudentServicesPage.jsx` | Service cards + booking thread UI |
+| `client/src/components/dashboard/DashboardLayout.jsx` | Admin layout with topbar (user badge + page title) |
 | `client/src/components/dashboard/Sidebar.jsx` | Admin sidebar nav |
-| `client/src/services/api.js` | All API clients (authAPI, usersAPI, ebooksAPI…) |
+| `client/src/components/layout/Navbar.jsx` | Public navbar |
+| `client/src/services/api.js` | All API clients (authAPI, usersAPI, ebooksAPI, learningAPI, bookingsAPI…) |
 | `client/src/styles/globals.css` | CSS variables, theme tokens, component classes |
 | `client/tailwind.config.js` | Design tokens, brand colors, shadows |
 | `client/src/animations/variants.js` | Framer Motion animation presets |
@@ -219,11 +248,32 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 ### Backend
 | File | Purpose |
 |------|---------|
-| `backend/portfolio/models.py` | All DB models incl. `UserProfile`, `SupportTicket` |
-| `backend/portfolio/serializers.py` | DRF serializers + `CustomTokenObtainPairSerializer` |
-| `backend/portfolio/views.py` | All views incl. `RegisterView`, `UserListView`, `user_me`, `SupportTicketView` |
+| `backend/portfolio/models.py` | All DB models: `UserProfile`, `StudentLearning`, `ServiceBooking`, `BookingReply`, `SupportTicket` |
+| `backend/portfolio/serializers.py` | DRF serializers + `CustomTokenObtainPairSerializer` (adds role/full_name/email) |
+| `backend/portfolio/views.py` | All views: auth, users, learning, bookings, support |
 | `backend/portfolio/urls.py` | All API routes |
 | `backend/portfolio/management/commands/create_test_users.py` | Creates admin + student test accounts |
+
+---
+
+## 🗃 Key Backend Models
+
+### UserProfile
+- OneToOne on Django `User`
+- Fields: `full_name`, `phone`, `role` (admin/employee/student)
+- Superusers/staff without a profile default to role `admin` in JWT
+
+### StudentLearning
+- ForeignKey User + EBook, `unique_together` — prevents duplicate claims
+- `get_or_create` used on POST — idempotent claiming
+
+### ServiceBooking
+- ForeignKey User + Service
+- Status: `pending` → `replied` (admin reply) → `pending` (student reply) → `closed`
+
+### BookingReply
+- ForeignKey ServiceBooking + sender User
+- `is_admin`, `read_by_student` — drives unread count badge
 
 ---
 
@@ -232,13 +282,13 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 ### ✅ DO:
 - Use Tailwind utilities (not inline styles)
 - Use `brand.amber` for important/premium elements that need to stand out
-- Use `credentials: 'include'` if switching to session auth (currently JWT)
-- Use Framer Motion for animations
+- Use Framer Motion for animations and page transitions
 - Show toast notifications on success/error
 - Keep components under 300 lines
 - Use font classes for typography (not raw `fontSize`)
 - Validate forms on both `onBlur` and `onSubmit`
 - Hardcode `role: 'student'` when registering from the public sign-up form
+- Handle superuser/staff fallback in any backend view that checks `profile.role`
 
 ### ❌ DON'T:
 - Don't add a light/dark theme toggle — theme is fixed
@@ -248,6 +298,7 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 - Don't add Ebook link to the public navbar — it's hidden by design
 - Don't redirect students to `/dashboard` — they go to `/student`
 - Don't hardcode indigo `#6366F1` — that's the old brand color; use `#3B82F6`
+- Don't assume a User has a `UserProfile` — always use `getattr(user, 'profile', None)`
 
 ---
 
