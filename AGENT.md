@@ -13,7 +13,7 @@ Instructions for Claude Code and other AI agents working on this project.
 - Session-based auth with role routing (admin → `/dashboard`, student → `/student`)
 - Navy/dark blue/black professional theme — single fixed theme, no toggle
 
-**Stack**: React 18 (Vite) + Express.js/Django (backend) + PostgreSQL + Tailwind CSS
+**Stack**: React 18 (Vite) + Django (backend) + MariaDB + Tailwind CSS
 
 ---
 
@@ -68,11 +68,23 @@ Instructions for Claude Code and other AI agents working on this project.
 ## 🔐 Auth & Roles
 
 **JWT-based auth** (token stored in `localStorage`):
-- Login: `POST /api/auth/login/` → returns `{ access }` JWT
-- Register: `POST /api/auth/register/` → creates student account
-- Refresh: `POST /api/auth/refresh/`
 
-**Roles** (from JWT payload `user.role`):
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/auth/login/` | POST | — | Returns `{ access }` JWT with role + profile claims |
+| `/api/auth/register/` | POST | — | Creates student account (role hardcoded to `student`) |
+| `/api/auth/refresh/` | POST | — | Refresh access token |
+| `/api/users/` | GET | admin/employee | List all users with profiles |
+| `/api/users/me/` | GET/PATCH | any | Current user profile (read + update) |
+| `/api/users/<id>/` | GET/DELETE | admin | User detail / delete |
+| `/api/support/` | GET/POST | any | Support tickets (admin sees all; student sees own) |
+
+**JWT payload** (decoded via `jwtDecode`):
+```json
+{ "user_id": 1, "username": "student1", "email": "...", "full_name": "...", "role": "student" }
+```
+
+**Roles** (from JWT `payload.role`):
 - `admin` — full dashboard access
 - `employee` — dashboard access (same as admin for now)
 - `student` — student portal only
@@ -82,6 +94,12 @@ Instructions for Claude Code and other AI agents working on this project.
 - `ProtectedRoute` accepts `allowedRoles` prop; wrong role → redirects to their home
 
 **Student registration** — role hardcoded to `'student'` in request payload.
+
+**Test accounts** (created via `python manage.py create_test_users`):
+| Role | Username | Password |
+|------|----------|----------|
+| admin | `admin` | `Admin@123` |
+| student | `student1` | `Student@123` |
 
 ---
 
@@ -181,6 +199,7 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 
 ## 📦 Important Files
 
+### Frontend
 | File | Purpose |
 |------|---------|
 | `client/src/App.jsx` | All routes (public, student, admin) |
@@ -196,6 +215,15 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 | `client/tailwind.config.js` | Design tokens, brand colors, shadows |
 | `client/src/animations/variants.js` | Framer Motion animation presets |
 | `client/src/utils/toast.js` | Toast notifications & SweetAlert2 |
+
+### Backend
+| File | Purpose |
+|------|---------|
+| `backend/portfolio/models.py` | All DB models incl. `UserProfile`, `SupportTicket` |
+| `backend/portfolio/serializers.py` | DRF serializers + `CustomTokenObtainPairSerializer` |
+| `backend/portfolio/views.py` | All views incl. `RegisterView`, `UserListView`, `user_me`, `SupportTicketView` |
+| `backend/portfolio/urls.py` | All API routes |
+| `backend/portfolio/management/commands/create_test_users.py` | Creates admin + student test accounts |
 
 ---
 

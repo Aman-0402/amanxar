@@ -47,9 +47,9 @@ amanxar/
 - **Axios** — HTTP client with JWT interceptor
 
 ### Backend
-- **Django** (primary) + **Express.js** (legacy)
-- **JWT auth** (via `rest_framework_simplejwt`)
-- **PostgreSQL** + Drizzle ORM
+- **Django** + Django REST Framework
+- **JWT auth** via `rest_framework_simplejwt` — custom serializer adds `role`, `full_name`, `email` to token
+- **MariaDB** (via Django ORM)
 
 ### Libraries
 - **Lucide React** — icons
@@ -140,11 +140,21 @@ brand.amber:     #F59E0B   amber-400   premium / important CTAs
 
 **JWT-based** (token in `localStorage`):
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/auth/login/` | POST | Login — returns JWT access token |
-| `/api/auth/register/` | POST | Student self-registration |
-| `/api/auth/refresh/` | POST | Refresh access token |
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/auth/login/` | POST | — | Login — returns JWT with `role`, `full_name`, `email` |
+| `/api/auth/register/` | POST | — | Student self-registration (role forced to `student`) |
+| `/api/auth/refresh/` | POST | — | Refresh access token |
+| `/api/users/` | GET | admin | List all registered users |
+| `/api/users/me/` | GET/PATCH | any | View/update own profile |
+| `/api/users/<id>/` | GET/DELETE | admin | User detail / delete |
+| `/api/support/` | GET/POST | any | Support tickets |
+
+**Test accounts:**
+| Role | Username | Password |
+|------|----------|----------|
+| admin | `admin` | `Admin@123` |
+| student | `student1` | `Student@123` |
 
 **Role routing:**
 - `admin` / `employee` → `/dashboard`
