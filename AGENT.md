@@ -38,29 +38,33 @@ Instructions for Claude Code and other AI agents working on this project.
 
 ### Student portal routes
 ```
-/student               → StudentHomePage
-/student/courses       → StudentCoursesPage   (free + premium, filter, "Add to Learning")
-/student/learning      → StudentMyLearningPage (claimed courses library)
-/student/services      → StudentServicesPage   (browse services + booking threads)
-/student/request       → StudentRequestPage    (support form)
-/student/profile       → StudentProfilePage
+/student                 → StudentHomePage          (stats: courses, learning, exams, sessions, tickets)
+/student/courses         → StudentCoursesPage       (free + premium, filter, "Add to Learning")
+/student/learning        → StudentMyLearningPage    (claimed courses library)
+/student/assessments     → StudentAssessmentsPage   (exam cards, filter by free/premium/status)
+/student/assessments/:id → StudentExamPage          (intro → timed exam → results + review)
+/student/services        → StudentServicesPage      (browse services + booking threads)
+/student/request         → StudentRequestPage       (support form)
+/student/profile         → StudentProfilePage
 ```
 
 ### Admin dashboard routes
 ```
-/dashboard             → DashboardOverviewPage  (stats: projects, students, ebooks)
-/dashboard/users       → DashboardUsersPage     (students list + delete)
-/dashboard/ebooks      → DashboardEbooksPage    (courses CRUD, free/premium toggle)
-/dashboard/projects    → DashboardProjectsPage
-/dashboard/about       → DashboardAboutPage
-/dashboard/skills      → DashboardSkillsPage
-/dashboard/tech-stack  → DashboardTechStackPage
-/dashboard/timeline    → DashboardTimelinePage
-/dashboard/messages    → DashboardMessagesPage
-/dashboard/knowledge-hub → DashboardKnowledgeHubPage
-/dashboard/gallery     → DashboardGalleryPage
-/dashboard/services    → DashboardServicesPage  (services CRUD + booking threads)
-/dashboard/navbar-footer → DashboardNavbarFooterPage
+/dashboard                      → DashboardOverviewPage     (stats: projects, students, ebooks)
+/dashboard/users                → DashboardUsersPage        (students list + delete)
+/dashboard/ebooks               → DashboardEbooksPage       (courses CRUD, free/premium toggle)
+/dashboard/assessments          → DashboardAssessmentsPage  (exam list + create/edit modal)
+/dashboard/assessments/:id/edit → DashboardAssessmentEditorPage (question builder)
+/dashboard/projects             → DashboardProjectsPage
+/dashboard/about                → DashboardAboutPage
+/dashboard/skills               → DashboardSkillsPage
+/dashboard/tech-stack           → DashboardTechStackPage
+/dashboard/timeline             → DashboardTimelinePage
+/dashboard/messages             → DashboardMessagesPage
+/dashboard/knowledge-hub        → DashboardKnowledgeHubPage
+/dashboard/gallery              → DashboardGalleryPage
+/dashboard/services             → DashboardServicesPage     (services CRUD + booking threads)
+/dashboard/navbar-footer        → DashboardNavbarFooterPage
 ```
 
 ---
@@ -85,6 +89,16 @@ Instructions for Claude Code and other AI agents working on this project.
 | `/api/bookings/<id>/reply/` | POST | any | Add message to booking thread |
 | `/api/bookings/<id>/status/` | PATCH | admin | Set booking status (pending/replied/closed) |
 | `/api/bookings/<id>/read/` | POST | student | Mark admin replies as read |
+| `/api/assessments/` | GET/POST | any/admin | List active exams (with `user_attempt`) / create |
+| `/api/assessments/<id>/` | GET/PUT/PATCH/DELETE | any/admin | Detail (admin gets questions) / update / delete |
+| `/api/assessments/<id>/questions/` | GET/POST | admin | List / add question |
+| `/api/assessments/<id>/start/` | POST | student | Start or resume attempt (idempotent) |
+| `/api/assessments/<id>/leaderboard/` | GET | any | Top 10 completers by score |
+| `/api/questions/<id>/` | GET/PATCH/DELETE | admin | Question update / delete |
+| `/api/questions/<id>/options/` | GET/POST | admin | List / add answer option |
+| `/api/options/<id>/` | GET/PATCH/DELETE | admin | Option update / delete |
+| `/api/attempts/<id>/submit/` | POST | student | Submit `{ answers: [{question_id, selected_option_ids}] }` → auto-grades |
+| `/api/attempts/<id>/result/` | GET | student | Full result: score + per-question correct/selected/explanation |
 
 **JWT payload** (decoded via `jwtDecode`):
 ```json
@@ -210,6 +224,21 @@ const validate = (form) => {
 // setErrors on submit + onBlur per field
 ```
 
+### Assessment exam flow
+```js
+// Start attempt (idempotent — returns existing if already started)
+const { data: attempt } = await assessmentsAPI.startAttempt(assessmentId)
+
+// Submit answers
+await assessmentsAPI.submitAttempt(attempt.id, {
+  answers: [{ question_id: 1, selected_option_ids: [3] }]
+})
+
+// Get result with per-question review
+const { data: result } = await assessmentsAPI.getResult(attempt.id)
+// result.score, result.total, result.percentage, result.passed, result.questions[]
+```
+
 ### Toast notifications
 ```jsx
 import { showSuccess, showError } from '@utils/toast'
@@ -235,11 +264,15 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 | `client/src/pages/student/StudentLayout.jsx` | Student sidebar layout (fixed desktop, drawer mobile) |
 | `client/src/pages/student/StudentCoursesPage.jsx` | Courses with filter + Add to Learning + success popup |
 | `client/src/pages/student/StudentMyLearningPage.jsx` | Claimed courses library |
+| `client/src/pages/student/StudentAssessmentsPage.jsx` | Exam list with status badges, score bars, free/premium filter |
+| `client/src/pages/student/StudentExamPage.jsx` | Exam state machine: intro → timed exam → result + review |
+| `client/src/pages/dashboard/DashboardAssessmentsPage.jsx` | Admin exam list + create/edit modal |
+| `client/src/pages/dashboard/DashboardAssessmentEditorPage.jsx` | Question builder (MCQ single/multi, T/F, options, explanations) |
 | `client/src/pages/student/StudentServicesPage.jsx` | Service cards + booking thread UI |
 | `client/src/components/dashboard/DashboardLayout.jsx` | Admin layout with topbar (user badge + page title) |
 | `client/src/components/dashboard/Sidebar.jsx` | Admin sidebar nav |
 | `client/src/components/layout/Navbar.jsx` | Public navbar |
-| `client/src/services/api.js` | All API clients (authAPI, usersAPI, ebooksAPI, learningAPI, bookingsAPI…) |
+| `client/src/services/api.js` | All API clients (authAPI, usersAPI, ebooksAPI, learningAPI, bookingsAPI, assessmentsAPI…) |
 | `client/src/styles/globals.css` | CSS variables, theme tokens, component classes |
 | `client/tailwind.config.js` | Design tokens, brand colors, shadows |
 | `client/src/animations/variants.js` | Framer Motion animation presets |
@@ -248,7 +281,7 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 ### Backend
 | File | Purpose |
 |------|---------|
-| `backend/portfolio/models.py` | All DB models: `UserProfile`, `StudentLearning`, `ServiceBooking`, `BookingReply`, `SupportTicket` |
+| `backend/portfolio/models.py` | All DB models: `UserProfile`, `StudentLearning`, `ServiceBooking`, `BookingReply`, `SupportTicket`, `Assessment`, `Question`, `AnswerOption`, `StudentAttempt`, `StudentAnswer` |
 | `backend/portfolio/serializers.py` | DRF serializers + `CustomTokenObtainPairSerializer` (adds role/full_name/email) |
 | `backend/portfolio/views.py` | All views: auth, users, learning, bookings, support |
 | `backend/portfolio/urls.py` | All API routes |
@@ -274,6 +307,30 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 ### BookingReply
 - ForeignKey ServiceBooking + sender User
 - `is_admin`, `read_by_student` — drives unread count badge
+
+### Assessment
+- Fields: `title`, `description`, `category`, `tags` (JSON), `is_free`, `time_limit` (nullable, minutes), `pass_mark` (int %, default 60), `is_active`, `order`
+- `related_name='questions'` (Question FK), `related_name='attempts'` (StudentAttempt FK)
+
+### Question
+- ForeignKey Assessment (`related_name='questions'`)
+- `type`: `mcq_single` | `mcq_multi` | `true_false`
+- Fields: `text`, `explanation`, `order`
+- `related_name='options'` (AnswerOption FK)
+
+### AnswerOption
+- ForeignKey Question (`related_name='options'`)
+- Fields: `text`, `is_correct`, `order`
+- Grading: `set(selected_option_ids) == set(correct_option_ids)` — works for all types
+
+### StudentAttempt
+- ForeignKey User + Assessment, `unique_together` — one attempt per student per exam
+- Fields: `started_at`, `submitted_at`, `score`, `total`, `status` (in_progress/completed)
+- Properties: `percentage` (0–100), `passed` (percentage >= assessment.pass_mark)
+
+### StudentAnswer
+- ForeignKey StudentAttempt + Question, `unique_together`
+- `selected_options` — JSON list of AnswerOption PKs
 
 ---
 

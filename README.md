@@ -175,6 +175,16 @@ brand.amber:     #F59E0B   amber-400   premium / important CTAs
 | `/api/bookings/<id>/reply/` | POST | any | Add message to booking thread |
 | `/api/bookings/<id>/status/` | PATCH | admin | Update booking status |
 | `/api/bookings/<id>/read/` | POST | student | Mark thread replies as read |
+| `/api/assessments/` | GET/POST | any/admin | List active exams (+ `user_attempt`) / create |
+| `/api/assessments/<id>/` | GET/PUT/PATCH/DELETE | any/admin | Detail / update / delete |
+| `/api/assessments/<id>/questions/` | GET/POST | admin | List / add question |
+| `/api/assessments/<id>/start/` | POST | student | Start (or resume) an attempt |
+| `/api/assessments/<id>/leaderboard/` | GET | any | Top 10 completers by score |
+| `/api/questions/<id>/` | GET/PUT/PATCH/DELETE | admin | Question detail / update / delete |
+| `/api/questions/<id>/options/` | GET/POST | admin | List / add answer option |
+| `/api/options/<id>/` | GET/PUT/PATCH/DELETE | admin | Option detail / update / delete |
+| `/api/attempts/<id>/submit/` | POST | student | Submit answers + auto-grade |
+| `/api/attempts/<id>/result/` | GET | student | Full result with per-question review |
 
 **Test accounts:**
 | Role | Username | Password |
