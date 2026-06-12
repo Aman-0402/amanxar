@@ -54,7 +54,7 @@ Instructions for Claude Code and other AI agents working on this project.
 /dashboard/users                → DashboardUsersPage        (students list + delete)
 /dashboard/ebooks               → DashboardEbooksPage       (courses CRUD, free/premium toggle)
 /dashboard/assessments          → DashboardAssessmentsPage  (exam list + create/edit modal)
-/dashboard/assessments/:id/edit → DashboardAssessmentEditorPage (question builder)
+/dashboard/assessments/:id/edit → DashboardAssessmentEditorPage (3 tabs: Questions | Analytics | Students)
 /dashboard/projects             → DashboardProjectsPage
 /dashboard/about                → DashboardAboutPage
 /dashboard/skills               → DashboardSkillsPage
@@ -99,6 +99,10 @@ Instructions for Claude Code and other AI agents working on this project.
 | `/api/options/<id>/` | GET/PATCH/DELETE | admin | Option update / delete |
 | `/api/attempts/<id>/submit/` | POST | student | Submit `{ answers: [{question_id, selected_option_ids}] }` → auto-grades |
 | `/api/attempts/<id>/result/` | GET | student | Full result: score + per-question correct/selected/explanation |
+| `/api/assessments/<id>/all-attempts/` | GET | admin | All student attempts with user info, started_at, submitted_at, score, pass/fail |
+| `/api/assessments/<id>/enrollments/` | GET | admin | List enrolled students |
+| `/api/assessments/<id>/enroll/` | POST | admin | Enroll student `{ user_id }` |
+| `/api/assessments/<id>/enrollments/<user_pk>/` | DELETE | admin | Unenroll student |
 
 **JWT payload** (decoded via `jwtDecode`):
 ```json
@@ -267,7 +271,7 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 | `client/src/pages/student/StudentAssessmentsPage.jsx` | Exam list with status badges, score bars, free/premium filter |
 | `client/src/pages/student/StudentExamPage.jsx` | Exam state machine: intro → timed exam → result + review |
 | `client/src/pages/dashboard/DashboardAssessmentsPage.jsx` | Admin exam list + create/edit modal |
-| `client/src/pages/dashboard/DashboardAssessmentEditorPage.jsx` | Question builder (MCQ single/multi, T/F, options, explanations) |
+| `client/src/pages/dashboard/DashboardAssessmentEditorPage.jsx` | 3 tabs: Questions (builder — MCQ single/multi, T/F, options, explanations), Analytics (enrolled count, pass/fail summary, per-student attempt table with start time/score), Students (enrollment management — enroll/unenroll per user) |
 | `client/src/pages/student/StudentServicesPage.jsx` | Service cards + booking thread UI |
 | `client/src/components/dashboard/DashboardLayout.jsx` | Admin layout with topbar (user badge + page title) |
 | `client/src/components/dashboard/Sidebar.jsx` | Admin sidebar nav |
@@ -281,11 +285,12 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 ### Backend
 | File | Purpose |
 |------|---------|
-| `backend/portfolio/models.py` | All DB models: `UserProfile`, `StudentLearning`, `ServiceBooking`, `BookingReply`, `SupportTicket`, `Assessment`, `Question`, `AnswerOption`, `StudentAttempt`, `StudentAnswer` |
+| `backend/portfolio/models.py` | All DB models: `UserProfile`, `StudentLearning`, `ServiceBooking`, `BookingReply`, `SupportTicket`, `Assessment`, `Question`, `AnswerOption`, `StudentAttempt`, `StudentAnswer`, `AssessmentEnrollment` |
 | `backend/portfolio/serializers.py` | DRF serializers + `CustomTokenObtainPairSerializer` (adds role/full_name/email) |
 | `backend/portfolio/views.py` | All views: auth, users, learning, bookings, support |
 | `backend/portfolio/urls.py` | All API routes |
 | `backend/portfolio/management/commands/create_test_users.py` | Creates admin + student test accounts |
+| `backend/portfolio/management/commands/create_test_assessment.py` | Seeds "Python Fundamentals Quiz" — 10 questions, 15 min, 60% pass, free |
 
 ---
 
@@ -331,6 +336,12 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 ### StudentAnswer
 - ForeignKey StudentAttempt + Question, `unique_together`
 - `selected_options` — JSON list of AnswerOption PKs
+
+### AssessmentEnrollment
+- ForeignKey User + Assessment, `unique_together` — admin grants premium exam access per student
+- `related_name='enrollments'` on Assessment
+- `is_enrolled` in `AssessmentListSerializer`: returns `True` if `assessment.is_free`, else checks `AssessmentEnrollment` for current user
+- `start_attempt` returns 403 `not_enrolled` for premium exams when student not enrolled and not admin/staff
 
 ---
 

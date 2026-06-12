@@ -41,7 +41,7 @@ amanxar/
 │
 ├── backend/                   # Django REST API
 │   └── portfolio/
-│       ├── models.py          # UserProfile, StudentLearning, ServiceBooking, BookingReply, Assessment, Question, AnswerOption, StudentAttempt, StudentAnswer
+│       ├── models.py          # UserProfile, StudentLearning, ServiceBooking, BookingReply, Assessment, Question, AnswerOption, StudentAttempt, StudentAnswer, AssessmentEnrollment
 │       ├── serializers.py     # DRF serializers + custom JWT serializer
 │       ├── views.py           # All API views
 │       └── urls.py            # API routes
@@ -109,7 +109,7 @@ amanxar/
 /dashboard/users                 → All registered users
 /dashboard/ebooks                → Courses CRUD (free/premium toggle)
 /dashboard/assessments           → Assessments list + create/edit modal
-/dashboard/assessments/:id/edit  → Question builder (MCQ single/multi, True/False, explanations)
+/dashboard/assessments/:id/edit  → Question builder (3 tabs: Questions | Analytics | Students enrollment)
 /dashboard/projects              → Projects CRUD
 /dashboard/about                 → About content management
 /dashboard/skills                → Skills management
@@ -185,6 +185,10 @@ brand.amber:     #F59E0B   amber-400   premium / important CTAs
 | `/api/options/<id>/` | GET/PUT/PATCH/DELETE | admin | Option detail / update / delete |
 | `/api/attempts/<id>/submit/` | POST | student | Submit answers + auto-grade |
 | `/api/attempts/<id>/result/` | GET | student | Full result with per-question review |
+| `/api/assessments/<id>/all-attempts/` | GET | admin | All student attempts — started_at, submitted_at, score, pass/fail |
+| `/api/assessments/<id>/enrollments/` | GET | admin | List enrolled students |
+| `/api/assessments/<id>/enroll/` | POST | admin | Enroll student `{ user_id }` |
+| `/api/assessments/<id>/enrollments/<user_pk>/` | DELETE | admin | Unenroll student |
 
 **Test accounts:**
 | Role | Username | Password |
@@ -220,6 +224,7 @@ npm run build        # → dist/
 cd backend
 python manage.py migrate
 python manage.py create_test_users
+python manage.py create_test_assessment   # seeds Python Fundamentals Quiz (10 questions)
 python manage.py runserver   # → http://localhost:8000
 ```
 
