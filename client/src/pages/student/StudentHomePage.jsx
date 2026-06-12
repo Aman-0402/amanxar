@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   GraduationCap, Briefcase, MessageSquare, ArrowRight,
-  Sparkles, Clock, TrendingUp, Star,
+  Sparkles, Clock, TrendingUp, Star, BookOpen,
 } from 'lucide-react'
 import { useAuth } from '@context/AuthContext'
 import { ebooksAPI } from '@services/api'

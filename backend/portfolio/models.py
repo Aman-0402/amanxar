@@ -406,6 +406,19 @@ class UserProfile(models.Model):
 # Support Ticket Model
 # ────────────────────────────────────────────────────────────────────────────
 
+class StudentLearning(models.Model):
+    user       = models.ForeignKey(User, on_delete=models.CASCADE, related_name='learning')
+    ebook      = models.ForeignKey('EBook', on_delete=models.CASCADE, related_name='learners')
+    claimed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [('user', 'ebook')]
+        ordering = ['-claimed_at']
+
+    def __str__(self):
+        return f'{self.user.username} → {self.ebook.title}'
+
+
 class ServiceBooking(models.Model):
     STATUS_CHOICES = [
         ('pending',  'Pending'),

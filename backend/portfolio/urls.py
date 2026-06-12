@@ -27,6 +27,8 @@ from .views import (
     UserDetailView,
     user_me,
     SupportTicketView,
+    StudentLearningView,
+    StudentLearningDetailView,
     ServiceBookingListCreateView,
     ServiceBookingDetailView,
     booking_reply,
@@ -70,6 +72,9 @@ urlpatterns = [
     path('users/<int:pk>/', UserDetailView.as_view(), name='user-detail'),
 
     path('support/', SupportTicketView.as_view(), name='support'),
+
+    path('learning/',          StudentLearningView.as_view(),       name='learning-list'),
+    path('learning/<int:pk>/', StudentLearningDetailView.as_view(), name='learning-detail'),
 
     path('bookings/',                        ServiceBookingListCreateView.as_view(), name='booking-list'),
     path('bookings/<int:pk>/',               ServiceBookingDetailView.as_view(),     name='booking-detail'),

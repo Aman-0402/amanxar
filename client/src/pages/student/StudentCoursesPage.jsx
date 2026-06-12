@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
   BookOpen, Search, ExternalLink, Lock, Tag, Crown, ArrowRight,
+  CheckCircle, PlusCircle, Loader2,
 } from 'lucide-react'
-import { ebooksAPI } from '@services/api'
+import { ebooksAPI, learningAPI } from '@services/api'
 import { fadeUp, staggerContainer } from '@animations/variants'
 import { assetUrl } from '@utils/assetUrl'
 
@@ -15,17 +16,29 @@ const FILTERS = [
 ]
 
 export default function StudentCoursesPage() {
-  const [ebooks, setEbooks]   = useState([])
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch]   = useState('')
-  const [filter, setFilter]   = useState('all')
+  const [ebooks, setEbooks]           = useState([])
+  const [learning, setLearning]       = useState([])  // { ebook: id, id: learningId }[]
+  const [loading, setLoading]         = useState(true)
+  const [search, setSearch]           = useState('')
+  const [filter, setFilter]           = useState('all')
+  const [claiming, setClaiming]       = useState(null)  // ebook id being claimed
+  const [successBook, setSuccessBook] = useState(null)  // ebook obj after claim
 
-  useEffect(() => {
-    ebooksAPI.getAll()
-      .then(({ data }) => setEbooks(data))
-      .catch(() => {})
-      .finally(() => setLoading(false))
+  const loadAll = useCallback(async () => {
+    try {
+      const [ebooksRes, learningRes] = await Promise.all([
+        ebooksAPI.getAll(),
+        learningAPI.getAll(),
+      ])
+      setEbooks(ebooksRes.data)
+      setLearning(learningRes.data)
+    } catch {}
+    finally { setLoading(false) }
   }, [])
+
+  useEffect(() => { loadAll() }, [loadAll])
+
+  const claimedIds = new Set(learning.map(l => l.ebook))
 
   const filtered = ebooks.filter(e => {
     const matchSearch =
@@ -40,6 +53,16 @@ export default function StudentCoursesPage() {
   const freeCount    = ebooks.filter(e => e.is_free).length
   const premiumCount = ebooks.filter(e => !e.is_free).length
 
+  const handleClaim = async (book) => {
+    setClaiming(book.id)
+    try {
+      await learningAPI.claim({ ebook: book.id })
+      setLearning(prev => [...prev, { ebook: book.id }])
+      setSuccessBook(book)
+    } catch {}
+    finally { setClaiming(null) }
+  }
+
   return (
     <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
 
@@ -51,8 +74,6 @@ export default function StudentCoursesPage() {
             {ebooks.length} courses available — {freeCount} free, {premiumCount} premium
           </p>
         </div>
-
-        {/* Premium CTA pill */}
         <Link
           to="/student/request"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-brand-amber/30 bg-brand-amber/8 text-brand-amber text-sm font-medium hover:bg-brand-amber/15 transition-colors shrink-0"
@@ -61,10 +82,8 @@ export default function StudentCoursesPage() {
         </Link>
       </motion.div>
 
-      {/* Search + Filter bar */}
+      {/* Search + Filter */}
       <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3">
-
-        {/* Search */}
         <div className="relative flex-1">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
           <input
@@ -75,8 +94,6 @@ export default function StudentCoursesPage() {
             className="w-full rounded-xl border border-bg-border bg-bg-elevated pl-9 pr-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
           />
         </div>
-
-        {/* Filter tabs */}
         <div className="flex gap-1.5 p-1 rounded-xl border border-bg-border bg-bg-elevated">
           {FILTERS.map(({ key, label }) => (
             <button
@@ -116,79 +133,159 @@ export default function StudentCoursesPage() {
         </motion.div>
       ) : (
         <motion.div variants={staggerContainer} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filtered.map(book => (
-            <motion.div
-              key={book.id || book.slug}
-              variants={fadeUp}
-              className="group rounded-xl border border-bg-border bg-bg-surface overflow-hidden hover:border-brand-primary/30 hover:shadow-card transition-all duration-200 flex flex-col"
-            >
-              {/* Cover */}
-              <div className="h-36 bg-bg-elevated flex items-center justify-center relative overflow-hidden">
-                {book.cover_image ? (
-                  <img
-                    src={assetUrl(book.cover_image)}
-                    alt={book.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center gap-2 opacity-40">
-                    {book.is_free
-                      ? <BookOpen size={36} className="text-brand-primary" />
-                      : <Crown size={36} className="text-brand-amber" />
-                    }
-                  </div>
-                )}
-                {/* Badge */}
-                {book.is_free ? (
-                  <span className="absolute top-2 right-2 rounded-full bg-green-500/20 border border-green-500/30 px-2.5 py-0.5 text-xs font-semibold text-green-400">
-                    Free
-                  </span>
-                ) : (
-                  <span className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-brand-amber/20 border border-brand-amber/40 px-2.5 py-0.5 text-xs font-semibold text-brand-amber">
-                    <Crown size={9} /> Premium
-                  </span>
-                )}
-              </div>
-
-              {/* Info */}
-              <div className="p-4 flex-1 flex flex-col gap-2">
-                {book.category && (
-                  <div className="flex items-center gap-1 text-[11px] text-text-muted uppercase tracking-wide">
-                    <Tag size={9} /> {book.category}
-                  </div>
-                )}
-                <h3 className="font-semibold text-text-primary text-sm leading-snug line-clamp-2">
-                  {book.title}
-                </h3>
-                {book.subtitle && (
-                  <p className="text-xs text-text-muted line-clamp-1">{book.subtitle}</p>
-                )}
-
-                {/* CTA */}
-                <div className="mt-auto pt-3">
-                  {book.is_free ? (
-                    <a
-                      href={book.read_url || book.download_url || book.file_url || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-1.5 w-full rounded-lg bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-xs font-semibold py-2.5 hover:bg-brand-primary hover:text-white transition-all"
-                    >
-                      <ExternalLink size={12} /> Read / Download
-                    </a>
+          {filtered.map(book => {
+            const inLearning = claimedIds.has(book.id)
+            const isClaiming = claiming === book.id
+            return (
+              <motion.div
+                key={book.id || book.slug}
+                variants={fadeUp}
+                className="group rounded-xl border border-bg-border bg-bg-surface overflow-hidden hover:border-brand-primary/30 hover:shadow-card transition-all duration-200 flex flex-col"
+              >
+                {/* Cover */}
+                <div className="h-36 bg-bg-elevated flex items-center justify-center relative overflow-hidden">
+                  {book.cover_image ? (
+                    <img
+                      src={assetUrl(book.cover_image)}
+                      alt={book.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
                   ) : (
-                    <Link
-                      to="/student/request"
-                      className="flex items-center justify-center gap-1.5 w-full rounded-lg bg-brand-amber/10 border border-brand-amber/20 text-brand-amber text-xs font-semibold py-2.5 hover:bg-brand-amber/20 transition-all"
-                    >
-                      <Lock size={12} /> Request Access <ArrowRight size={11} />
-                    </Link>
+                    <div className="flex flex-col items-center gap-2 opacity-40">
+                      {book.is_free
+                        ? <BookOpen size={36} className="text-brand-primary" />
+                        : <Crown size={36} className="text-brand-amber" />
+                      }
+                    </div>
+                  )}
+                  {book.is_free ? (
+                    <span className="absolute top-2 right-2 rounded-full bg-green-500/20 border border-green-500/30 px-2.5 py-0.5 text-xs font-semibold text-green-400">
+                      Free
+                    </span>
+                  ) : (
+                    <span className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-brand-amber/20 border border-brand-amber/40 px-2.5 py-0.5 text-xs font-semibold text-brand-amber">
+                      <Crown size={9} /> Premium
+                    </span>
                   )}
                 </div>
-              </div>
-            </motion.div>
-          ))}
+
+                {/* Info */}
+                <div className="p-4 flex-1 flex flex-col gap-2">
+                  {book.category && (
+                    <div className="flex items-center gap-1 text-[11px] text-text-muted uppercase tracking-wide">
+                      <Tag size={9} /> {book.category}
+                    </div>
+                  )}
+                  <h3 className="font-semibold text-text-primary text-sm leading-snug line-clamp-2">
+                    {book.title}
+                  </h3>
+                  {book.subtitle && (
+                    <p className="text-xs text-text-muted line-clamp-1">{book.subtitle}</p>
+                  )}
+
+                  {/* CTA */}
+                  <div className="mt-auto pt-3">
+                    {book.is_free ? (
+                      inLearning ? (
+                        <Link
+                          to="/student/learning"
+                          className="flex items-center justify-center gap-1.5 w-full rounded-lg bg-green-500/10 border border-green-500/25 text-green-400 text-xs font-semibold py-2.5 hover:bg-green-500/20 transition-all"
+                        >
+                          <CheckCircle size={12} /> In My Learning
+                        </Link>
+                      ) : (
+                        <button
+                          disabled={isClaiming}
+                          onClick={() => handleClaim(book)}
+                          className="flex items-center justify-center gap-1.5 w-full rounded-lg bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-xs font-semibold py-2.5 hover:bg-brand-primary hover:text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          {isClaiming
+                            ? <><Loader2 size={12} className="animate-spin" /> Adding…</>
+                            : <><PlusCircle size={12} /> Add to Learning</>
+                          }
+                        </button>
+                      )
+                    ) : (
+                      <Link
+                        to="/student/request"
+                        className="flex items-center justify-center gap-1.5 w-full rounded-lg bg-brand-amber/10 border border-brand-amber/20 text-brand-amber text-xs font-semibold py-2.5 hover:bg-brand-amber/20 transition-all"
+                      >
+                        <Lock size={12} /> Request Access <ArrowRight size={11} />
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            )
+          })}
         </motion.div>
       )}
+
+      {/* Success popup */}
+      <AnimatePresence>
+        {successBook && (
+          <motion.div
+            key="success-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+            onClick={() => setSuccessBook(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1,   opacity: 1, y: 0  }}
+              exit={{   scale: 0.8, opacity: 0, y: 10  }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              className="bg-bg-surface border border-bg-border rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Animated check */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 20, delay: 0.1 }}
+                className="mx-auto mb-4 h-16 w-16 rounded-full bg-green-500/15 border border-green-500/30 flex items-center justify-center"
+              >
+                <motion.div
+                  initial={{ scale: 0, rotate: -30 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: 'spring', stiffness: 600, damping: 20, delay: 0.2 }}
+                >
+                  <CheckCircle size={32} className="text-green-400" />
+                </motion.div>
+              </motion.div>
+
+              <h3 className="font-display text-lg font-bold text-text-primary mb-1">
+                Successfully Claimed!
+              </h3>
+              <p className="text-sm text-text-secondary mb-1">
+                <span className="text-brand-primary font-semibold">{successBook.title}</span>
+              </p>
+              <p className="text-xs text-text-muted mb-6">
+                Added to your learning library.
+              </p>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setSuccessBook(null)}
+                  className="flex-1 py-2.5 rounded-xl border border-bg-border text-text-secondary text-sm hover:bg-bg-elevated transition-colors"
+                >
+                  Continue Browsing
+                </button>
+                <Link
+                  to="/student/learning"
+                  onClick={() => setSuccessBook(null)}
+                  className="flex-1 py-2.5 rounded-xl bg-brand-primary text-white text-sm font-semibold hover:bg-brand-primary/90 transition-colors text-center"
+                >
+                  My Learning
+                </Link>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }

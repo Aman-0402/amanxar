@@ -26,6 +26,7 @@ from .models import (
     SocialLink,
     UserProfile,
     SupportTicket,
+    StudentLearning,
     ServiceBooking,
     BookingReply,
 )
@@ -53,6 +54,7 @@ from .serializers import (
     RegisterSerializer,
     UserSerializer,
     SupportTicketSerializer,
+    StudentLearningSerializer,
     ServiceBookingSerializer,
     BookingReplySerializer,
 )
@@ -330,6 +332,30 @@ class SupportTicketView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+# ── Student Learning Views ────────────────────────────────────────────────────
+
+class StudentLearningView(generics.ListCreateAPIView):
+    serializer_class = StudentLearningSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return StudentLearning.objects.filter(user=self.request.user).select_related('ebook')
+
+    def create(self, request, *args, **kwargs):
+        ebook_id = request.data.get('ebook')
+        obj, created = StudentLearning.objects.get_or_create(user=request.user, ebook_id=ebook_id)
+        serializer = self.get_serializer(obj)
+        return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+
+class StudentLearningDetailView(generics.DestroyAPIView):
+    serializer_class = StudentLearningSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return StudentLearning.objects.filter(user=self.request.user)
 
 
 # ── Service Booking Views ─────────────────────────────────────────────────────

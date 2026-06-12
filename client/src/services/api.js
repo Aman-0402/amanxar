@@ -52,6 +52,12 @@ export const supportAPI = {
   getAll: ()     => api.get('/api/support/'),
 }
 
+export const learningAPI = {
+  getAll:  ()       => api.get('/api/learning/'),
+  claim:   (data)   => api.post('/api/learning/', data),
+  remove:  (id)     => api.delete(`/api/learning/${id}/`),
+}
+
 export const bookingsAPI = {
   getAll:       ()          => api.get('/api/bookings/'),
   getById:      (id)        => api.get(`/api/bookings/${id}/`),

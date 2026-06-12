@@ -3,7 +3,7 @@ import { NavLink, Link, Outlet, useNavigate, useLocation } from 'react-router-do
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   BookOpen, Crown, Briefcase, MessageSquare,
-  User, LogOut, Menu, X, Home, ChevronRight, GraduationCap,
+  User, LogOut, Menu, X, Home, ChevronRight, GraduationCap, Library,
 } from 'lucide-react'
 import { useAuth } from '@context/AuthContext'
 import { assetUrl } from '@utils/assetUrl'
@@ -11,6 +11,7 @@ import { assetUrl } from '@utils/assetUrl'
 const NAV_LINKS = [
   { href: '/student',           label: 'Dashboard',    icon: Home,          end: true },
   { href: '/student/courses',   label: 'Courses',      icon: GraduationCap           },
+  { href: '/student/learning',  label: 'My Learning',  icon: Library                 },
   { href: '/student/services',  label: 'Services',      icon: Briefcase              },
   { href: '/student/request',   label: 'Request',      icon: MessageSquare           },
   { href: '/student/profile',   label: 'My Profile',   icon: User                   },
