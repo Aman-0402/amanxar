@@ -22,21 +22,17 @@ export default function Footer() {
   const year = new Date().getFullYear()
 
   useEffect(() => {
-    const fetchFooterData = async () => {
-      try {
-        const [sectionsRes, ctaRes, socialsRes] = await Promise.all([
-          footerSectionsAPI.getAll(),
-          footerCTAAPI.getAll(),
-          socialLinksAPI.getAll(),
-        ])
-        setFooterSections(sectionsRes.data.sort((a, b) => a.order - b.order))
-        setFooterCTA(ctaRes.data[0] || null)
-        setSocialLinks(socialsRes.data.sort((a, b) => a.order - b.order))
-      } catch (err) {
-        console.error('Failed to fetch footer data:', err)
-      }
-    }
-    fetchFooterData()
+    footerSectionsAPI.getAll()
+      .then(({ data }) => setFooterSections([...data].sort((a, b) => a.order - b.order)))
+      .catch(() => {})
+
+    footerCTAAPI.getAll()
+      .then(({ data }) => setFooterCTA(data[0] || null))
+      .catch(() => {})
+
+    socialLinksAPI.getAll()
+      .then(({ data }) => setSocialLinks([...data].sort((a, b) => a.order - b.order)))
+      .catch(() => {})
   }, [])
 
   return (
@@ -87,7 +83,7 @@ export default function Footer() {
           variants={staggerContainer}
           initial="hidden"
           whileInView="visible"
-          viewport={viewport}
+          viewport={{ once: true, margin: '0px' }}
           className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]"
         >
 

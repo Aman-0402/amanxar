@@ -231,7 +231,7 @@ class NavbarLinkViewSet(viewsets.ModelViewSet):
 
 
 class FooterSectionViewSet(viewsets.ModelViewSet):
-    queryset = FooterSection.objects.all()
+    queryset = FooterSection.objects.prefetch_related('links').all()
     serializer_class = FooterSectionSerializer
 
     def get_permissions(self):
