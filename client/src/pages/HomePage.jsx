@@ -35,9 +35,12 @@ function ParticleCanvas({ mouseRef }) {
     const MOUSE_R2   = MOUSE_R * MOUSE_R
     const FORCE      = 0.016
 
+    const FW = W || 1200
+    const FH = H || 700
+
     const pts = Array.from({ length: N }, () => ({
-      x:  Math.random() * W || Math.random() * 1200,
-      y:  Math.random() * H || Math.random() * 700,
+      x:  Math.random() * FW,
+      y:  Math.random() * FH,
       vx: (Math.random() - 0.5) * 0.35,
       vy: (Math.random() - 0.5) * 0.35,
       baseR: Math.random() * 1.8 + 0.4,
@@ -45,7 +48,53 @@ function ParticleCanvas({ mouseRef }) {
       phase: Math.random() * Math.PI * 2,
       speed: Math.random() * 0.018 + 0.008,
       baseAlpha: Math.random() * 0.35 + 0.35,
+      inConstellation: false,
     }))
+
+    // ── Build random constellations ──────────────────────────────────────────
+    // 5 constellations of 4–7 stars each, connected as a path (chain of edges)
+    const NUM_CONSTELLATIONS = 5
+    const constellationEdges = [] // [{a, b}] pairs to draw each frame
+
+    const usedIndices = new Set()
+    for (let c = 0; c < NUM_CONSTELLATIONS; c++) {
+      const size = 4 + Math.floor(Math.random() * 4)  // 4–7 stars
+      // Pick a random seed not already used
+      let seed
+      do { seed = Math.floor(Math.random() * N) } while (usedIndices.has(seed))
+
+      // Grow constellation by picking nearest unused neighbours
+      const members = [seed]
+      usedIndices.add(seed)
+
+      while (members.length < size) {
+        const last = pts[members[members.length - 1]]
+        let bestDist = Infinity, bestIdx = -1
+        for (let i = 0; i < N; i++) {
+          if (usedIndices.has(i)) continue
+          const dx = pts[i].x - last.x
+          const dy = pts[i].y - last.y
+          // bias toward candidates that are in a moderate range (not too close, not too far)
+          const d = Math.sqrt(dx * dx + dy * dy)
+          const score = Math.abs(d - 120) // prefer ~120px apart
+          if (score < bestDist) { bestDist = score; bestIdx = i }
+        }
+        if (bestIdx === -1) break
+        members.push(bestIdx)
+        usedIndices.add(bestIdx)
+      }
+
+      // Chain edges: 0→1→2→…→last, plus one skip edge for variety
+      for (let i = 0; i < members.length - 1; i++) {
+        constellationEdges.push({ a: members[i], b: members[i + 1] })
+        pts[members[i]].inConstellation = true
+      }
+      pts[members[members.length - 1]].inConstellation = true
+      // Extra branch edge if size >= 6
+      if (members.length >= 6) {
+        constellationEdges.push({ a: members[1], b: members[members.length - 2] })
+      }
+    }
 
     const loop = () => {
       ctx.clearRect(0, 0, W, H)
@@ -101,8 +150,10 @@ function ParticleCanvas({ mouseRef }) {
         ctx.beginPath()
         ctx.arc(p.x, p.y, drawR, 0, Math.PI * 2)
         ctx.fillStyle = proximity > 0.25
-          ? `rgba(186,230,253,${alpha})`   // near cursor: sky-200 bright
-          : `rgba(96,165,250,${alpha})`    // normal: blue-400
+          ? `rgba(186,230,253,${alpha})`
+          : p.inConstellation
+            ? `rgba(186,230,253,${Math.min(1, alpha + 0.2)})`  // constellation stars: brighter
+            : `rgba(96,165,250,${alpha})`
         ctx.fill()
       }
 
@@ -124,6 +175,23 @@ function ParticleCanvas({ mouseRef }) {
             ctx.stroke()
           }
         }
+      }
+
+      // Constellation lines — drawn on top, brighter + slightly thicker
+      ctx.lineWidth = 1.1
+      for (const { a, b } of constellationEdges) {
+        const pa = pts[a], pb = pts[b]
+        const dx = pa.x - pb.x
+        const dy = pa.y - pb.y
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        // Fade slightly if stars have drifted very far apart
+        const alpha = Math.max(0, Math.min(0.55, 0.55 - (dist - 180) * 0.003))
+        if (alpha <= 0) continue
+        ctx.beginPath()
+        ctx.strokeStyle = `rgba(147,197,253,${alpha.toFixed(3)})`
+        ctx.moveTo(pa.x, pa.y)
+        ctx.lineTo(pb.x, pb.y)
+        ctx.stroke()
       }
 
       rafId = requestAnimationFrame(loop)
