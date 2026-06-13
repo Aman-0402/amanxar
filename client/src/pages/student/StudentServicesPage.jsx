@@ -132,7 +132,10 @@ function ServiceCard({ svc, onRequest }) {
       <button className="w-full text-left p-5" onClick={() => setExpanded(v => !v)}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">{svc.icon || '🎯'}</span>
+            {svc.icon && /\p{Emoji_Presentation}|\p{Extended_Pictographic}/u.test(svc.icon)
+              ? <span className="text-2xl">{svc.icon}</span>
+              : <Briefcase size={22} className="text-brand-primary opacity-70 shrink-0" />
+            }
             <div>
               <h3 className="font-semibold text-text-primary text-sm">{svc.title}</h3>
               <p className="text-xs text-text-muted mt-0.5 line-clamp-1">{svc.description}</p>
