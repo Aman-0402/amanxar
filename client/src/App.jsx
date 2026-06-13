@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import RootLayout from '@components/layout/RootLayout'
@@ -272,11 +272,7 @@ const router = createBrowserRouter(
       },
       {
         path: 'ebooks',
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <EbooksPage />
-          </Suspense>
-        ),
+        element: <Navigate to="/login" replace />,
       },
       {
         path: 'knowledge-hub',

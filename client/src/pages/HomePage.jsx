@@ -10,7 +10,6 @@ import ProjectPreviewCard from '@components/home/ProjectPreviewCard'
 import ServicePeekCard from '@components/home/ServicePeekCard'
 
 // ─── Particle Network Canvas ──────────────────────────────────────────────────
-// Runs entirely on native Canvas 2D API — zero React re-renders during animation.
 function ParticleCanvas({ mouseRef }) {
   const canvasRef = useRef(null)
 
@@ -26,67 +25,106 @@ function ParticleCanvas({ mouseRef }) {
       H = canvas.height = canvas.offsetHeight
     }
     resize()
-
     const ro = new ResizeObserver(resize)
     ro.observe(canvas)
 
-    // Particle pool
-    const N = 75
-    const CONNECT_D2 = 130 * 130   // squared to avoid sqrt in hot loop
-    const MOUSE_R    = 160
-    const FORCE      = 0.011
+    const N          = 200
+    const CONNECT_D  = 140
+    const CONNECT_D2 = CONNECT_D * CONNECT_D
+    const MOUSE_R    = 220
+    const MOUSE_R2   = MOUSE_R * MOUSE_R
+    const FORCE      = 0.016
 
     const pts = Array.from({ length: N }, () => ({
-      x:  Math.random() * W,
-      y:  Math.random() * H,
-      vx: (Math.random() - 0.5) * 0.38,
-      vy: (Math.random() - 0.5) * 0.38,
-      r:  Math.random() * 1.5 + 0.5,
+      x:  Math.random() * W || Math.random() * 1200,
+      y:  Math.random() * H || Math.random() * 700,
+      vx: (Math.random() - 0.5) * 0.35,
+      vy: (Math.random() - 0.5) * 0.35,
+      baseR: Math.random() * 1.8 + 0.4,
+      r:  0,
+      phase: Math.random() * Math.PI * 2,
+      speed: Math.random() * 0.018 + 0.008,
+      baseAlpha: Math.random() * 0.35 + 0.35,
     }))
 
     const loop = () => {
       ctx.clearRect(0, 0, W, H)
       const { x: mx, y: my } = mouseRef.current
 
-      // Update particles
+      // Cursor aura glow
+      if (mx !== -999) {
+        const aura = ctx.createRadialGradient(mx, my, 0, mx, my, MOUSE_R)
+        aura.addColorStop(0,   'rgba(59,130,246,0.13)')
+        aura.addColorStop(0.5, 'rgba(59,130,246,0.05)')
+        aura.addColorStop(1,   'rgba(59,130,246,0)')
+        ctx.fillStyle = aura
+        ctx.fillRect(0, 0, W, H)
+      }
+
+      // Update + draw particles
       for (const p of pts) {
+        p.phase += p.speed
+        p.r = Math.max(0.1, p.baseR + Math.sin(p.phase) * 0.55)
+
         const ddx = p.x - mx
         const ddy = p.y - my
         const d2  = ddx * ddx + ddy * ddy
-        if (d2 < MOUSE_R * MOUSE_R && d2 > 0) {
+
+        let proximity = 0
+        if (d2 < MOUSE_R2 && d2 > 0 && mx !== -999) {
           const d = Math.sqrt(d2)
-          const f = (1 - d / MOUSE_R) * FORCE
+          proximity = 1 - d / MOUSE_R
+          const f = proximity * FORCE
           p.vx += (ddx / d) * f
           p.vy += (ddy / d) * f
         }
-        p.vx *= 0.99; p.vy *= 0.99
-        p.x  += p.vx; p.y  += p.vy
+
+        p.vx *= 0.992; p.vy *= 0.992
+        p.x  += p.vx;  p.y  += p.vy
         if (p.x < 0) { p.x = 0; p.vx =  Math.abs(p.vx) }
         if (p.x > W) { p.x = W; p.vx = -Math.abs(p.vx) }
         if (p.y < 0) { p.y = 0; p.vy =  Math.abs(p.vy) }
         if (p.y > H) { p.y = H; p.vy = -Math.abs(p.vy) }
 
+        // Twinkle alpha + proximity boost
+        const alpha  = Math.min(1, p.baseAlpha + Math.sin(p.phase * 1.4) * 0.18 + proximity * 0.45)
+        const drawR  = Math.max(0.1, p.r * (1 + proximity * 1.8))
+
+        // Glow for brighter stars
+        if (drawR > 1.6 || proximity > 0.3) {
+          ctx.shadowBlur  = proximity > 0.3 ? 12 : 5
+          ctx.shadowColor = `rgba(147,197,253,${alpha})`
+        } else {
+          ctx.shadowBlur = 0
+        }
+
         ctx.beginPath()
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
-        ctx.fillStyle = 'rgba(96,165,250,0.65)'
+        ctx.arc(p.x, p.y, drawR, 0, Math.PI * 2)
+        ctx.fillStyle = proximity > 0.25
+          ? `rgba(186,230,253,${alpha})`   // near cursor: sky-200 bright
+          : `rgba(96,165,250,${alpha})`    // normal: blue-400
         ctx.fill()
       }
 
-      // Connections — single batched stroke call for GPU efficiency
-      ctx.beginPath()
-      ctx.strokeStyle = 'rgba(96,165,250,0.14)'
-      ctx.lineWidth   = 0.7
+      ctx.shadowBlur = 0
+
+      // Connections — distance-faded opacity
+      ctx.lineWidth = 0.6
       for (let i = 0; i < N; i++) {
         for (let j = i + 1; j < N; j++) {
           const dx = pts[i].x - pts[j].x
           const dy = pts[i].y - pts[j].y
-          if (dx * dx + dy * dy < CONNECT_D2) {
+          const d2 = dx * dx + dy * dy
+          if (d2 < CONNECT_D2) {
+            const fade = 1 - Math.sqrt(d2) / CONNECT_D
+            ctx.beginPath()
+            ctx.strokeStyle = `rgba(96,165,250,${(0.12 * fade).toFixed(3)})`
             ctx.moveTo(pts[i].x, pts[i].y)
             ctx.lineTo(pts[j].x, pts[j].y)
+            ctx.stroke()
           }
         }
       }
-      ctx.stroke()
 
       rafId = requestAnimationFrame(loop)
     }
