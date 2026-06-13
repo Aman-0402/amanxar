@@ -111,14 +111,16 @@ amanxar/
 /dashboard/assessments           → Assessments list + create/edit modal
 /dashboard/assessments/:id/edit  → Question builder (3 tabs: Questions | Analytics | Students enrollment)
 /dashboard/projects              → Projects CRUD
+/dashboard/messages              → Messages (Contact tab + Support Tickets tab with filter pills + thread view + close/reopen)
+/dashboard/services              → Services CMS + booking threads
+/dashboard/gallery               → Gallery management
+/dashboard/knowledge-hub         → Knowledge Hub CMS
+/dashboard/settings              → Profile update (name/email/phone) + password change
+— Site Content (collapsible sidebar group) —
 /dashboard/about                 → About content management
 /dashboard/skills                → Skills management
 /dashboard/tech-stack            → Tech stack management
 /dashboard/timeline              → Timeline events
-/dashboard/messages              → Messages (Contact tab + Support Tickets tab with filter pills + thread view + close/reopen)
-/dashboard/knowledge-hub         → Knowledge Hub CMS
-/dashboard/gallery               → Gallery management
-/dashboard/services              → Services CMS + booking threads
 /dashboard/navbar-footer         → Navbar + footer link management
 ```
 
@@ -166,8 +168,10 @@ brand.amber:     #F59E0B   amber-400   premium / important CTAs
 | `/api/auth/register/` | POST | — | Student self-registration (role forced to `student`) |
 | `/api/auth/refresh/` | POST | — | Refresh access token |
 | `/api/users/` | GET | admin | List all registered users |
-| `/api/users/me/` | GET/PATCH | any | View/update own profile |
+| `/api/users/me/` | GET/PATCH | any | View/update own profile (name/email/phone) |
+| `/api/users/me/change-password/` | POST | any | Change password `{ current_password, new_password }` |
 | `/api/users/<id>/` | GET/DELETE | admin | User detail / delete |
+| `/api/public/stats/` | GET | — | Public stats `{ students, courses, projects }` for hero counters |
 | `/api/support/` | GET/POST | any | Support tickets (admin: all; student: own) |
 | `/api/support/<id>/` | GET | auth | Ticket detail with replies |
 | `/api/support/<id>/reply/` | POST | auth | Add reply — `is_admin` set from role |

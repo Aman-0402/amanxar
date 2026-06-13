@@ -50,20 +50,22 @@ Instructions for Claude Code and other AI agents working on this project.
 
 ### Admin dashboard routes
 ```
-/dashboard                      → DashboardOverviewPage     (stats: projects, students, ebooks)
-/dashboard/users                → DashboardUsersPage        (students list + delete)
-/dashboard/ebooks               → DashboardEbooksPage       (courses CRUD, free/premium toggle)
-/dashboard/assessments          → DashboardAssessmentsPage  (exam list + create/edit modal)
+/dashboard                      → DashboardOverviewPage         (stats: projects, students, ebooks)
+/dashboard/users                → DashboardUsersPage            (students list + delete)
+/dashboard/ebooks               → DashboardEbooksPage           (courses CRUD, free/premium toggle)
+/dashboard/assessments          → DashboardAssessmentsPage      (exam list + create/edit modal)
 /dashboard/assessments/:id/edit → DashboardAssessmentEditorPage (3 tabs: Questions | Analytics | Students)
 /dashboard/projects             → DashboardProjectsPage
+/dashboard/messages             → DashboardMessagesPage         (two tabs: Contact submissions | Support Tickets with filter + thread)
+/dashboard/services             → DashboardServicesPage         (services CRUD + booking threads)
+/dashboard/gallery              → DashboardGalleryPage
+/dashboard/knowledge-hub        → DashboardKnowledgeHubPage
+/dashboard/settings             → DashboardSettingsPage         (profile update: name/email/phone + password change)
+— Site Content (collapsible sidebar group) —
 /dashboard/about                → DashboardAboutPage
 /dashboard/skills               → DashboardSkillsPage
 /dashboard/tech-stack           → DashboardTechStackPage
 /dashboard/timeline             → DashboardTimelinePage
-/dashboard/messages             → DashboardMessagesPage     (two tabs: Contact submissions | Support Tickets with filter + thread)
-/dashboard/knowledge-hub        → DashboardKnowledgeHubPage
-/dashboard/gallery              → DashboardGalleryPage
-/dashboard/services             → DashboardServicesPage     (services CRUD + booking threads)
 /dashboard/navbar-footer        → DashboardNavbarFooterPage
 ```
 
@@ -79,8 +81,10 @@ Instructions for Claude Code and other AI agents working on this project.
 | `/api/auth/register/` | POST | — | Creates student account (role hardcoded to `student`) |
 | `/api/auth/refresh/` | POST | — | Refresh access token |
 | `/api/users/` | GET | admin/employee | List all users with profiles |
-| `/api/users/me/` | GET/PATCH | any | Current user profile (read + update) |
+| `/api/users/me/` | GET/PATCH | any | Current user profile (read + update name/email/phone) |
+| `/api/users/me/change-password/` | POST | any | Change password `{ current_password, new_password }` |
 | `/api/users/<id>/` | GET/DELETE | admin | User detail / delete |
+| `/api/public/stats/` | GET | — | Public stats `{ students, courses, projects }` — used in hero counters |
 | `/api/support/` | GET/POST | any | Support tickets (admin sees all; student sees own) |
 | `/api/support/<id>/` | GET | auth | Ticket detail with all replies |
 | `/api/support/<id>/reply/` | POST | auth | Add reply `{ message }` — sets `is_admin` from role, updates status |
@@ -295,7 +299,8 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 | `client/src/components/dashboard/DashboardLayout.jsx` | Admin layout with topbar (user badge + page title) |
 | `client/src/components/dashboard/Sidebar.jsx` | Admin sidebar nav |
 | `client/src/components/layout/Navbar.jsx` | Public navbar |
-| `client/src/services/api.js` | All API clients (authAPI, usersAPI, ebooksAPI, learningAPI, bookingsAPI, assessmentsAPI…) |
+| `client/src/services/api.js` | All API clients (authAPI, usersAPI, ebooksAPI, learningAPI, bookingsAPI, assessmentsAPI, publicAPI…) |
+| `client/src/pages/dashboard/DashboardSettingsPage.jsx` | Profile update (name/email/phone) + password change with show/hide toggles |
 | `client/src/styles/globals.css` | CSS variables, theme tokens, component classes |
 | `client/tailwind.config.js` | Design tokens, brand colors, shadows |
 | `client/src/animations/variants.js` | Framer Motion animation presets |
@@ -394,7 +399,7 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 - Don't use `alert()` — use toast utilities
 - Don't create styled-components or CSS-in-JS
 - Don't use inline `style={{}}` for colors/layout
-- Don't add Ebook link to the public navbar — it's hidden by design
+- Don't add Ebook link to the public navbar — `/ebooks` redirects to `/login` by design
 - Don't redirect students to `/dashboard` — they go to `/student`
 - Don't hardcode indigo `#6366F1` — that's the old brand color; use `#3B82F6`
 - Don't assume a User has a `UserProfile` — always use `getattr(user, 'profile', None)`
