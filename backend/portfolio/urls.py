@@ -52,6 +52,7 @@ from .views import (
     enroll_student,
     unenroll_student,
     assessment_attempts,
+    public_stats,
 )
 
 app_name = 'portfolio'
@@ -119,4 +120,6 @@ urlpatterns = [
     path('assessments/<int:assessment_pk>/enrollments/',              enrollment_list,   name='enrollment-list'),
     path('assessments/<int:assessment_pk>/enroll/',                   enroll_student,    name='enroll-student'),
     path('assessments/<int:assessment_pk>/enrollments/<int:user_pk>/', unenroll_student, name='unenroll-student'),
+
+    path('public/stats/', public_stats, name='public-stats'),
 ]

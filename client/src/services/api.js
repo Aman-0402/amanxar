@@ -241,4 +241,8 @@ export const socialLinksAPI = {
   delete: (id) => api.delete(`/api/social-links/${id}/`),
 }
 
+export const publicAPI = {
+  getStats: () => api.get('/api/public/stats/'),
+}
+
 export default api

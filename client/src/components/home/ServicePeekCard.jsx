@@ -1,17 +1,17 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { fadeUp } from '@animations/variants'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, Briefcase } from 'lucide-react'
+
+const EMOJI_RE = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/u
 
 export default function ServicePeekCard({ service }) {
-  // Render icon from service.icon (can be emoji or text)
   const renderIcon = () => {
-    if (!service.icon) return null
-    // If it's a unicode emoji or special char, render directly
-    if (typeof service.icon === 'string') {
-      return <div className="text-5xl">{service.icon}</div>
+    const icon = service.icon
+    if (icon && typeof icon === 'string' && EMOJI_RE.test(icon)) {
+      return <div className="text-5xl">{icon}</div>
     }
-    return null
+    return <Briefcase size={40} className="text-brand-primary opacity-70" />
   }
 
   return (

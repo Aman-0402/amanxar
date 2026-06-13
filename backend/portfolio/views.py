@@ -901,3 +901,16 @@ def unenroll_student(request, assessment_pk, user_pk):
     if not deleted:
         return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def public_stats(request):
+    students = UserProfile.objects.filter(role='student').count()
+    courses  = EBook.objects.count()
+    projects = Project.objects.count()
+    return Response({
+        'students': students,
+        'courses':  courses,
+        'projects': projects,
+    })

@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
-import { ArrowRight, Sparkles, Briefcase, Code2, Users, Zap, Mail } from 'lucide-react'
+import { ArrowRight, Sparkles, Zap, Mail } from 'lucide-react'
 import PageLayout from '@components/layout/PageLayout'
 import { fadeUp, staggerContainer } from '@animations/variants'
 import { viewport } from '@animations/transitions'
-import { projectsAPI, servicesAPI } from '@services/api'
+import { projectsAPI, servicesAPI, publicAPI } from '@services/api'
 import ProjectPreviewCard from '@components/home/ProjectPreviewCard'
 import ServicePeekCard from '@components/home/ServicePeekCard'
 
@@ -301,6 +301,7 @@ export default function HomePage() {
   // Featured content state
   const [featuredProjects, setFeaturedProjects] = useState([])
   const [topServices, setTopServices] = useState([])
+  const [liveStats, setLiveStats] = useState({ students: 0, courses: 0, projects: 0 })
 
   // Normalized mouse position (-0.5 → 0.5) for tilt + orbs
   const mouseX = useMotionValue(0)
@@ -358,6 +359,13 @@ export default function HomePage() {
       }
     }
     fetchFeaturedProjects()
+  }, [])
+
+  // Fetch public stats
+  useEffect(() => {
+    publicAPI.getStats()
+      .then(({ data }) => setLiveStats(data))
+      .catch(() => {})
   }, [])
 
   // Fetch top services
@@ -427,14 +435,6 @@ export default function HomePage() {
               animate="visible"
               className="space-y-6 max-w-3xl mx-auto"
             >
-              {/* Badge */}
-              <motion.div variants={fadeUp} className="flex justify-center">
-                <span className="inline-flex items-center gap-2 rounded-full border border-brand-primary/30 bg-brand-primary/8 px-4 py-1.5 text-xs font-semibold text-brand-primary tracking-wider uppercase">
-                  <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
-                  Available for Freelance &amp; Training
-                </span>
-              </motion.div>
-
               {/* Heading — scramble on name */}
               <motion.div variants={fadeUp} className="space-y-1">
                 <p className="text-text-secondary text-lg font-medium tracking-wide">Hi, I'm</p>
@@ -462,13 +462,14 @@ export default function HomePage() {
 
               {/* Live stat counters */}
               <motion.div variants={fadeUp}>
-                <div className="inline-grid grid-cols-3 gap-px rounded-2xl overflow-hidden border border-bg-border bg-bg-border mx-auto">
+                <div className="inline-grid grid-cols-4 gap-px rounded-2xl overflow-hidden border border-bg-border bg-bg-border mx-auto">
                   {[
-                    { value: featuredProjects.length > 0 ? 15 : 15, suffix: '+', label: 'Projects' },
-                    { value: 200, suffix: '+', label: 'Students' },
-                    { value: 10, suffix: '',  label: 'Courses'  },
+                    { value: 950 + (liveStats.students || 0), suffix: '+', label: 'Students'  },
+                    { value: 50  + (liveStats.projects || 0), suffix: '+', label: 'Projects'  },
+                    { value: 10  + (liveStats.courses || 0),  suffix: '+', label: 'Courses'   },
+                    { value: 10,                              suffix: '+', label: 'Clients'   },
                   ].map(s => (
-                    <div key={s.label} className="bg-bg-surface/80 backdrop-blur px-8 py-4 text-center">
+                    <div key={s.label} className="bg-bg-surface/80 backdrop-blur px-6 py-4 text-center">
                       <div className="text-3xl sm:text-4xl font-black text-text-primary font-display tabular-nums">
                         <CountUp target={s.value} suffix={s.suffix} />
                       </div>
@@ -536,40 +537,6 @@ export default function HomePage() {
       </section>
 
       {/* ── Stats Row ────────────────────────────────────────────────────────────── */}
-      <section className="section-container section-padding">
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewport}
-          className="grid gap-8 sm:grid-cols-3"
-        >
-          <motion.div variants={fadeUp} className="text-center">
-            <div className="flex justify-center mb-3">
-              <Briefcase size={32} className="text-brand-primary" />
-            </div>
-            <p className="text-3xl font-bold text-text-primary mb-1">5+</p>
-            <p className="text-sm text-text-secondary">Years Building</p>
-          </motion.div>
-
-          <motion.div variants={fadeUp} className="text-center">
-            <div className="flex justify-center mb-3">
-              <Code2 size={32} className="text-brand-primary" />
-            </div>
-            <p className="text-3xl font-bold text-text-primary mb-1">30+</p>
-            <p className="text-sm text-text-secondary">Projects Shipped</p>
-          </motion.div>
-
-          <motion.div variants={fadeUp} className="text-center">
-            <div className="flex justify-center mb-3">
-              <Users size={32} className="text-brand-primary" />
-            </div>
-            <p className="text-3xl font-bold text-text-primary mb-1">20+</p>
-            <p className="text-sm text-text-secondary">Happy Clients</p>
-          </motion.div>
-        </motion.div>
-      </section>
-
       {/* ── Featured Work ─────────────────────────────────────────────────────────── */}
       {featuredProjects.length > 0 && (
         <section className="section-container section-padding">
