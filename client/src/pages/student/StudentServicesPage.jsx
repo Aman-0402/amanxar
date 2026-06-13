@@ -6,6 +6,8 @@ import {
   LayoutList, ListChecks,
 } from 'lucide-react'
 import { servicesAPI, bookingsAPI } from '@services/api'
+
+const EMOJI_RE = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/u
 import { useAuth } from '@context/AuthContext'
 import { fadeUp, staggerContainer } from '@animations/variants'
 
@@ -132,7 +134,7 @@ function ServiceCard({ svc, onRequest }) {
       <button className="w-full text-left p-5" onClick={() => setExpanded(v => !v)}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            {svc.icon && /\p{Emoji_Presentation}|\p{Extended_Pictographic}/u.test(svc.icon)
+            {svc.icon && EMOJI_RE.test(svc.icon)
               ? <span className="text-2xl">{svc.icon}</span>
               : <Briefcase size={22} className="text-brand-primary opacity-70 shrink-0" />
             }

@@ -17,13 +17,51 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
+let isRefreshing = false
+let failedQueue = []
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(({ resolve, reject }) => error ? reject(error) : resolve(token))
+  failedQueue = []
+}
+
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('auth_user')
-      window.location.href = '/login'
+  async (error) => {
+    const original = error.config
+    if (error.response?.status === 401 && !original._retry) {
+      const refreshToken = localStorage.getItem('refresh_token')
+      if (!refreshToken) {
+        localStorage.removeItem('auth_token')
+        window.location.href = `${import.meta.env.BASE_URL}login`
+        return Promise.reject(error)
+      }
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject })
+        }).then(token => {
+          original.headers.Authorization = `Bearer ${token}`
+          return api(original)
+        })
+      }
+      original._retry = true
+      isRefreshing = true
+      try {
+        const { data } = await api.post('/api/auth/refresh/', { refresh: refreshToken })
+        localStorage.setItem('auth_token', data.access)
+        api.defaults.headers.common.Authorization = `Bearer ${data.access}`
+        original.headers.Authorization = `Bearer ${data.access}`
+        processQueue(null, data.access)
+        return api(original)
+      } catch (refreshError) {
+        processQueue(refreshError, null)
+        localStorage.removeItem('auth_token')
+        localStorage.removeItem('refresh_token')
+        window.location.href = `${import.meta.env.BASE_URL}login`
+        return Promise.reject(refreshError)
+      } finally {
+        isRefreshing = false
+      }
     }
     return Promise.reject(error)
   }

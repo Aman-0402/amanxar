@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import RootLayout from '@components/layout/RootLayout'
+import ErrorBoundary from '@components/ErrorBoundary'
 import DashboardLayout from '@components/dashboard/DashboardLayout'
 import ProtectedRoute from '@components/auth/ProtectedRoute'
 import PageLoader from '@components/ui/PageLoader'
@@ -353,7 +354,9 @@ export default function App() {
         pauseOnHover
         theme="dark"
       />
-      <RouterProvider router={router} />
+      <ErrorBoundary>
+        <RouterProvider router={router} />
+      </ErrorBoundary>
     </>
   )
 }

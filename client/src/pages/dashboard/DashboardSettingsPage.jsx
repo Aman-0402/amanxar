@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { User, Lock, Save, Eye, EyeOff, CheckCircle } from 'lucide-react'
 import { usersAPI } from '@services/api'
+import { useAuth } from '@context/AuthContext'
 import { fadeUp, staggerContainer } from '@animations/variants'
 
 export default function DashboardSettingsPage() {
+  const { logout } = useAuth()
+  const navigate = useNavigate()
   const [profile, setProfile] = useState({ full_name: '', email: '', phone: '' })
   const [profileLoading, setProfileLoading] = useState(false)
   const [profileMsg, setProfileMsg] = useState(null)
@@ -44,8 +48,9 @@ export default function DashboardSettingsPage() {
     setPwLoading(true)
     try {
       await usersAPI.changePassword({ current_password: pw.current_password, new_password: pw.new_password })
-      setPwMsg({ type: 'success', text: 'Password changed successfully.' })
+      setPwMsg({ type: 'success', text: 'Password changed. Logging out in 2 seconds…' })
       setPw({ current_password: '', new_password: '', confirm: '' })
+      setTimeout(() => { logout(); navigate('/login', { replace: true }) }, 2000)
     } catch (err) {
       setPwMsg({ type: 'error', text: err?.response?.data?.detail || 'Failed to change password.' })
     } finally {
