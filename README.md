@@ -83,7 +83,7 @@ amanxar/
 /projects      → ProjectsPage
 /projects/:slug → ProjectDetailPage
 /gallery       → GalleryPage
-/ebooks        → EbooksPage (public course browser)
+/ebooks        → Redirects to /login (auth required to browse courses)
 /knowledge-hub → KnowledgeHubPage
 /services      → ServicesPage
 /resources     → ResourcesPage
