@@ -53,6 +53,7 @@ from .views import (
     unenroll_student,
     assessment_attempts,
     public_stats,
+    change_password,
 )
 
 app_name = 'portfolio'
@@ -122,4 +123,5 @@ urlpatterns = [
     path('assessments/<int:assessment_pk>/enrollments/<int:user_pk>/', unenroll_student, name='unenroll-student'),
 
     path('public/stats/', public_stats, name='public-stats'),
+    path('users/me/change-password/', change_password, name='change-password'),
 ]

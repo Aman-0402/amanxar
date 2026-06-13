@@ -45,6 +45,7 @@ export const usersAPI = {
   delete:    (id)     => api.delete(`/api/users/${id}/`),
   getProfile: ()      => api.get('/api/users/me/'),
   updateProfile: (data) => api.patch('/api/users/me/', data),
+  changePassword: (data) => api.post('/api/users/me/change-password/', data),
 }
 
 export const supportAPI = {

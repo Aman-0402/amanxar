@@ -338,6 +338,23 @@ def user_me(request):
     })
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    user = request.user
+    current = request.data.get('current_password', '')
+    new_pw  = request.data.get('new_password', '')
+    if not current or not new_pw:
+        return Response({'detail': 'Both current_password and new_password are required.'}, status=400)
+    if not user.check_password(current):
+        return Response({'detail': 'Current password is incorrect.'}, status=400)
+    if len(new_pw) < 8:
+        return Response({'detail': 'New password must be at least 8 characters.'}, status=400)
+    user.set_password(new_pw)
+    user.save()
+    return Response({'detail': 'Password changed successfully.'})
+
+
 # ── Support Ticket Views ──────────────────────────────────────────────────────
 
 class SupportTicketView(generics.ListCreateAPIView):

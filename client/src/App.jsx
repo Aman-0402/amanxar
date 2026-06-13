@@ -37,6 +37,7 @@ const DashboardTest     = lazy(() => import('@pages/dashboard/DashboardTestPage'
 const DashboardUsers    = lazy(() => import('@pages/dashboard/DashboardUsersPage'))
 const DashboardAssessments = lazy(() => import('@pages/dashboard/DashboardAssessmentsPage'))
 const DashboardAssessmentEditor = lazy(() => import('@pages/dashboard/DashboardAssessmentEditorPage'))
+const DashboardSettings         = lazy(() => import('@pages/dashboard/DashboardSettingsPage'))
 
 // ─── Student portal pages ──────────────────────────────────────────────────────
 const StudentLayout   = lazy(() => import('@pages/student/StudentLayout'))
@@ -219,6 +220,14 @@ const router = createBrowserRouter(
             element: (
               <Suspense fallback={<PageLoader />}>
                 <DashboardAssessmentEditor />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'settings',
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <DashboardSettings />
               </Suspense>
             ),
           },
