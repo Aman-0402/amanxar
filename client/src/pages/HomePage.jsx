@@ -219,6 +219,80 @@ const TECH = [
   { label: 'PostgreSQL', color: '#336791' },
 ]
 
+const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&*!'
+
+// ─── Scrambled text reveal ────────────────────────────────────────────────────
+function ScrambledText({ text, delay = 400 }) {
+  const [displayed, setDisplayed] = useState(() => text.split('').map(() => SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)]))
+  useEffect(() => {
+    let frame = 0
+    const t = setTimeout(() => {
+      const id = setInterval(() => {
+        frame++
+        setDisplayed(text.split('').map((ch, i) => {
+          if (ch === ' ') return ' '
+          if (frame > i * 2.5 + 6) return ch
+          return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)]
+        }))
+        if (frame > text.length * 2.5 + 10) clearInterval(id)
+      }, 38)
+      return () => clearInterval(id)
+    }, delay)
+    return () => clearTimeout(t)
+  }, [text, delay])
+  return <>{displayed.join('')}</>
+}
+
+// ─── Cycling typewriter ───────────────────────────────────────────────────────
+function TypewriterRoles({ roles }) {
+  const [idx, setIdx]           = useState(0)
+  const [txt, setTxt]           = useState('')
+  const [deleting, setDeleting] = useState(false)
+  useEffect(() => {
+    const role = roles[idx]
+    let t
+    if (!deleting) {
+      if (txt.length < role.length) t = setTimeout(() => setTxt(role.slice(0, txt.length + 1)), 55)
+      else t = setTimeout(() => setDeleting(true), 2200)
+    } else {
+      if (txt.length > 0) t = setTimeout(() => setTxt(txt.slice(0, -1)), 32)
+      else { setDeleting(false); setIdx((idx + 1) % roles.length) }
+    }
+    return () => clearTimeout(t)
+  }, [txt, deleting, idx, roles])
+  return (
+    <span>
+      {txt}<span className="inline-block w-0.5 h-5 bg-brand-primary ml-0.5 align-middle animate-pulse" />
+    </span>
+  )
+}
+
+// ─── Count-up on enter viewport ──────────────────────────────────────────────
+function CountUp({ target, suffix = '+', duration = 1600 }) {
+  const [count, setCount] = useState(0)
+  const ref     = useRef(null)
+  const started = useRef(false)
+  useEffect(() => {
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting && !started.current) {
+        started.current = true
+        const t0 = performance.now()
+        const tick = (now) => {
+          const p = Math.min((now - t0) / duration, 1)
+          const ease = 1 - Math.pow(1 - p, 3)
+          setCount(Math.floor(ease * target))
+          if (p < 1) requestAnimationFrame(tick)
+          else setCount(target)
+        }
+        requestAnimationFrame(tick)
+      }
+    })
+    if (ref.current) obs.observe(ref.current)
+    return () => obs.disconnect()
+  }, [target, duration])
+  return <span ref={ref}>{count}{suffix}</span>
+}
+
 // ─── HomePage ─────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const sectionRef = useRef(null)
@@ -351,62 +425,65 @@ export default function HomePage() {
               variants={staggerContainer}
               initial="hidden"
               animate="visible"
-              className="space-y-7 max-w-2xl mx-auto"
+              className="space-y-6 max-w-3xl mx-auto"
             >
+              {/* Badge */}
+              <motion.div variants={fadeUp} className="flex justify-center">
+                <span className="inline-flex items-center gap-2 rounded-full border border-brand-primary/30 bg-brand-primary/8 px-4 py-1.5 text-xs font-semibold text-brand-primary tracking-wider uppercase">
+                  <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
+                  Available for Freelance &amp; Training
+                </span>
+              </motion.div>
 
-              {/* Heading */}
-              <motion.h1
-                variants={fadeUp}
-                className="text-display-hero"
-              >
-                Hi, I'm{' '}
-                <span className="gradient-text relative inline-block">
-                  Aman Raj
-                  {/* Animated underline */}
+              {/* Heading — scramble on name */}
+              <motion.div variants={fadeUp} className="space-y-1">
+                <p className="text-text-secondary text-lg font-medium tracking-wide">Hi, I'm</p>
+                <h1
+                  className="font-display font-black leading-none gradient-text relative inline-block"
+                  style={{ fontSize: 'clamp(3.2rem, 10vw, 6.5rem)' }}
+                >
+                  <ScrambledText text="Aman Raj" delay={300} />
                   <motion.span
-                    className="absolute -bottom-2 left-0 h-1.5 w-full rounded-full"
+                    className="absolute -bottom-3 left-0 h-[3px] w-full rounded-full"
                     style={{ background: 'linear-gradient(90deg, #3B82F6, #0EA5E9)' }}
                     initial={{ scaleX: 0, originX: 0 }}
                     animate={{ scaleX: 1 }}
-                    transition={{ delay: 0.9, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ delay: 1.6, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
                   />
-                </span>
-              </motion.h1>
-
-              {/* Role row */}
-              <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-x-4 gap-y-1">
-                {ROLES.map((role, i) => (
-                  <span key={role} className="flex items-center gap-2 text-body-xl font-medium text-text-secondary">
-                    {i > 0 && <span className="text-brand-primary/40 select-none">·</span>}
-                    {role}
-                  </span>
-                ))}
+                </h1>
               </motion.div>
 
-              {/* Tech stack pills */}
-              <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-2">
-                {TECH.map((t, i) => (
-                  <motion.span
-                    key={t.label}
-                    className="glass px-3 py-1 rounded-full text-xs font-medium text-text-secondary inline-flex items-center gap-1.5"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 1.1 + i * 0.06, duration: 0.3 }}
-                    whileHover={{ scale: 1.12, y: -3, transition: { duration: 0.18 } }}
-                    whileTap={{ scale: 0.96 }}
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: t.color }} />
-                    {t.label}
-                  </motion.span>
-                ))}
+              {/* Typewriter cycling role */}
+              <motion.div variants={fadeUp} className="h-8 flex items-center justify-center">
+                <span className="text-lg sm:text-xl font-medium text-text-secondary">
+                  <TypewriterRoles roles={ROLES} />
+                </span>
+              </motion.div>
+
+              {/* Live stat counters */}
+              <motion.div variants={fadeUp}>
+                <div className="inline-grid grid-cols-3 gap-px rounded-2xl overflow-hidden border border-bg-border bg-bg-border mx-auto">
+                  {[
+                    { value: featuredProjects.length > 0 ? 15 : 15, suffix: '+', label: 'Projects' },
+                    { value: 200, suffix: '+', label: 'Students' },
+                    { value: 10, suffix: '',  label: 'Courses'  },
+                  ].map(s => (
+                    <div key={s.label} className="bg-bg-surface/80 backdrop-blur px-8 py-4 text-center">
+                      <div className="text-3xl sm:text-4xl font-black text-text-primary font-display tabular-nums">
+                        <CountUp target={s.value} suffix={s.suffix} />
+                      </div>
+                      <div className="text-[10px] text-text-muted mt-1 uppercase tracking-widest font-semibold">{s.label}</div>
+                    </div>
+                  ))}
+                </div>
               </motion.div>
 
               {/* CTA buttons */}
-              <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-4 pt-2">
+              <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-4 pt-1">
                 <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
                   <Link
                     to="/projects"
-                    className="flex items-center gap-2 rounded-lg border-3 border-brand-primary bg-brand-primary px-7 py-3.5 text-sm font-semibold text-white hover:bg-brand-dark transition-all offset-shadow"
+                    className="flex items-center gap-2 rounded-xl border-2 border-brand-primary bg-brand-primary px-7 py-3.5 text-sm font-semibold text-white hover:bg-brand-dark shadow-glow-primary transition-all"
                   >
                     View Projects <ArrowRight size={14} />
                   </Link>
@@ -414,11 +491,29 @@ export default function HomePage() {
                 <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
                   <Link
                     to="/contact"
-                    className="flex items-center gap-2 rounded-lg border-3 border-text-primary px-7 py-3.5 text-sm font-medium text-text-primary hover:text-brand-primary transition-all offset-shadow"
+                    className="flex items-center gap-2 rounded-xl border-2 border-bg-border bg-bg-elevated/60 backdrop-blur px-7 py-3.5 text-sm font-medium text-text-primary hover:border-brand-primary/50 hover:text-brand-primary transition-all"
                   >
                     <Sparkles size={14} /> Let's Connect
                   </Link>
                 </motion.div>
+              </motion.div>
+
+              {/* Tech stack pills */}
+              <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-2 pt-1">
+                {TECH.map((t, i) => (
+                  <motion.span
+                    key={t.label}
+                    className="glass px-3 py-1 rounded-full text-xs font-medium text-text-secondary inline-flex items-center gap-1.5"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 1.4 + i * 0.06, duration: 0.3 }}
+                    whileHover={{ scale: 1.12, y: -3, transition: { duration: 0.18 } }}
+                    whileTap={{ scale: 0.96 }}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: t.color }} />
+                    {t.label}
+                  </motion.span>
+                ))}
               </motion.div>
             </motion.div>
           </div>
