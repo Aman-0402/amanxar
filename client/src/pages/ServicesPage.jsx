@@ -1,6 +1,6 @@
 import PageLayout from '@components/layout/PageLayout'
 import { Link } from 'react-router-dom'
-import { CheckCircle2, ArrowRight } from 'lucide-react'
+import { CheckCircle2, ArrowRight, Briefcase } from 'lucide-react'
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion'
 import { useRef, useState, useEffect } from 'react'
 import { servicesAPI } from '@services/api'
@@ -59,7 +59,9 @@ function ServiceCard({ svc, index }) {
         transition={{ duration: 3 + index * 0.4, repeat: Infinity, ease: 'easeInOut' }}
         style={{ transformStyle: 'preserve-3d', translateZ: 20 }}
       >
-        {svc.icon}
+        {svc.icon && /\p{Emoji_Presentation}|\p{Extended_Pictographic}/u.test(svc.icon)
+          ? svc.icon
+          : <Briefcase size={36} className="text-brand-primary opacity-70" />}
       </motion.div>
 
       <h3 className="font-display font-bold text-text-primary mb-2">{svc.title}</h3>
