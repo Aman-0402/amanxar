@@ -57,7 +57,7 @@ Instructions for Claude Code and other AI agents working on this project.
 /dashboard/assessments/:id/edit → DashboardAssessmentEditorPage (3 tabs: Questions | Analytics | Students)
 /dashboard/projects             → DashboardProjectsPage
 /dashboard/messages             → DashboardMessagesPage         (split-pane layout; Contact tab: search + mark-all-read + mailto reply + relative timestamps; Support tab: ticket thread + search + filter pills + close/reopen; unread badge on both tabs)
-/dashboard/services             → DashboardServicesPage         (services CRUD + booking threads)
+/dashboard/services             → DashboardServicesPage         (two tabs — Services card grid: CRUD with Lucide icon picker; Bookings split-pane: left list with search+filter pills+stats bar, right BookingThread with chat bubbles+close/reopen+relTime; markRead on open)
 /dashboard/gallery              → DashboardGalleryPage
 /dashboard/knowledge-hub        → DashboardKnowledgeHubPage
 /dashboard/settings             → DashboardSettingsPage         (profile update: name/email/phone + password change + social media links CRUD)
@@ -329,6 +329,12 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 - ForeignKey User + EBook, `unique_together` — prevents duplicate claims
 - `get_or_create` used on POST — idempotent claiming
 
+### Service
+- `icon = CharField(max_length=50)` — stores a **Lucide icon name** (e.g. `"Code2"`, `"Brain"`, `"Briefcase"`)
+- **Not emoji** — MariaDB `utf8` charset is 3-byte; emoji (4-byte) corrupt to `????`
+- Frontend renders with `LucideIcons[service.icon] || LucideIcons.Briefcase`
+- Form uses 16-icon picker grid (no free-text emoji input)
+
 ### ServiceBooking
 - ForeignKey User + Service
 - Status: `pending` → `replied` (admin reply) → `pending` (student reply) → `closed`
@@ -405,6 +411,7 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 - Don't assume a User has a `UserProfile` — always use `getattr(user, 'profile', None)`
 - Don't add a Navbar & Footer admin page — nav links are hardcoded; social links managed in `/dashboard/settings`
 - Don't display `employee` in UI — always map to `"Moderator"` using `ROLE_LABEL = { admin: 'Admin', employee: 'Moderator', student: 'Student' }`
+- **Don't store emoji in MariaDB** — DB uses `utf8` charset (3-byte), emoji are 4-byte → stored as `????`. Use Lucide icon names (e.g. `"Code2"`, `"Brain"`) stored as `CharField(max_length=50)` and render with dynamic `LucideIcons[name]` on the frontend. `Service.icon` already follows this pattern.
 
 ---
 

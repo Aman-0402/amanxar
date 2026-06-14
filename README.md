@@ -112,7 +112,7 @@ amanxar/
 /dashboard/assessments/:id/edit  → Question builder (3 tabs: Questions | Analytics | Students enrollment)
 /dashboard/projects              → Projects CRUD
 /dashboard/messages              → Messages (split-pane; Contact: search + mark-all-read + mailto reply + relative timestamps; Support: ticket thread + search + filter pills + close/reopen; unread badges)
-/dashboard/services              → Services CMS + booking threads
+/dashboard/services              → Services (card grid CRUD + Lucide icon picker) + Bookings (split-pane: list with search/filter/stats, BookingThread with chat + close/reopen + relative timestamps)
 /dashboard/gallery               → Gallery management
 /dashboard/knowledge-hub         → Knowledge Hub CMS
 /dashboard/settings              → Profile update (name/email/phone) + password change + social media links CRUD (replaces old Navbar & Footer admin page)
