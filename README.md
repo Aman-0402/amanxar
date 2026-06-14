@@ -115,13 +115,12 @@ amanxar/
 /dashboard/services              → Services CMS + booking threads
 /dashboard/gallery               → Gallery management
 /dashboard/knowledge-hub         → Knowledge Hub CMS
-/dashboard/settings              → Profile update (name/email/phone) + password change
+/dashboard/settings              → Profile update (name/email/phone) + password change + social media links CRUD
 — Site Content (collapsible sidebar group) —
 /dashboard/about                 → About content management
 /dashboard/skills                → Skills management
 /dashboard/tech-stack            → Tech stack management
 /dashboard/timeline              → Timeline events
-/dashboard/navbar-footer         → Navbar + footer link management
 ```
 
 ---

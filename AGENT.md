@@ -60,13 +60,12 @@ Instructions for Claude Code and other AI agents working on this project.
 /dashboard/services             → DashboardServicesPage         (services CRUD + booking threads)
 /dashboard/gallery              → DashboardGalleryPage
 /dashboard/knowledge-hub        → DashboardKnowledgeHubPage
-/dashboard/settings             → DashboardSettingsPage         (profile update: name/email/phone + password change)
+/dashboard/settings             → DashboardSettingsPage         (profile update: name/email/phone + password change + social media links CRUD)
 — Site Content (collapsible sidebar group) —
 /dashboard/about                → DashboardAboutPage
 /dashboard/skills               → DashboardSkillsPage
 /dashboard/tech-stack           → DashboardTechStackPage
 /dashboard/timeline             → DashboardTimelinePage
-/dashboard/navbar-footer        → DashboardNavbarFooterPage
 ```
 
 ---
@@ -300,7 +299,7 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 | `client/src/components/dashboard/Sidebar.jsx` | Admin sidebar nav |
 | `client/src/components/layout/Navbar.jsx` | Public navbar |
 | `client/src/services/api.js` | All API clients (authAPI, usersAPI, ebooksAPI, learningAPI, bookingsAPI, assessmentsAPI, publicAPI…) |
-| `client/src/pages/dashboard/DashboardSettingsPage.jsx` | Profile update (name/email/phone) + password change with show/hide toggles |
+| `client/src/pages/dashboard/DashboardSettingsPage.jsx` | Profile update (name/email/phone) + password change with show/hide toggles + social media links CRUD |
 | `client/src/styles/globals.css` | CSS variables, theme tokens, component classes |
 | `client/tailwind.config.js` | Design tokens, brand colors, shadows |
 | `client/src/animations/variants.js` | Framer Motion animation presets |
