@@ -6,6 +6,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db import transaction
+from django.db.models import Count
 from .models import (
     Project,
     AboutStat,
@@ -170,7 +171,7 @@ class MessageViewSet(viewsets.ModelViewSet):
 
 
 class EBookViewSet(viewsets.ModelViewSet):
-    queryset = EBook.objects.all()
+    queryset = EBook.objects.annotate(learners_count=Count('learners')).all()
     serializer_class = EBookSerializer
     lookup_field = 'slug'
 

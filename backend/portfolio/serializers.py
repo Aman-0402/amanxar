@@ -125,11 +125,14 @@ class MessageSerializer(serializers.ModelSerializer):
 
 
 class EBookSerializer(serializers.ModelSerializer):
+    learners_count = serializers.IntegerField(read_only=True, default=0)
+
     class Meta:
         model = EBook
         fields = ['id', 'slug', 'title', 'subtitle', 'description', 'category', 'tags',
-                  'gradient', 'icon', 'icon_white', 'read_url', 'is_free', 'order', 'created_at']
-        read_only_fields = ['id', 'created_at']
+                  'gradient', 'icon', 'icon_white', 'read_url', 'is_free', 'order', 'created_at',
+                  'learners_count']
+        read_only_fields = ['id', 'created_at', 'learners_count']
 
 
 class KnowledgeToolSerializer(serializers.ModelSerializer):
