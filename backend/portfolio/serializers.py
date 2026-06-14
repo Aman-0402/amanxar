@@ -267,7 +267,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_role(self, obj):
         profile = getattr(obj, 'profile', None)
-        return profile.role if profile else 'student'
+        if profile:
+            return profile.role
+        return 'admin' if (obj.is_superuser or obj.is_staff) else 'student'
 
 
 class SupportTicketReplySerializer(serializers.ModelSerializer):

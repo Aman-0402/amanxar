@@ -3,9 +3,11 @@ import { motion } from 'framer-motion'
 import { Users, Search, Trash2, Loader2, AlertCircle, UserCheck } from 'lucide-react'
 import { usersAPI } from '@services/api'
 import { fadeUp, staggerContainer } from '@animations/variants'
+import { useAuth } from '@context/AuthContext'
 import Swal from 'sweetalert2'
 
 export default function DashboardUsersPage() {
+  const { user: currentUser } = useAuth()
   const [users, setUsers]     = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch]   = useState('')
@@ -136,14 +138,18 @@ export default function DashboardUsersPage() {
                       {u.date_joined ? new Date(u.date_joined).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        onClick={() => handleDelete(u.id)}
-                        disabled={deleting === u.id}
-                        className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
-                      >
-                        {deleting === u.id ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
-                        Delete
-                      </button>
+                      {u.id === currentUser?.user_id ? (
+                        <span className="text-xs text-text-muted px-3 py-1.5">You</span>
+                      ) : (
+                        <button
+                          onClick={() => handleDelete(u.id)}
+                          disabled={deleting === u.id}
+                          className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                        >
+                          {deleting === u.id ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
+                          Delete
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
