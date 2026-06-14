@@ -1,57 +1,50 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Edit2, Trash2, Plus, Eye } from 'lucide-react'
+import {
+  Edit2, Trash2, Plus, Eye, Search, Star,
+  FolderOpen, CheckCircle, Clock, Loader2,
+} from 'lucide-react'
 import { projectsAPI } from '@services/api'
 import ProjectFormModal from '@components/dashboard/ProjectFormModal'
 import DeleteConfirmModal from '@components/dashboard/DeleteConfirmModal'
 import { fadeUp, staggerContainer } from '@animations/variants'
 import { showSuccess, showError } from '@utils/toast'
+import { assetUrl } from '@utils/assetUrl'
+
+const STATUS_META = {
+  completed:   { label: 'Completed',   color: 'text-green-400 bg-green-400/10 border-green-400/30'      },
+  in_progress: { label: 'In Progress', color: 'text-brand-amber bg-brand-amber/10 border-brand-amber/30' },
+  archived:    { label: 'Archived',    color: 'text-text-muted bg-bg-elevated border-bg-border'          },
+}
+
+const FILTERS = ['all', 'completed', 'in_progress', 'featured']
 
 export default function DashboardProjectsPage() {
-  const [projects, setProjects] = useState([])
+  const [projects, setProjects]   = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [search, setSearch]       = useState('')
+  const [filter, setFilter]       = useState('all')
 
-  // Form Modal State
-  const [formModalOpen, setFormModalOpen] = useState(false)
-  const [editingProject, setEditingProject] = useState(null)
+  const [formModalOpen, setFormModalOpen]     = useState(false)
+  const [editingProject, setEditingProject]   = useState(null)
   const [isFormSubmitting, setIsFormSubmitting] = useState(false)
 
-  // Delete Modal State
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [projectToDelete, setProjectToDelete] = useState(null)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [isDeleting, setIsDeleting]           = useState(false)
+  const [togglingSlug, setTogglingSlug]       = useState(null)
 
-  useEffect(() => {
-    fetchProjects()
-  }, [])
+  useEffect(() => { fetchProjects() }, [])
 
   const fetchProjects = async () => {
     try {
       const { data } = await projectsAPI.getAll()
       setProjects(data)
-    } catch (err) {
-      setError('Failed to fetch projects')
-      console.error(err)
+    } catch {
+      showError('Failed to load projects')
     } finally {
       setIsLoading(false)
     }
-  }
-
-  // Form Modal Handlers
-  const handleOpenAddForm = () => {
-    setEditingProject(null)
-    setFormModalOpen(true)
-  }
-
-  const handleOpenEditForm = (project) => {
-    setEditingProject(project)
-    setFormModalOpen(true)
-  }
-
-  const handleCloseForm = () => {
-    setFormModalOpen(false)
-    setEditingProject(null)
   }
 
   const handleFormSubmit = async (formData, isFormData = false) => {
@@ -64,220 +57,258 @@ export default function DashboardProjectsPage() {
         await projectsAPI.create(formData, config)
       }
       await fetchProjects()
-      handleCloseForm()
+      setFormModalOpen(false)
+      setEditingProject(null)
     } catch (err) {
-      const errorMsg = err.response?.data?.detail ||
-                      err.response?.data?.[Object.keys(err.response?.data || {})[0]]?.[0] ||
-                      'Failed to save project'
-      console.error('Project save error:', err.response?.data || err)
-      showError(`Failed to save: ${errorMsg}`)
+      const msg = err.response?.data?.detail ||
+        err.response?.data?.[Object.keys(err.response?.data || {})[0]]?.[0] ||
+        'Failed to save project'
+      showError(`Failed to save: ${msg}`)
     } finally {
       setIsFormSubmitting(false)
     }
-  }
-
-  // Delete Modal Handlers
-  const handleOpenDeleteModal = (project) => {
-    setProjectToDelete(project)
-    setDeleteModalOpen(true)
-  }
-
-  const handleCloseDeleteModal = () => {
-    setDeleteModalOpen(false)
-    setProjectToDelete(null)
   }
 
   const handleConfirmDelete = async () => {
     setIsDeleting(true)
     try {
       await projectsAPI.delete(projectToDelete.slug)
-      showSuccess('Project deleted successfully!')
-      await fetchProjects()
-      handleCloseDeleteModal()
+      showSuccess('Project deleted')
+      setProjects(prev => prev.filter(p => p.slug !== projectToDelete.slug))
+      setDeleteModalOpen(false)
+      setProjectToDelete(null)
     } catch (err) {
-      const errorMsg = err.response?.data?.detail || 'Failed to delete project'
-      showError(`Failed to delete: ${errorMsg}`)
-      console.error('Failed to delete project:', err)
+      showError(err.response?.data?.detail || 'Failed to delete project')
     } finally {
       setIsDeleting(false)
     }
   }
 
+  const handleToggleFeatured = async (project) => {
+    setTogglingSlug(project.slug)
+    try {
+      await projectsAPI.partialUpdate(project.slug, { featured: !project.featured })
+      setProjects(prev => prev.map(p => p.slug === project.slug ? { ...p, featured: !p.featured } : p))
+    } catch {
+      showError('Failed to update featured status')
+    } finally {
+      setTogglingSlug(null)
+    }
+  }
+
+  // Stats
+  const totalCompleted = projects.filter(p => p.status === 'completed').length
+  const totalFeatured  = projects.filter(p => p.featured).length
+
+  const filterCounts = {
+    all:         projects.length,
+    completed:   totalCompleted,
+    in_progress: projects.filter(p => p.status === 'in_progress').length,
+    featured:    totalFeatured,
+  }
+
+  const filtered = useMemo(() => projects.filter(p => {
+    const term = search.toLowerCase()
+    const matchSearch = !term ||
+      p.title?.toLowerCase().includes(term) ||
+      p.shortDesc?.toLowerCase().includes(term) ||
+      p.categories?.some(c => c.toLowerCase().includes(term)) ||
+      p.techStack?.some(t => t.toLowerCase().includes(term))
+    const matchFilter =
+      filter === 'all'         ||
+      (filter === 'featured'    && p.featured)               ||
+      (filter === 'completed'   && p.status === 'completed') ||
+      (filter === 'in_progress' && p.status === 'in_progress')
+    return matchSearch && matchFilter
+  }), [projects, search, filter])
+
   return (
-    <div className="space-y-8">
-      {/* Header with CTA */}
-      <motion.div
-        variants={fadeUp}
-        initial="hidden"
-        animate="visible"
-        className="flex items-center justify-between"
-      >
+    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
+
+      {/* Header */}
+      <motion.div variants={fadeUp} className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="font-display text-3xl font-bold text-text-primary">
-            Projects
-          </h1>
-          <p className="text-text-secondary mt-2">
-            Manage your portfolio projects
-          </p>
+          <h1 className="font-display text-3xl font-bold text-text-primary">Projects</h1>
+          <p className="text-text-secondary mt-1">Manage your portfolio projects</p>
         </div>
         <button
-          onClick={handleOpenAddForm}
-          className="flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow-glow-primary hover:bg-brand-dark transition-all duration-200"
+          onClick={() => { setEditingProject(null); setFormModalOpen(true) }}
+          className="flex items-center gap-2 rounded-xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-white shadow-glow-primary hover:bg-brand-dark transition-all"
         >
-          <Plus size={16} />
-          Add Project
+          <Plus size={16} /> Add Project
         </button>
       </motion.div>
 
-      {/* Projects Table */}
-      <motion.div
-        variants={fadeUp}
-        initial="hidden"
-        animate="visible"
-        className="rounded-2xl border border-bg-border bg-bg-surface/50 backdrop-blur overflow-hidden"
-      >
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-brand-primary border-t-transparent" />
+      {/* Stats bar */}
+      <motion.div variants={fadeUp} className="flex flex-wrap gap-3">
+        {[
+          { label: 'Total',       value: projects.length, color: 'border-bg-border bg-bg-elevated text-text-primary' },
+          { label: 'Completed',   value: totalCompleted,  color: 'border-green-500/30 bg-green-500/8 text-green-400' },
+          { label: 'Featured',    value: totalFeatured,   color: 'border-brand-amber/30 bg-brand-amber/8 text-brand-amber' },
+        ].map(s => (
+          <div key={s.label} className={`flex items-center gap-2 rounded-xl border px-4 py-2 ${s.color}`}>
+            <span className="text-xs font-semibold uppercase tracking-wide opacity-70">{s.label}</span>
+            <span className="text-sm font-bold">{s.value}</span>
           </div>
-        ) : error ? (
-          <div className="text-center py-12 text-red-400">{error}</div>
-        ) : projects.length === 0 ? (
-          <div className="text-center py-12 text-text-muted">
-            No projects found. Create one to get started!
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b border-bg-border bg-bg-elevated/30">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-text-muted">
-                    Title
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-text-muted">
-                    Tech Stack
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-text-muted">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-text-muted">
-                    Featured
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-text-muted">
-                    Year
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-text-muted">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-bg-border">
-                {projects.map((project, idx) => (
-                  <motion.tr
-                    key={project.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className="hover:bg-bg-elevated/30 transition-colors"
-                  >
-                    <td className="px-6 py-4">
-                      <div>
-                        <p className="font-semibold text-text-primary">
-                          {project.title}
-                        </p>
-                        <p className="text-xs text-text-muted mt-1">
-                          {project.slug}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-1">
-                        {project.techStack?.slice(0, 3).map((tech) => (
-                          <span
-                            key={tech}
-                            className="px-2 py-1 text-xs rounded-full bg-brand-primary/10 text-brand-primary"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                        {project.techStack?.length > 3 && (
-                          <span className="px-2 py-1 text-xs text-text-muted">
-                            +{project.techStack.length - 3}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                        project.status === 'completed'
-                          ? 'bg-green-400/10 text-green-400'
-                          : 'bg-gray-400/10 text-gray-400'
-                      }`}>
-                        {project.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center justify-center w-4 h-4 rounded text-xs ${
-                        project.featured
-                          ? 'bg-yellow-400/20 text-yellow-400'
-                          : 'bg-gray-400/10 text-gray-400'
-                      }`}>
-                        {project.featured ? '★' : '☆'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-text-secondary">
-                      {project.year}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <a
-                          href={`/projects/${project.slug}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 text-text-muted hover:text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-colors"
-                          title="View"
-                        >
-                          <Eye size={16} />
-                        </a>
-                        <button
-                          onClick={() => handleOpenEditForm(project)}
-                          className="p-2 text-text-muted hover:text-blue-400 hover:bg-blue-400/10 rounded-lg transition-colors"
-                          title="Edit"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleOpenDeleteModal(project)}
-                          className="p-2 text-text-muted hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        ))}
       </motion.div>
 
-      {/* Modals */}
+      {/* Search + Filter */}
+      <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+          <input
+            type="text" placeholder="Search projects, tech, category…"
+            value={search} onChange={e => setSearch(e.target.value)}
+            className="w-full rounded-xl border border-bg-border bg-bg-elevated pl-9 pr-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
+          />
+        </div>
+        <div className="flex gap-1 p-1 rounded-xl border border-bg-border bg-bg-elevated">
+          {FILTERS.map(f => (
+            <button key={f} onClick={() => setFilter(f)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${
+                filter === f ? 'bg-brand-primary text-white' : 'text-text-secondary hover:text-text-primary'
+              }`}>
+              {f.replace('_', ' ')} <span className="opacity-60">({filterCounts[f]})</span>
+            </button>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Grid */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-bg-border bg-bg-surface h-72 animate-pulse" />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <motion.div variants={fadeUp} className="flex flex-col items-center justify-center py-20 text-text-muted">
+          <FolderOpen size={44} className="mb-3 opacity-30" />
+          <p className="text-sm">{search || filter !== 'all' ? 'No projects match filters' : 'No projects yet'}</p>
+          {(search || filter !== 'all') && (
+            <button onClick={() => { setSearch(''); setFilter('all') }} className="mt-2 text-xs text-brand-primary hover:underline">Clear filters</button>
+          )}
+        </motion.div>
+      ) : (
+        <motion.div variants={staggerContainer} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filtered.map(project => {
+            const status = STATUS_META[project.status] ?? { label: project.status, color: 'text-text-muted bg-bg-elevated border-bg-border' }
+            const isToggling = togglingSlug === project.slug
+
+            return (
+              <motion.div key={project.slug} variants={fadeUp}
+                className="group rounded-xl border border-bg-border bg-bg-surface overflow-hidden hover:border-brand-primary/30 hover:shadow-card transition-all duration-200 flex flex-col">
+
+                {/* Thumbnail */}
+                <div className="relative h-40 bg-bg-elevated overflow-hidden">
+                  {project.thumbnail ? (
+                    <img
+                      src={assetUrl(project.thumbnail)}
+                      alt={project.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={e => { e.target.style.display = 'none' }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <FolderOpen size={40} className="text-text-muted opacity-30" />
+                    </div>
+                  )}
+                  {/* Overlay on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+
+                  {/* Status badge top-left */}
+                  <span className={`absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${status.color}`}>
+                    {status.label}
+                  </span>
+
+                  {/* Featured star top-right */}
+                  <button
+                    onClick={() => handleToggleFeatured(project)}
+                    disabled={isToggling}
+                    title={project.featured ? 'Remove from featured' : 'Mark as featured'}
+                    className={`absolute top-2 right-2 h-7 w-7 flex items-center justify-center rounded-full border backdrop-blur-sm transition-all disabled:opacity-50 ${
+                      project.featured
+                        ? 'bg-brand-amber/30 border-brand-amber/50 text-brand-amber hover:bg-red-500/30 hover:border-red-400/50 hover:text-red-400'
+                        : 'bg-black/30 border-white/10 text-white/40 hover:bg-brand-amber/30 hover:border-brand-amber/50 hover:text-brand-amber'
+                    }`}>
+                    {isToggling
+                      ? <Loader2 size={11} className="animate-spin" />
+                      : <Star size={11} className={project.featured ? 'fill-current' : ''} />
+                    }
+                  </button>
+
+                  {/* Year badge bottom-left on hover */}
+                  <span className="absolute bottom-2 left-2 text-[10px] text-white/70 bg-black/40 backdrop-blur-sm rounded px-1.5 py-0.5">
+                    {project.year}
+                    {project.duration && ` · ${project.duration}`}
+                  </span>
+                </div>
+
+                {/* Content */}
+                <div className="p-4 flex-1 flex flex-col gap-2">
+                  <h3 className="font-semibold text-text-primary text-sm leading-snug line-clamp-1">{project.title}</h3>
+                  <p className="text-xs text-text-muted line-clamp-2 leading-relaxed">{project.shortDesc}</p>
+
+                  {/* Tech stack */}
+                  {project.techStack?.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-0.5">
+                      {project.techStack.slice(0, 4).map(t => (
+                        <span key={t} className="text-[10px] bg-brand-primary/10 border border-brand-primary/20 text-brand-primary px-1.5 py-0.5 rounded">
+                          {t}
+                        </span>
+                      ))}
+                      {project.techStack.length > 4 && (
+                        <span className="text-[10px] bg-bg-elevated border border-bg-border text-text-muted px-1.5 py-0.5 rounded">
+                          +{project.techStack.length - 4}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="mt-auto pt-3 flex items-center gap-1.5">
+                    <a href={`/projects/${project.slug}`} target="_blank" rel="noopener noreferrer"
+                      title="View public page"
+                      className="h-7 w-7 flex items-center justify-center rounded-lg border border-bg-border text-text-muted hover:text-brand-primary hover:border-brand-primary/30 transition-colors">
+                      <Eye size={13} />
+                    </a>
+                    <button onClick={() => { setEditingProject(project); setFormModalOpen(true) }} title="Edit"
+                      className="h-7 w-7 flex items-center justify-center rounded-lg border border-bg-border text-text-muted hover:text-brand-primary hover:border-brand-primary/30 transition-colors">
+                      <Edit2 size={13} />
+                    </button>
+                    <button onClick={() => { setProjectToDelete(project); setDeleteModalOpen(true) }} title="Delete"
+                      className="h-7 w-7 flex items-center justify-center rounded-lg border border-bg-border text-text-muted hover:text-red-400 hover:border-red-400/30 transition-colors">
+                      <Trash2 size={13} />
+                    </button>
+
+                    {/* Categories */}
+                    {project.categories?.length > 0 && (
+                      <span className="ml-auto text-[10px] text-text-muted truncate max-w-24">{project.categories[0]}</span>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            )
+          })}
+        </motion.div>
+      )}
+
       <ProjectFormModal
         isOpen={formModalOpen}
-        onClose={handleCloseForm}
+        onClose={() => { setFormModalOpen(false); setEditingProject(null) }}
         onSubmit={handleFormSubmit}
         project={editingProject}
+        isLoading={isFormSubmitting}
       />
 
       <DeleteConfirmModal
         isOpen={deleteModalOpen}
-        onClose={handleCloseDeleteModal}
+        onClose={() => { setDeleteModalOpen(false); setProjectToDelete(null) }}
         onConfirm={handleConfirmDelete}
         itemName={projectToDelete?.title || 'project'}
         isLoading={isDeleting}
       />
-    </div>
+    </motion.div>
   )
 }
