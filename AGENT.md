@@ -56,7 +56,7 @@ Instructions for Claude Code and other AI agents working on this project.
 /dashboard/assessments          → DashboardAssessmentsPage      (exam list + create/edit modal)
 /dashboard/assessments/:id/edit → DashboardAssessmentEditorPage (3 tabs: Questions | Analytics | Students)
 /dashboard/projects             → DashboardProjectsPage
-/dashboard/messages             → DashboardMessagesPage         (two tabs: Contact submissions | Support Tickets with filter + thread)
+/dashboard/messages             → DashboardMessagesPage         (split-pane layout; Contact tab: search + mark-all-read + mailto reply + relative timestamps; Support tab: ticket thread + search + filter pills + close/reopen; unread badge on both tabs)
 /dashboard/services             → DashboardServicesPage         (services CRUD + booking threads)
 /dashboard/gallery              → DashboardGalleryPage
 /dashboard/knowledge-hub        → DashboardKnowledgeHubPage

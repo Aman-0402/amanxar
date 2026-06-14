@@ -89,7 +89,7 @@ export default function DashboardOverviewPage() {
         assessments:    aData.length,
         projects:       pData.length,
         openTickets:    tData.filter(t => t.status === 'open').length,
-        unreadMessages: mData.filter(m => !m.is_read).length,
+        unreadMessages: mData.filter(m => !m.read).length,
       })
       setRecentTickets(tData.slice(0, 5))
       setRecentMessages(mData.slice(0, 5))
@@ -196,7 +196,7 @@ export default function DashboardOverviewPage() {
               {recentMessages.map(m => (
                 <Link key={m.id} to="/dashboard/messages"
                   className={`flex items-center justify-between p-3 rounded-xl transition-colors ${
-                    !m.is_read
+                    !m.read
                       ? 'bg-brand-amber/5 border border-brand-amber/20 hover:bg-brand-amber/10'
                       : 'bg-bg-elevated/40 hover:bg-bg-elevated'
                   }`}
@@ -205,7 +205,7 @@ export default function DashboardOverviewPage() {
                     <p className="text-sm font-medium text-text-primary truncate">{m.name || m.email}</p>
                     <p className="text-xs text-text-muted truncate">{m.subject || m.message}</p>
                   </div>
-                  {!m.is_read && <span className="ml-3 shrink-0 h-2 w-2 rounded-full bg-brand-amber" />}
+                  {!m.read && <span className="ml-3 shrink-0 h-2 w-2 rounded-full bg-brand-amber" />}
                 </Link>
               ))}
             </div>

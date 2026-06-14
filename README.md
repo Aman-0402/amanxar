@@ -111,7 +111,7 @@ amanxar/
 /dashboard/assessments           → Assessments list + create/edit modal
 /dashboard/assessments/:id/edit  → Question builder (3 tabs: Questions | Analytics | Students enrollment)
 /dashboard/projects              → Projects CRUD
-/dashboard/messages              → Messages (Contact tab + Support Tickets tab with filter pills + thread view + close/reopen)
+/dashboard/messages              → Messages (split-pane; Contact: search + mark-all-read + mailto reply + relative timestamps; Support: ticket thread + search + filter pills + close/reopen; unread badges)
 /dashboard/services              → Services CMS + booking threads
 /dashboard/gallery               → Gallery management
 /dashboard/knowledge-hub         → Knowledge Hub CMS
