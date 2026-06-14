@@ -33,7 +33,6 @@ const DashboardEbooks   = lazy(() => import('@pages/dashboard/DashboardEbooksPag
 const DashboardKnowledgeHub = lazy(() => import('@pages/dashboard/DashboardKnowledgeHubPage'))
 const DashboardGallery  = lazy(() => import('@pages/dashboard/DashboardGalleryPage'))
 const DashboardServices = lazy(() => import('@pages/dashboard/DashboardServicesPage'))
-const DashboardNavbarFooter = lazy(() => import('@pages/dashboard/DashboardNavbarFooterPage'))
 const DashboardTest     = lazy(() => import('@pages/dashboard/DashboardTestPage'))
 const DashboardUsers    = lazy(() => import('@pages/dashboard/DashboardUsersPage'))
 const DashboardAssessments = lazy(() => import('@pages/dashboard/DashboardAssessmentsPage'))
@@ -181,14 +180,6 @@ const router = createBrowserRouter(
             element: (
               <Suspense fallback={<PageLoader />}>
                 <DashboardServices />
-              </Suspense>
-            ),
-          },
-          {
-            path: 'navbar-footer',
-            element: (
-              <Suspense fallback={<PageLoader />}>
-                <DashboardNavbarFooter />
               </Suspense>
             ),
           },

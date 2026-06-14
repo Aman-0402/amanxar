@@ -3,7 +3,6 @@ import { NavLink, Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, LogIn } from 'lucide-react'
 import { assetUrl } from '@utils/assetUrl'
-import { navbarAPI } from '@services/api'
 import MobileMenu from './MobileMenu'
 import { navbarSlide } from '@animations/variants'
 
@@ -12,23 +11,19 @@ const linkBase    = 'relative text-sm font-medium transition-colors duration-200
 const linkDefault = 'text-text-secondary hover:text-text-primary'
 const linkActive  = 'text-text-primary'
 
-export default function Navbar() {
-  const [scrolled,       setScrolled]       = useState(false)
-  const [mobileOpen,     setMobileOpen]     = useState(false)
-  const [navLinks, setNavLinks] = useState([])
-  const location = useLocation()
+const NAV_LINKS = [
+  { href: '/about',         label: 'About'         },
+  { href: '/projects',      label: 'Projects'      },
+  { href: '/gallery',       label: 'Gallery'       },
+  { href: '/knowledge-hub', label: 'Knowledge Hub' },
+  { href: '/services',      label: 'Services'      },
+  { href: '/contact',       label: 'Contact'       },
+]
 
-  useEffect(() => {
-    const fetchNavLinks = async () => {
-      try {
-        const { data } = await navbarAPI.getAll()
-        setNavLinks(data.sort((a, b) => a.order - b.order))
-      } catch (err) {
-        console.error('Failed to fetch navbar links:', err)
-      }
-    }
-    fetchNavLinks()
-  }, [])
+export default function Navbar() {
+  const [scrolled,   setScrolled]   = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const location = useLocation()
 
   // ── Scroll detection ────────────────────────────────────────────────────────
   const handleScroll = useCallback(() => {
@@ -72,7 +67,6 @@ export default function Navbar() {
             className="flex items-center gap-2 group"
             aria-label="Aman Raj — Home"
           >
-            {/* Logo image */}
             <div className="relative h-8 w-8 rounded-lg overflow-hidden shadow-glow-primary group-hover:shadow-glow-lg transition-shadow duration-300">
               <img
                 src={assetUrl('/assets/images/Extra/logo.png')}
@@ -87,7 +81,7 @@ export default function Navbar() {
 
           {/* ── Desktop Nav Links ─────────────────────────────────────────── */}
           <ul className="hidden lg:flex items-center gap-1" role="list">
-            {navLinks.map((link) => (
+            {NAV_LINKS.map((link) => (
               <li key={link.href}>
                 <NavLink
                   to={link.href}
@@ -98,7 +92,6 @@ export default function Navbar() {
                   {({ isActive }) => (
                     <>
                       {link.label}
-                      {/* Animated underline indicator */}
                       <motion.span
                         className="absolute bottom-0 left-3 right-3 h-px bg-gradient-brand rounded-full"
                         initial={false}
@@ -167,7 +160,7 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <MobileMenu
-            links={navLinks}
+            links={NAV_LINKS}
             onClose={() => setMobileOpen(false)}
           />
         )}

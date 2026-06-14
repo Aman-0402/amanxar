@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   Home, FileText, MessageSquare, Settings, LogOut, User, Users,
-  BookOpen, Compass, Image, Briefcase, Menu, X, ClipboardList,
+  BookOpen, Compass, Image, Briefcase, X, ClipboardList,
   ChevronDown, ChevronRight, Layers,
 } from 'lucide-react'
 import { useAuth } from '@context/AuthContext'
@@ -25,7 +25,6 @@ const CONTENT_ITEMS = [
   { label: 'Skills',        href: '/dashboard/skills',        icon: Layers        },
   { label: 'Tech Stack',    href: '/dashboard/tech-stack',    icon: Layers        },
   { label: 'Timeline',      href: '/dashboard/timeline',      icon: Layers        },
-  { label: 'Navbar & Footer',href: '/dashboard/navbar-footer',icon: Menu          },
 ]
 
 function NavLink({ href, icon: Icon, label, onClick, isActive }) {
