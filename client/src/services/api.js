@@ -84,6 +84,7 @@ export const usersAPI = {
   getProfile: ()      => api.get('/api/users/me/'),
   updateProfile: (data) => api.patch('/api/users/me/', data),
   changePassword: (data) => api.post('/api/users/me/change-password/', data),
+  updateRole: (id, role) => api.patch(`/api/users/${id}/role/`, { role }),
 }
 
 export const supportAPI = {

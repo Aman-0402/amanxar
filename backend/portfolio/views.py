@@ -303,6 +303,33 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
 
 
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_user_role(request, pk):
+    u = request.user
+    profile = getattr(u, 'profile', None)
+    is_admin = (profile and profile.role in ('admin', 'employee')) or u.is_staff or u.is_superuser
+    if not is_admin:
+        return Response({'detail': 'Permission denied.'}, status=403)
+    if u.id == pk:
+        return Response({'detail': 'Cannot change your own role.'}, status=400)
+    new_role = request.data.get('role')
+    if new_role not in ('admin', 'employee', 'student'):
+        return Response({'detail': 'Invalid role. Must be admin, employee, or student.'}, status=400)
+    try:
+        target = User.objects.select_related('profile').get(pk=pk)
+    except User.DoesNotExist:
+        return Response({'detail': 'User not found.'}, status=404)
+    target_profile = getattr(target, 'profile', None)
+    if target_profile:
+        target_profile.role = new_role
+        target_profile.save()
+    else:
+        from .models import UserProfile
+        UserProfile.objects.create(user=target, role=new_role)
+    return Response({'id': target.id, 'role': new_role})
+
+
 @api_view(['GET', 'PATCH'])
 @permission_classes([IsAuthenticated])
 def user_me(request):

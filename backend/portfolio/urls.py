@@ -25,6 +25,7 @@ from .views import (
     RegisterView,
     UserListView,
     UserDetailView,
+    update_user_role,
     user_me,
     SupportTicketView,
     SupportTicketDetailView,
@@ -90,6 +91,7 @@ urlpatterns = [
     path('users/', UserListView.as_view(), name='user-list'),
     path('users/me/', user_me, name='user-me'),
     path('users/<int:pk>/', UserDetailView.as_view(), name='user-detail'),
+    path('users/<int:pk>/role/', update_user_role, name='user-update-role'),
 
     path('support/',                         SupportTicketView.as_view(),       name='support'),
     path('support/<int:pk>/',                SupportTicketDetailView.as_view(), name='support-detail'),
