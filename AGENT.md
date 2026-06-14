@@ -118,7 +118,7 @@ Instructions for Claude Code and other AI agents working on this project.
 
 **Roles** (from JWT `payload.role`):
 - `admin` — full dashboard access; superusers/staff without a profile also get `admin`
-- `employee` — dashboard access (same as admin for now)
+- `employee` — dashboard access (same as admin for now); **displayed as "Moderator"** in all UI — backend value stays `employee`
 - `student` — student portal only
 
 **Redirect logic** (in `LoginPage.jsx` + `ProtectedRoute.jsx`):
@@ -297,8 +297,9 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 | `client/src/pages/student/StudentServicesPage.jsx` | Service cards + booking thread UI |
 | `client/src/components/dashboard/DashboardLayout.jsx` | Admin layout with topbar (user badge + page title) |
 | `client/src/components/dashboard/Sidebar.jsx` | Admin sidebar nav |
-| `client/src/components/layout/Navbar.jsx` | Public navbar |
+| `client/src/components/layout/Navbar.jsx` | Public navbar — **static `NAV_LINKS` array** (hardcoded, no DB fetch) |
 | `client/src/services/api.js` | All API clients (authAPI, usersAPI, ebooksAPI, learningAPI, bookingsAPI, assessmentsAPI, publicAPI…) |
+| `client/src/pages/dashboard/DashboardMessagesPage.jsx` | Split-pane messages: Contact (search, mark-all-read, mailto reply, relative timestamps) + Support tickets (thread, search, filter pills, close/reopen) |
 | `client/src/pages/dashboard/DashboardSettingsPage.jsx` | Profile update (name/email/phone) + password change with show/hide toggles + social media links CRUD |
 | `client/src/styles/globals.css` | CSS variables, theme tokens, component classes |
 | `client/tailwind.config.js` | Design tokens, brand colors, shadows |
@@ -402,6 +403,8 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 - Don't redirect students to `/dashboard` — they go to `/student`
 - Don't hardcode indigo `#6366F1` — that's the old brand color; use `#3B82F6`
 - Don't assume a User has a `UserProfile` — always use `getattr(user, 'profile', None)`
+- Don't add a Navbar & Footer admin page — nav links are hardcoded; social links managed in `/dashboard/settings`
+- Don't display `employee` in UI — always map to `"Moderator"` using `ROLE_LABEL = { admin: 'Admin', employee: 'Moderator', student: 'Student' }`
 
 ---
 

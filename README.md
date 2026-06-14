@@ -103,10 +103,10 @@ amanxar/
 /student/profile            → Edit personal info
 ```
 
-### Admin Dashboard (role: admin | employee)
+### Admin Dashboard (role: admin | employee → displayed as "Moderator")
 ```
 /dashboard                       → Overview (6 stat cards: students/courses/assessments/projects/open-tickets/unread-messages; recent tickets, messages, bookings; quick-action shortcuts)
-/dashboard/users                 → All users (admins pinned top, search + date-range filter + sort, self-delete blocked)
+/dashboard/users                 → All users (admins pinned top, search + date-range filter + sort, self-delete blocked; employee role shown as "Moderator")
 /dashboard/ebooks                → Courses CRUD (free/premium toggle)
 /dashboard/assessments           → Assessments list + create/edit modal
 /dashboard/assessments/:id/edit  → Question builder (3 tabs: Questions | Analytics | Students enrollment)
@@ -115,7 +115,7 @@ amanxar/
 /dashboard/services              → Services CMS + booking threads
 /dashboard/gallery               → Gallery management
 /dashboard/knowledge-hub         → Knowledge Hub CMS
-/dashboard/settings              → Profile update (name/email/phone) + password change + social media links CRUD
+/dashboard/settings              → Profile update (name/email/phone) + password change + social media links CRUD (replaces old Navbar & Footer admin page)
 — Site Content (collapsible sidebar group) —
 /dashboard/about                 → About content management
 /dashboard/skills                → Skills management
@@ -210,6 +210,8 @@ Run `python manage.py create_test_users` to create them.
 - `student` → `/student`
 
 `ProtectedRoute` accepts `allowedRoles` prop. Wrong role redirects to correct home. Superusers/staff without a `UserProfile` are treated as `admin`.
+
+> **UI label:** `employee` role is always displayed as **"Moderator"** — backend value is never changed. Public navbar links are hardcoded (no DB); social links managed in `/dashboard/settings`.
 
 ---
 
