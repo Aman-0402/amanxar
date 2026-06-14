@@ -51,7 +51,7 @@ Instructions for Claude Code and other AI agents working on this project.
 ### Admin dashboard routes
 ```
 /dashboard                      → DashboardOverviewPage         (stats: projects, students, ebooks)
-/dashboard/users                → DashboardUsersPage            (students list + delete)
+/dashboard/users                → DashboardUsersPage            (all users; admins pinned top; search + date-range filter + newest/oldest sort; self-delete blocked)
 /dashboard/ebooks               → DashboardEbooksPage           (courses CRUD, free/premium toggle)
 /dashboard/assessments          → DashboardAssessmentsPage      (exam list + create/edit modal)
 /dashboard/assessments/:id/edit → DashboardAssessmentEditorPage (3 tabs: Questions | Analytics | Students)
@@ -322,7 +322,7 @@ All API calls auto-attach `Authorization: Bearer <token>` via axios interceptor 
 ### UserProfile
 - OneToOne on Django `User`
 - Fields: `full_name`, `phone`, `role` (admin/employee/student)
-- Superusers/staff without a profile default to role `admin` in JWT
+- Superusers/staff without a profile default to role `admin` in JWT **and** in `UserSerializer.get_role`
 
 ### StudentLearning
 - ForeignKey User + EBook, `unique_together` — prevents duplicate claims
