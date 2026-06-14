@@ -277,16 +277,26 @@ export default function DashboardAssessmentsPage() {
               <div className="flex items-center gap-3 shrink-0 flex-wrap">
                 {/* Student counts */}
                 <div className="flex items-center gap-3 px-3 py-2 rounded-xl border border-bg-border bg-bg-elevated/60 text-xs">
-                  <span className="flex items-center gap-1.5 text-text-secondary" title="Enrolled students">
-                    <Users size={12} className="text-brand-primary" />
-                    <span className="font-semibold text-text-primary">{item.enrolled_count ?? 0}</span>
-                    <span className="text-text-muted">enrolled</span>
+                  {!item.is_free && (
+                    <>
+                      <span className="flex items-center gap-1.5 text-text-secondary" title="Students granted access">
+                        <Crown size={11} className="text-brand-amber" />
+                        <span className="font-semibold text-text-primary">{item.enrolled_count ?? 0}</span>
+                        <span className="text-text-muted">enrolled</span>
+                      </span>
+                      <span className="text-bg-border">|</span>
+                    </>
+                  )}
+                  <span className="flex items-center gap-1.5 text-text-secondary" title="Students who started">
+                    <Users size={11} className="text-brand-primary" />
+                    <span className="font-semibold text-text-primary">{item.started_count ?? 0}</span>
+                    <span className="text-text-muted">started</span>
                   </span>
                   <span className="text-bg-border">|</span>
                   <span className="flex items-center gap-1.5 text-text-secondary" title="Students who completed">
-                    <UserCheck size={12} className="text-green-400" />
+                    <UserCheck size={11} className="text-green-400" />
                     <span className="font-semibold text-text-primary">{item.attempt_count ?? 0}</span>
-                    <span className="text-text-muted">completed</span>
+                    <span className="text-text-muted">done</span>
                   </span>
                 </div>
 

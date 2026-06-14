@@ -430,6 +430,7 @@ class QuestionPublicSerializer(serializers.ModelSerializer):
 
 class AssessmentListSerializer(serializers.ModelSerializer):
     question_count  = serializers.SerializerMethodField()
+    started_count   = serializers.SerializerMethodField()
     attempt_count   = serializers.SerializerMethodField()
     enrolled_count  = serializers.SerializerMethodField()
     user_attempt    = serializers.SerializerMethodField()
@@ -440,13 +441,16 @@ class AssessmentListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'description', 'category', 'tags',
             'is_free', 'time_limit', 'pass_mark', 'is_active',
-            'order', 'created_at', 'question_count', 'attempt_count',
-            'enrolled_count', 'user_attempt', 'is_enrolled',
+            'order', 'created_at', 'question_count', 'started_count',
+            'attempt_count', 'enrolled_count', 'user_attempt', 'is_enrolled',
         ]
         read_only_fields = ['id', 'created_at']
 
     def get_question_count(self, obj):
         return obj.questions.count()
+
+    def get_started_count(self, obj):
+        return obj.attempts.count()
 
     def get_attempt_count(self, obj):
         return obj.attempts.filter(status='completed').count()
