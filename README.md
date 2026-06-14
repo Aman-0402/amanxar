@@ -105,7 +105,7 @@ amanxar/
 
 ### Admin Dashboard (role: admin | employee)
 ```
-/dashboard                       → Overview (project + student + ebook stats)
+/dashboard                       → Overview (6 stat cards: students/courses/assessments/projects/open-tickets/unread-messages; recent tickets, messages, bookings; quick-action shortcuts)
 /dashboard/users                 → All users (admins pinned top, search + date-range filter + sort, self-delete blocked)
 /dashboard/ebooks                → Courses CRUD (free/premium toggle)
 /dashboard/assessments           → Assessments list + create/edit modal

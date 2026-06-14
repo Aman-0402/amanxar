@@ -50,7 +50,7 @@ Instructions for Claude Code and other AI agents working on this project.
 
 ### Admin dashboard routes
 ```
-/dashboard                      → DashboardOverviewPage         (stats: projects, students, ebooks)
+/dashboard                      → DashboardOverviewPage         (6 stat cards: students/courses/assessments/projects/open-tickets/unread-messages; recent support tickets, contact messages, service bookings; quick-action shortcuts)
 /dashboard/users                → DashboardUsersPage            (all users; admins pinned top; search + date-range filter + newest/oldest sort; self-delete blocked)
 /dashboard/ebooks               → DashboardEbooksPage           (courses CRUD, free/premium toggle)
 /dashboard/assessments          → DashboardAssessmentsPage      (exam list + create/edit modal)
