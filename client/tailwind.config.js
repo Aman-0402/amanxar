@@ -34,6 +34,7 @@ export default {
         body:    ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
         accent:  ['"DM Sans"', 'sans-serif'],
         mono:    ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
+        emoji:   ['"Segoe UI Emoji"', '"Apple Color Emoji"', '"Noto Color Emoji"', 'sans-serif'],
       },
 
       fontSize: {

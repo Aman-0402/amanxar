@@ -1,15 +1,35 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import * as LucideIcons from 'lucide-react'
 import { X, Loader2, Plus, Trash2 } from 'lucide-react'
 import { modalBackdrop, modalContent } from '@animations/variants'
 import { showSuccess, showError } from '@utils/toast'
+
+const ICON_OPTIONS = [
+  { name: 'Code2',          label: 'Code'          },
+  { name: 'Brain',          label: 'AI / ML'       },
+  { name: 'GraduationCap',  label: 'Training'      },
+  { name: 'Briefcase',      label: 'Consulting'    },
+  { name: 'Globe',          label: 'Web'           },
+  { name: 'Server',         label: 'Backend'       },
+  { name: 'Smartphone',     label: 'Mobile'        },
+  { name: 'Database',       label: 'Data'          },
+  { name: 'Shield',         label: 'Security'      },
+  { name: 'BarChart2',      label: 'Analytics'     },
+  { name: 'Layers',         label: 'Full-Stack'    },
+  { name: 'Zap',            label: 'Automation'    },
+  { name: 'PenTool',        label: 'Design'        },
+  { name: 'Cloud',          label: 'Cloud'         },
+  { name: 'Users',          label: 'Team'          },
+  { name: 'Cpu',            label: 'Systems'       },
+]
 
 export default function ServiceFormModal({ isOpen, onClose, onSubmit, service = null }) {
   const [formData, setFormData] = useState({
     id: '',
     slug: '',
     title: '',
-    icon: '💻',
+    icon: 'Code2',
     description: '',
     features: [],
     tiers: [],
@@ -31,7 +51,7 @@ export default function ServiceFormModal({ isOpen, onClose, onSubmit, service = 
         id: '',
         slug: '',
         title: '',
-        icon: '💻',
+        icon: 'Code2',
         description: '',
         features: [],
         tiers: [],
@@ -218,38 +238,43 @@ export default function ServiceFormModal({ isOpen, onClose, onSubmit, service = 
                   />
                 </div>
 
-                {/* Icon & Order */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-text-primary mb-1">
-                      Icon (Emoji) *
-                    </label>
-                    <input
-                      type="text"
-                      name="icon"
-                      value={formData.icon}
-                      onChange={handleChange}
-                      placeholder="💻"
-                      maxLength={5}
-                      className="w-full rounded-lg border border-bg-border bg-bg-elevated px-3 py-2 text-text-primary focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
-                      required
-                      disabled={isLoading}
-                    />
+                {/* Icon Picker */}
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">Icon *</label>
+                  <div className="grid grid-cols-8 gap-1.5">
+                    {ICON_OPTIONS.map(({ name, label }) => {
+                      const Icon = LucideIcons[name] || LucideIcons.Briefcase
+                      return (
+                        <button
+                          key={name}
+                          type="button"
+                          title={label}
+                          onClick={() => setFormData(prev => ({ ...prev, icon: name }))}
+                          disabled={isLoading}
+                          className={`flex items-center justify-center h-9 w-9 rounded-lg border transition-all ${
+                            formData.icon === name
+                              ? 'border-brand-primary bg-brand-primary/15 text-brand-primary'
+                              : 'border-bg-border bg-bg-elevated text-text-muted hover:border-brand-primary/40 hover:text-text-primary'
+                          }`}
+                        >
+                          <Icon size={16} />
+                        </button>
+                      )
+                    })}
                   </div>
+                </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-text-primary mb-1">
-                      Order
-                    </label>
-                    <input
-                      type="number"
-                      name="order"
-                      value={formData.order}
-                      onChange={handleChange}
-                      className="w-full rounded-lg border border-bg-border bg-bg-elevated px-3 py-2 text-text-primary focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
-                      disabled={isLoading}
-                    />
-                  </div>
+                {/* Order */}
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-1">Order</label>
+                  <input
+                    type="number"
+                    name="order"
+                    value={formData.order}
+                    onChange={handleChange}
+                    className="w-full rounded-lg border border-bg-border bg-bg-elevated px-3 py-2 text-text-primary focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
+                    disabled={isLoading}
+                  />
                 </div>
 
                 {/* Description */}

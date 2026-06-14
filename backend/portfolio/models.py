@@ -279,7 +279,7 @@ class Service(models.Model):
     id = models.CharField(max_length=100, primary_key=True, unique=True)
     slug = models.SlugField(unique=True)
     title = models.CharField(max_length=255)
-    icon = models.CharField(max_length=10)
+    icon = models.CharField(max_length=50, default='Briefcase')
     description = models.TextField()
     features = models.JSONField(default=list)
     tiers = models.JSONField(default=list)
