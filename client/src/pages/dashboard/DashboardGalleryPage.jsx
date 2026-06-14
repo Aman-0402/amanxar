@@ -6,7 +6,6 @@ import DeleteConfirmModal from '@components/dashboard/DeleteConfirmModal'
 import GalleryFormModal from '@components/dashboard/GalleryFormModal'
 import { showSuccess, showError } from '@utils/toast'
 import { fadeUp, staggerContainer } from '@animations/variants'
-import { assetUrl } from '@utils/assetUrl'
 
 const CATEGORIES = ['All', 'Design', 'Diagrams', 'Events', 'Certificates', 'Screenshots']
 
@@ -185,7 +184,7 @@ export default function DashboardGalleryPage() {
 
               {/* Image */}
               <img
-                src={assetUrl(item.image)}
+                src={item.image}
                 alt={item.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 onError={e => { e.target.style.display = 'none' }}
@@ -241,7 +240,7 @@ export default function DashboardGalleryPage() {
           onClick={() => setLightbox(null)}>
           <div className="relative max-w-5xl w-full" onClick={e => e.stopPropagation()}>
             <img
-              src={assetUrl(lightbox.image)}
+              src={lightbox.image}
               alt={lightbox.title}
               className="w-full max-h-[80vh] object-contain rounded-xl"
             />
