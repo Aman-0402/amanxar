@@ -106,7 +106,7 @@ amanxar/
 ### Admin Dashboard (role: admin | employee)
 ```
 /dashboard                       → Overview (project + student + ebook stats)
-/dashboard/users                 → All registered users
+/dashboard/users                 → All users (admins pinned top, search + date-range filter + sort, self-delete blocked)
 /dashboard/ebooks                → Courses CRUD (free/premium toggle)
 /dashboard/assessments           → Assessments list + create/edit modal
 /dashboard/assessments/:id/edit  → Question builder (3 tabs: Questions | Analytics | Students enrollment)
